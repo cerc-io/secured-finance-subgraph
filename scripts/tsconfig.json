@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "importHelpers": true,
+    "module": "commonjs",
+    "outDir": "dist",
+    "rootDir": ".",
+    "strict": true,
+    "target": "es2017",
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "allowJs": true,
+    "checkJs": true
+  },
+  "include": ["copy-abis.ts", "generate.ts", "update-subgraphrc.ts"],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs",
+      "strictNullChecks": true
+    }
+  }
+}
