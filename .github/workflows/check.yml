@@ -16,12 +16,10 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
 
-      - name: Set env
-        run: |
-          echo "NPM_AUTH_TOKEN=${{ secrets.NPM_TOKEN }}" >> $GITHUB_ENV
-
       - name: Install Dependencies
         run: npm ci
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
       - name: Format Code
         run: npm run format
