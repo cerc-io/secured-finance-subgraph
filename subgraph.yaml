@@ -21,6 +21,8 @@ dataSources:
       eventHandlers:
         - event: CreateLendingMarket(indexed bytes32,indexed address,address,uint256,uint256)
           handler: handleCreateLendingMarket
+        - event: RotateLendingMarkets(bytes32,uint256,uint256)
+          handler: handleRotateLendingMarkets
       file: ./src/lending-controller.ts
 templates:
   - kind: ethereum

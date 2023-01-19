@@ -46,11 +46,18 @@ type LendingMarket @entity {
   blockNumber: BigInt!
   txHash: Bytes!
 
-  orders: [Order!] @derivedFrom(field: "lendingMarket")
+  transactions: [Transaction!]! @derivedFrom(field: "lendingMarket")
 }
 
 enum OrderStatus {
   Open
   Cancelled
   Filled
+}
+
+type AvailableLendingMarket @entity {
+  id: Bytes! # currency
+  currency: Bytes!
+
+  markets: [LendingMarket!]!
 }
