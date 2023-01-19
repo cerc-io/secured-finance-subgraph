@@ -1,17 +1,34 @@
 {
   "name": "secured-finance-subgraph",
-  "version": "0.2.2",
+  "version": "0.2.0-beta.34",
+  "private": "true",
   "scripts": {
-    "create": "graph create secured-finance/secured-finance-protocol --node https://api.thegraph.com/deploy/",
-    "create-local": "graph create secured-finance/secured-finance-protocol --node http://127.0.0.1:8020",
-    "codegen": "graph codegen",
-    "build": "graph build",
-    "deploy": "graph deploy secured-finance/secured-finance-protocol --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
-    "deploy-local": "graph deploy secured-finance/secured-finance-protocol --ipfs http://localhost:5001 --node http://127.0.0.1:8020"
+    "generate:dev": "ts-node ./scripts/generate.ts development goerli",
+    "generate:stg": "ts-node ./scripts/generate.ts staging goerli",
+    "codegen": "graph codegen ./subgraph.yaml",
+    "precodegen": "ts-node ./scripts/copy-abis.ts",
+    "build": "graph build ./subgraph.yaml",
+    "prebuild": "npm run codegen",
+    "test": "graph test",
+    "coverage": "graph test -- -c",
+    "auth": "graph auth --studio",
+    "deploy:dev": "cat ./subgraph.development.yaml && graph deploy ./subgraph.development.yaml --studio sf-protocol-dev --output-dir ./build/development --versionLabel",
+    "deploy:stg": "cat ./subgraph.staging.yaml && graph deploy ./subgraph.staging.yaml --studio sf-protocol-stg --output-dir ./build/staging --versionLabel",
+    "prepublish": "npm run codegen",
+    "update-subgraphrc": "ts-node ./scripts/update-subgraphrc.ts",
+    "format": "prettier --config ./.prettierrc.json --check '**/*.{js,jsx,ts,tsx,json}' '*.{js,jsx,ts,tsx,json}'"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "^0.26.0",
-    "@graphprotocol/graph-ts": "^0.26.0"
+    "@graphprotocol/graph-cli": "^0.34.0",
+    "@graphprotocol/graph-ts": "^0.26.0",
+    "@secured-finance/smart-contracts": "0.0.5-beta.19",
+    "@types/js-yaml": "^4.0.5",
+    "@types/node": "^16.14.2",
+    "js-yaml": "^4.1.0",
+    "matchstick-as": "0.4.3",
+    "ts-node": "^10.9.1",
+    "eslint": "^8.19.0",
+    "prettier": "^2.8.2"
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",

@@ -1,0 +1,24 @@
+{
+  "tabWidth": 4,
+  "singleQuote": true,
+  "jsxSingleQuote": true,
+  "arrowParens": "avoid",
+  "parser": "typescript",
+  "overrides": [
+    {
+      "files": ["*.json", ".eslintrc", "project.code-workspace"],
+      "options": {
+        "parser": "json",
+        "singleQuote": false,
+        "tabWidth": 2
+      }
+    },
+    {
+      "files": ["*.graphql"],
+      "options": {
+        "parser": "graphql",
+        "tabWidth": 2
+      }
+    }
+  ]
+}

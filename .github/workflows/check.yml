@@ -1,0 +1,34 @@
+name: Validate Pull Request
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  checks-pr:
+    name: Validate Pull Request
+    runs-on: ubuntu-latest
+    if: github.actor != 'secured-finance-machine-user[bot]'
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+
+      - name: Format Code
+        run: npm run format
+
+      - name: Build Repo
+        run: npm run build
+
+      - name: Execute Test
+        run: npm run test
+
+      - name: Execute Coverage
+        run: npm run coverage

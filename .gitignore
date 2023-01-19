@@ -30,10 +30,15 @@ bower_components
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
 build/
+**/build
 
 # Dependency directories
 node_modules/
+**/node_modules
 jspm_packages/
+
+# Packages
+**/package/
 
 # TypeScript v1 declaration files
 typings/
@@ -52,11 +57,21 @@ typings/
 
 # dotenv environment variables file
 .env
+.env.local
+.env.develop.local
+.env.test.local
+.env.production.local
 
-# next.js build output
-.next
+**/dist/
 
 # Generated code
 generated/
 
-src/.DS_Store
+.DS_Store
+
+test/.bin
+test/.latest.json
+
+# Subgraph
+subgraph.*.yaml
+abis/
