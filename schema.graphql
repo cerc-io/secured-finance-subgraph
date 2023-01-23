@@ -53,7 +53,7 @@ enum OrderStatus {
   Filled
 }
 
-type AvailableLendingMarket @entity {
+type LendingMarketList @entity {
   id: Bytes! # currency
   currency: Bytes!
 

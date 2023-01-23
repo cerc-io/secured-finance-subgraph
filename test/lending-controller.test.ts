@@ -53,7 +53,7 @@ const newAddress = Address.fromString(
 );
 
 const LENDING_MARKET_ENTITY_NAME = 'LendingMarket';
-const AVAILABLE_LENDING_MARKET_ENTITY_NAME = 'AvailableLendingMarket';
+const AVAILABLE_LENDING_MARKET_ENTITY_NAME = 'LendingMarketList';
 
 const TOTAL_NUMBER_PREPOPULATED_MARKET = 8;
 const assertLendingMarketCreated = (): void => {
@@ -91,7 +91,7 @@ describe('With no lending markets existing', () => {
         assert.fieldEquals(LENDING_MARKET_ENTITY_NAME, id, 'isActive', 'true');
     });
 
-    test('Creating a new lending market should create the AvailableLendingMarket entity and add this lending market to it', () => {
+    test('Creating a new lending market should create the LendingMarketList entity and add this lending market to it', () => {
         const event = createCreateLendingMarketEvent(
             ethBytes,
             lendingMarketAddress,
@@ -214,6 +214,7 @@ describe('With lending markets already existing', () => {
             filBytes.toHexString(),
             'markets',
             toArrayString([
+                buildLendingMarketId(filBytes, maturityList[0]),
                 buildLendingMarketId(filBytes, maturityList[1]),
                 buildLendingMarketId(filBytes, maturityList[2]),
                 buildLendingMarketId(filBytes, maturityList[3]),

@@ -4,8 +4,8 @@ import {
     RotateLendingMarkets,
 } from '../generated/LendingMarketController/LendingMarketController';
 import {
-    AvailableLendingMarket,
     LendingMarket,
+    LendingMarketList,
     Transaction,
 } from '../generated/schema';
 import { LendingMarket as LendingMarketTemplate } from '../generated/templates';
@@ -43,76 +43,65 @@ export function handleRotateLendingMarkets(event: RotateLendingMarkets): void {
     );
 
     if (rollingOutMarket) {
-        rollOutMarket(event.params.ccy, rollingOutMarket);
+        rollOutMarket(rollingOutMarket);
         updateTransactions(rollingOutMarket);
     } else {
         throw new Error('No market found');
     }
 }
 
-const getAvailableMarkets = (ccy: Bytes): LendingMarket[] => {
-    const availableMarkets = AvailableLendingMarket.load(ccy);
+const getMarketList = (ccy: Bytes): LendingMarket[] => {
+    const availableMarkets = LendingMarketList.load(ccy);
     if (availableMarkets) {
         const markets = availableMarkets.markets;
-        if (markets && markets.length > 0) {
-            const available: LendingMarket[] = [];
+        if (markets) {
+            const marketList: LendingMarket[] = [];
             for (let i = 0; i < markets.length; i++) {
                 const market = LendingMarket.load(markets[i]);
                 if (market) {
-                    available.push(market);
+                    marketList.push(market);
                 }
             }
-            return available;
+            return marketList;
         }
     }
     return [];
 };
 
-const getShortestMaturityMarket = (ccy: Bytes): LendingMarket | null => {
-    const availableMarkets = getAvailableMarkets(ccy);
+const getShortestMaturityActiveMarket = (ccy: Bytes): LendingMarket | null => {
+    const marketList = getMarketList(ccy);
     let market: LendingMarket | null = null;
-    if (availableMarkets && availableMarkets.length > 0) {
-        for (let i = 0; i < availableMarkets.length; i++) {
-            if (market == null) {
-                market = availableMarkets[i];
+    if (marketList && marketList.length > 0) {
+        for (let i = 0; i < marketList.length; i++) {
+            if (!marketList[i].isActive) {
+                continue;
             }
-            if (availableMarkets[i].maturity.lt(market.maturity)) {
-                market = availableMarkets[i];
+
+            if (market == null) {
+                market = marketList[i];
+            }
+
+            if (marketList[i].maturity.lt(market.maturity)) {
+                market = marketList[i];
             }
         }
     }
     return market;
 };
 
-const rollOutMarket = (ccy: Bytes, market: LendingMarket): void => {
-    const availableMarkets = getAvailableMarkets(ccy);
-    const entity = AvailableLendingMarket.load(ccy);
-    if (entity) {
-        // Closures are not supported in AssemblyScript
-        for (let i = 0; i < availableMarkets.length; i++) {
-            if (availableMarkets[i].maturity.equals(market.maturity)) {
-                availableMarkets.splice(i, 1);
-                entity.markets = availableMarkets.map<string>(
-                    market => market.id
-                );
-                break;
-            }
-        }
-        entity.save();
-    }
-
+const rollOutMarket = (market: LendingMarket): void => {
     market.isActive = false;
     market.save();
 };
 
 const rollInMarket = (ccy: Bytes, market: LendingMarket): void => {
-    const entity = AvailableLendingMarket.load(ccy);
+    const entity = LendingMarketList.load(ccy);
     if (entity) {
         // Array.push is not working with entities
         entity.markets = entity.markets.concat([market.id]);
         entity.save();
     } else {
-        const newEntity = new AvailableLendingMarket(ccy);
+        const newEntity = new LendingMarketList(ccy);
         newEntity.markets = [market.id];
         newEntity.currency = ccy;
         newEntity.save();
@@ -145,7 +134,9 @@ const updateTransactions = (rolledOutMarket: LendingMarket): void => {
         return;
     }
 
-    const closestMarket = getShortestMaturityMarket(rolledOutMarket.currency);
+    const closestMarket = getShortestMaturityActiveMarket(
+        rolledOutMarket.currency
+    );
 
     if (!closestMarket) {
         throw new Error('No closest market found');
