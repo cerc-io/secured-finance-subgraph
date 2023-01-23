@@ -19,19 +19,14 @@
     "format": "prettier --config ./.prettierrc.json --check '**/*.{js,jsx,ts,tsx,json}' '*.{js,jsx,ts,tsx,json}'"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "^0.34.0",
-    "@graphprotocol/graph-ts": "^0.26.0",
+    "@graphprotocol/graph-cli": "^0.37.6",
+    "@graphprotocol/graph-ts": "^0.29.1",
     "@secured-finance/smart-contracts": "0.0.5-beta.23",
     "@types/js-yaml": "^4.0.5",
     "@types/node": "^16.14.2",
     "js-yaml": "^4.1.0",
-    "matchstick-as": "0.4.3",
+    "matchstick-as": "0.5.0",
     "ts-node": "^10.9.1",
-    "eslint": "^8.19.0",
-    "prettier": "^2.8.2"
-  },
-  "dependencies": {
-    "babel-polyfill": "^6.26.0",
-    "babel-register": "^6.26.0"
+    "prettier": "^2.8.3"
   }
 }

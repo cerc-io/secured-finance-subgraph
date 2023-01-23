@@ -32,21 +32,19 @@ type Order @entity {
   createdAt: BigInt!
   blockNumber: BigInt!
   txHash: Bytes!
-
-  lendingMarket: LendingMarket
 }
 
 type LendingMarket @entity {
   id: ID!
-  contractAddress: Bytes!
   currency: Bytes!
   maturity: BigInt!
+  isActive: Boolean!
 
   createdAt: BigInt!
   blockNumber: BigInt!
   txHash: Bytes!
 
-  transactions: [Transaction!]! @derivedFrom(field: "lendingMarket")
+  transactions: [Transaction!]!
 }
 
 enum OrderStatus {
