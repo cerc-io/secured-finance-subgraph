@@ -1,6 +1,9 @@
 import { Address, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import { newMockEvent } from 'matchstick-as/assembly/index';
-import { CreateLendingMarket } from '../../generated/LendingMarketController/LendingMarketController';
+import {
+    CreateLendingMarket,
+    RotateLendingMarkets,
+} from '../../generated/LendingMarketController/LendingMarketController';
 
 export function createCreateLendingMarketEvent(
     ccy: Bytes,
@@ -9,7 +12,7 @@ export function createCreateLendingMarketEvent(
     index: BigInt,
     maturity: BigInt
 ): CreateLendingMarket {
-    const mockEvent = newMockEvent();
+    const mockEvent = changetype<CreateLendingMarket>(newMockEvent());
     const event = new CreateLendingMarket(
         mockEvent.address,
         mockEvent.logIndex,
@@ -17,7 +20,8 @@ export function createCreateLendingMarketEvent(
         mockEvent.logType,
         mockEvent.block,
         mockEvent.transaction,
-        mockEvent.parameters
+        mockEvent.parameters,
+        mockEvent.receipt
     );
     event.parameters = [];
 
@@ -50,4 +54,48 @@ export function createCreateLendingMarketEvent(
     );
 
     return event;
+}
+
+export function createRotateLendingMarketsEvent(
+    ccy: Bytes,
+    oldMaturity: BigInt,
+    newMaturity: BigInt
+): RotateLendingMarkets {
+    const mockEvent = changetype<RotateLendingMarkets>(newMockEvent());
+    const event = new RotateLendingMarkets(
+        mockEvent.address,
+        mockEvent.logIndex,
+        mockEvent.transactionLogIndex,
+        mockEvent.logType,
+        mockEvent.block,
+        mockEvent.transaction,
+        mockEvent.parameters,
+        mockEvent.receipt
+    );
+
+    event.parameters = [];
+
+    event.parameters.push(
+        new ethereum.EventParam('ccy', ethereum.Value.fromBytes(ccy))
+    );
+
+    event.parameters.push(
+        new ethereum.EventParam(
+            'oldMaturity',
+            ethereum.Value.fromUnsignedBigInt(oldMaturity)
+        )
+    );
+
+    event.parameters.push(
+        new ethereum.EventParam(
+            'newMaturity',
+            ethereum.Value.fromUnsignedBigInt(newMaturity)
+        )
+    );
+
+    return event;
+}
+
+export function toArrayString(array: Array<string>): string {
+    return `[${array.map<string>(item => item.toString()).join(', ')}]`;
 }

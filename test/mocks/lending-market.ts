@@ -18,7 +18,7 @@ export function createMakeOrderEvent(
     amount: BigInt,
     unitPrice: BigInt
 ): MakeOrder {
-    const mockEvent = newMockEvent();
+    const mockEvent = changetype<MakeOrder>(newMockEvent());
     const event = new MakeOrder(
         mockEvent.address,
         mockEvent.logIndex,
@@ -26,7 +26,8 @@ export function createMakeOrderEvent(
         mockEvent.logType,
         mockEvent.block,
         mockEvent.transaction,
-        mockEvent.parameters
+        mockEvent.parameters,
+        mockEvent.receipt
     );
     event.parameters = [];
 
@@ -80,9 +81,14 @@ export function createTakeOrdersEvent(
     maturity: BigInt,
     filledAmount: BigInt,
     unitPrice: BigInt,
-    filledFutureValue: BigInt
+    filledFutureValue: BigInt,
+    hash: Address | null = null
 ): TakeOrders {
-    const mockEvent = newMockEvent();
+    const mockEvent = changetype<TakeOrders>(newMockEvent());
+    if (hash) {
+        mockEvent.transaction.hash = hash;
+    }
+
     const event = new TakeOrders(
         mockEvent.address,
         mockEvent.logIndex,
@@ -90,7 +96,8 @@ export function createTakeOrdersEvent(
         mockEvent.logType,
         mockEvent.block,
         mockEvent.transaction,
-        mockEvent.parameters
+        mockEvent.parameters,
+        mockEvent.receipt
     );
     event.parameters = [];
 
@@ -140,7 +147,7 @@ export function createCancelOrderEvent(
     amount: BigInt,
     unitPrice: BigInt
 ): CancelOrder {
-    const mockEvent = newMockEvent();
+    const mockEvent = changetype<CancelOrder>(newMockEvent());
     const event = new CancelOrder(
         mockEvent.address,
         mockEvent.logIndex,
@@ -148,7 +155,8 @@ export function createCancelOrderEvent(
         mockEvent.logType,
         mockEvent.block,
         mockEvent.transaction,
-        mockEvent.parameters
+        mockEvent.parameters,
+        mockEvent.receipt
     );
     event.parameters = [];
 
@@ -196,7 +204,7 @@ export function createCleanOrders(
     ccy: Bytes,
     maturity: BigInt
 ): CleanOrders {
-    const mockEvent = newMockEvent();
+    const mockEvent = changetype<CleanOrders>(newMockEvent());
     const event = new CleanOrders(
         mockEvent.address,
         mockEvent.logIndex,
@@ -204,7 +212,8 @@ export function createCleanOrders(
         mockEvent.logType,
         mockEvent.block,
         mockEvent.transaction,
-        mockEvent.parameters
+        mockEvent.parameters,
+        mockEvent.receipt
     );
     event.parameters = [];
 
