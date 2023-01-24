@@ -6,6 +6,7 @@ import {
     MakeOrder,
     TakeOrders,
 } from '../generated/templates/LendingMarket/LendingMarket';
+import { buildLendingMarketId } from './utils/string';
 
 export function handleMakeOrder(event: MakeOrder): void {
     const orderId = event.params.orderId.toHexString();
@@ -32,11 +33,6 @@ export function handleMakeOrder(event: MakeOrder): void {
     order.blockNumber = event.block.number;
     order.txHash = event.transaction.hash;
 
-    const lendingMarket = LendingMarket.load(event.address.toHexString());
-    if (lendingMarket !== null) {
-        order.lendingMarket = lendingMarket.id;
-    }
-
     order.save();
 }
 
@@ -62,10 +58,22 @@ export function handleTakeOrders(event: TakeOrders): void {
     transaction.blockNumber = event.block.number;
     transaction.txHash = event.transaction.hash;
 
-    const lendingMarket = LendingMarket.load(event.address.toHexString());
-    if (lendingMarket !== null) {
+    const lendingMarketId = buildLendingMarketId(
+        transaction.currency,
+        transaction.maturity
+    );
+
+    const lendingMarket = LendingMarket.load(lendingMarketId);
+    if (lendingMarket) {
         transaction.lendingMarket = lendingMarket.id;
+        lendingMarket.transactions = lendingMarket.transactions.concat([
+            transaction.id,
+        ]);
+        lendingMarket.save();
+    } else {
+        throw new Error(`Lending market not found: ${lendingMarketId}}`);
     }
+
     transaction.save();
 }
 
