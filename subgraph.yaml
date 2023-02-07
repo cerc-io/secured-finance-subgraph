@@ -2,6 +2,8 @@ specVersion: 0.0.5
 description: Secured Finance is decentralized P2P banking business for digital assets
 schema:
   file: ./schema.graphql
+graft:
+  base: QmXV1HMrFjfhYqRXuBDd85rfSaGdNq3zwwdZ2pmQZMYzAs
 dataSources:
   - kind: ethereum
     name: LendingMarketController
