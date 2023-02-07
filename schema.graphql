@@ -4,7 +4,7 @@ type Transaction @entity {
   maturity: BigInt!
   side: Int!
   orderPrice: BigInt!
-  taker: Bytes!
+  taker: User!
 
   forwardValue: BigInt!
   amount: BigInt!
@@ -21,7 +21,7 @@ type Order @entity {
   id: ID!
   orderId: BigInt!
   originalOrderId: BigInt!
-  maker: Bytes!
+  maker: User!
   currency: Bytes!
   side: Int!
   maturity: BigInt!
@@ -58,4 +58,8 @@ type LendingMarketList @entity {
   currency: Bytes!
 
   markets: [LendingMarket!]!
+}
+
+type User @entity {
+  id: ID! # wallet address
 }

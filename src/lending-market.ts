@@ -6,6 +6,7 @@ import {
     MakeOrder,
     TakeOrders,
 } from '../generated/templates/LendingMarket/LendingMarket';
+import { getOrInitUser } from './helper/initializer';
 import { buildLendingMarketId } from './utils/string';
 
 export function handleMakeOrder(event: MakeOrder): void {
@@ -23,7 +24,7 @@ export function handleMakeOrder(event: MakeOrder): void {
             originalOrder.save();
         }
     }
-    order.maker = event.params.maker;
+    order.maker = getOrInitUser(event.params.maker).id;
     order.currency = event.params.ccy;
     order.side = event.params.side;
     order.maturity = event.params.maturity;
@@ -40,7 +41,7 @@ export function handleTakeOrders(event: TakeOrders): void {
     const transaction = new Transaction(event.transaction.hash.toHexString());
 
     transaction.orderPrice = event.params.unitPrice;
-    transaction.taker = event.params.taker;
+    transaction.taker = getOrInitUser(event.params.taker).id;
     transaction.currency = event.params.ccy;
     transaction.maturity = event.params.maturity;
     transaction.side = event.params.side;

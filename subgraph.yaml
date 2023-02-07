@@ -24,6 +24,25 @@ dataSources:
         - event: RotateLendingMarkets(bytes32,uint256,uint256)
           handler: handleRotateLendingMarkets
       file: ./src/lending-controller.ts
+  - kind: ethereum
+    name: TokenVault
+    network: ~
+    source:
+      abi: TokenVault
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - User
+      abis:
+        - name: TokenVault
+          file: >-
+            ./abis/TokenVault.sol/TokenVault.json
+      eventHandlers:
+        - event: Deposit(indexed address,bytes32,uint256)
+          handler: handleDeposit
+      file: ./src/token-vault.ts
 templates:
   - kind: ethereum
     name: LendingMarket
