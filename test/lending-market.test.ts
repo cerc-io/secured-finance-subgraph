@@ -1,5 +1,11 @@
 import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts';
-import { assert, test } from 'matchstick-as/assembly/index';
+import {
+    assert,
+    beforeEach,
+    clearStore,
+    describe,
+    test,
+} from 'matchstick-as/assembly/index';
 import { LendingMarket } from '../generated/schema';
 import {
     handleCancelOrder,
@@ -7,6 +13,7 @@ import {
     handleMakeOrder,
     handleTakeOrders,
 } from '../src/lending-market';
+import { getDailyVolumeEntityId } from '../src/utils/id-generation';
 import { buildLendingMarketId, toBytes32 } from '../src/utils/string';
 import {
     createCancelOrderEvent,
@@ -14,12 +21,13 @@ import {
     createMakeOrderEvent,
     createTakeOrdersEvent,
 } from './mocks';
+import { createLendingMarket, createTransaction } from './utils/createEntities';
 
 const originalOrderId = BigInt.fromI32(0);
 const maker = Address.zero();
 const side = BigInt.fromI32(0).toI32();
 const ccy = toBytes32('ETH');
-const maturity = BigInt.fromI32(365);
+const maturity = BigInt.fromI32(1677628800); // 1st Mar 23
 const amount = BigInt.fromI32(100);
 const unitPrice = BigInt.fromI32(100);
 
@@ -220,4 +228,102 @@ test('Should create a Transaction when the TakeOrders Event is raised', () => {
         'averagePrice',
         averagePrice.toString()
     );
+});
+
+describe('Transaction Volume', () => {
+    beforeEach(() => {
+        clearStore();
+        createLendingMarket(ccy, maturity);
+
+        const filledFutureValue = BigInt.fromString('1230000000000000000000');
+        const filledAmount = BigInt.fromString('1200000000000000000000');
+
+        createTransaction(
+            maker,
+            side,
+            ccy,
+            maturity,
+            filledAmount,
+            unitPrice,
+            filledFutureValue,
+            Address.fromString('0x0000000000000000000000000000000000000001'),
+            1675845895 // Wednesday, February 8, 2023 8:44:55 AM GMT
+        );
+    });
+    test('Should create the daily volume of the market when the TakeOrders Event is raised', () => {
+        const id = getDailyVolumeEntityId(ccy, maturity, '2023-02-08');
+
+        assert.fieldEquals(
+            'DailyVolume',
+            id,
+            'volume',
+            '1200000000000000000000'
+        );
+        assert.fieldEquals('DailyVolume', id, 'day', '2023-02-08');
+        assert.fieldEquals('DailyVolume', id, 'currency', ccy.toHexString());
+        assert.fieldEquals('DailyVolume', id, 'maturity', maturity.toString());
+        assert.fieldEquals('DailyVolume', id, 'timestamp', '1675814400');
+    });
+
+    test('Should update the daily volume of the market when the TakeOrders Event is raised the same day', () => {
+        const amount = BigInt.fromString('2230000000000000000000');
+        createTransaction(
+            maker,
+            side,
+            ccy,
+            maturity,
+            amount,
+            unitPrice,
+            amount,
+            Address.fromString('0x0000000000000000000000000000000000000000'),
+            1675878200 // Wednesday, February 8, 2023 5:43:20 PM
+        );
+
+        const id = getDailyVolumeEntityId(ccy, maturity, '2023-02-08');
+
+        assert.fieldEquals(
+            'DailyVolume',
+            id,
+            'volume',
+            '3430000000000000000000'
+        );
+        assert.fieldEquals('DailyVolume', id, 'day', '2023-02-08');
+        assert.fieldEquals('DailyVolume', id, 'currency', ccy.toHexString());
+        assert.fieldEquals('DailyVolume', id, 'maturity', maturity.toString());
+        assert.fieldEquals('DailyVolume', id, 'timestamp', '1675814400');
+    });
+
+    test('Should update the daily volume of another market when the currency is different', () => {
+        const amount = BigInt.fromString('2230000000000000000000');
+        const ccy2 = toBytes32('FIL');
+        createLendingMarket(ccy2, maturity);
+
+        createTransaction(
+            maker,
+            side,
+            ccy2,
+            maturity,
+            amount,
+            unitPrice,
+            amount,
+            Address.fromString('0x0000000000000000000000000000000000000000'),
+            1675878200 // Wednesday, February 8, 2023 5:43:20 PM
+        );
+
+        const id = getDailyVolumeEntityId(ccy, maturity, '2023-02-08');
+        const id2 = getDailyVolumeEntityId(ccy2, maturity, '2023-02-08');
+
+        assert.fieldEquals('DailyVolume', id2, 'volume', amount.toString());
+        assert.fieldEquals('DailyVolume', id2, 'day', '2023-02-08');
+        assert.fieldEquals('DailyVolume', id2, 'currency', ccy2.toHexString());
+        assert.fieldEquals('DailyVolume', id2, 'maturity', maturity.toString());
+        assert.fieldEquals('DailyVolume', id2, 'timestamp', '1675814400');
+
+        assert.fieldEquals(
+            'DailyVolume',
+            id,
+            'volume',
+            '1200000000000000000000'
+        );
+    });
 });
