@@ -1,4 +1,4 @@
-import { BigDecimal } from '@graphprotocol/graph-ts';
+import { BigDecimal, log } from '@graphprotocol/graph-ts';
 import { LendingMarket, Order, Transaction } from '../generated/schema';
 import {
     CancelOrder,
@@ -6,7 +6,7 @@ import {
     MakeOrder,
     TakeOrders,
 } from '../generated/templates/LendingMarket/LendingMarket';
-import { getOrInitUser } from './helper/initializer';
+import { getOrInitDailyVolume, getOrInitUser } from './helper/initializer';
 import { buildLendingMarketId } from './utils/string';
 
 export function handleMakeOrder(event: MakeOrder): void {
@@ -99,5 +99,23 @@ export function handleCleanOrders(event: CleanOrders): void {
 
         order.status = 'Filled';
         order.save();
+    }
+}
+
+export function handleTransactionVolume(event: TakeOrders): void {
+    // We expect to have a transaction entity created in the handleTakeOrders
+    const transaction = Transaction.load(event.transaction.hash.toHexString());
+    if (transaction) {
+        const dailyVolume = getOrInitDailyVolume(
+            transaction.currency,
+            transaction.maturity,
+            event.block.timestamp
+        );
+        dailyVolume.volume = dailyVolume.volume.plus(transaction.amount);
+        dailyVolume.save();
+    } else {
+        log.error('Transaction entity not found: {}', [
+            event.transaction.hash.toHexString(),
+        ]);
     }
 }

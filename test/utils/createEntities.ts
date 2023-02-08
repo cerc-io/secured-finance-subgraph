@@ -1,5 +1,10 @@
 import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts';
-import { handleTakeOrders } from '../../src/lending-market';
+import { LendingMarket } from '../../generated/schema';
+import {
+    handleTakeOrders,
+    handleTransactionVolume,
+} from '../../src/lending-market';
+import { buildLendingMarketId, toBytes32 } from '../../src/utils/string';
 import { createTakeOrdersEvent } from '../mocks';
 
 export const ALICE = Address.fromString(
@@ -17,7 +22,8 @@ export function createTransaction(
     filledAmount: BigInt,
     unitPrice: BigInt,
     filledFutureValue: BigInt,
-    hash: Address
+    hash: Address | null = null,
+    timestamp: i32 = 0
 ): void {
     const takeOrdersEvent = createTakeOrdersEvent(
         taker,
@@ -29,5 +35,19 @@ export function createTransaction(
         filledFutureValue,
         hash
     );
+    if (timestamp) takeOrdersEvent.block.timestamp = BigInt.fromI32(timestamp);
     handleTakeOrders(takeOrdersEvent);
+    handleTransactionVolume(takeOrdersEvent);
+}
+
+export function createLendingMarket(ccy: Bytes, maturity: BigInt): void {
+    const market = new LendingMarket(buildLendingMarketId(ccy, maturity));
+    market.currency = ccy;
+    market.maturity = maturity;
+    market.blockNumber = BigInt.fromI32(0);
+    market.txHash = toBytes32('0x0');
+    market.isActive = true;
+    market.transactions = [];
+    market.createdAt = BigInt.fromI32(0);
+    market.save();
 }

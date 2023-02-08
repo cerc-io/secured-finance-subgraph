@@ -63,3 +63,12 @@ type LendingMarketList @entity {
 type User @entity {
   id: ID! # wallet address
 }
+
+type DailyVolume @entity {
+  id: ID! # currency-maturity-date(dd-mm-yyyy)
+  currency: Bytes!
+  maturity: BigInt!
+  day: String! # dd-mm-yyyy
+  volume: BigInt!
+  timestamp: BigInt!
+}
