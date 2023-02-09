@@ -24,7 +24,8 @@ export function handleMakeOrder(event: MakeOrder): void {
             originalOrder.save();
         }
     }
-    order.maker = getOrInitUser(event.params.maker).id;
+    const user = getOrInitUser(event.params.maker);
+    order.maker = user.id;
     order.currency = event.params.ccy;
     order.side = event.params.side;
     order.maturity = event.params.maturity;
@@ -35,13 +36,16 @@ export function handleMakeOrder(event: MakeOrder): void {
     order.txHash = event.transaction.hash;
 
     order.save();
+    user.orders = user.orders.concat([order.id]);
+    user.save();
 }
 
 export function handleTakeOrders(event: TakeOrders): void {
     const transaction = new Transaction(event.transaction.hash.toHexString());
+    const user = getOrInitUser(event.params.taker);
 
     transaction.orderPrice = event.params.unitPrice;
-    transaction.taker = getOrInitUser(event.params.taker).id;
+    transaction.taker = user.id;
     transaction.currency = event.params.ccy;
     transaction.maturity = event.params.maturity;
     transaction.side = event.params.side;
@@ -76,6 +80,8 @@ export function handleTakeOrders(event: TakeOrders): void {
     }
 
     transaction.save();
+    user.transactions = user.transactions.concat([transaction.id]);
+    user.save();
 }
 
 export function handleCancelOrder(event: CancelOrder): void {

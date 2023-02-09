@@ -60,8 +60,10 @@ type LendingMarketList @entity {
   markets: [LendingMarket!]!
 }
 
-type User @entity {
+type User @entity(immutable: true) {
   id: ID! # wallet address
+  transactions: [Transaction!]! @derivedFrom(field: "taker")
+  orders: [Order!]! @derivedFrom(field: "maker")
 }
 
 type DailyVolume @entity {

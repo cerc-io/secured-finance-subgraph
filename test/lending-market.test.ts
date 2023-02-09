@@ -20,6 +20,7 @@ import {
     createCleanOrders,
     createMakeOrderEvent,
     createTakeOrdersEvent,
+    toArrayString,
 } from './mocks';
 import { createLendingMarket, createTransaction } from './utils/createEntities';
 
@@ -228,6 +229,62 @@ test('Should create a Transaction when the TakeOrders Event is raised', () => {
         'averagePrice',
         averagePrice.toString()
     );
+});
+
+describe('User entity', () => {
+    beforeEach(() => {
+        clearStore();
+        createLendingMarket(ccy, maturity);
+
+        const filledFutureValue = BigInt.fromString('1230000000000000000000');
+        const filledAmount = BigInt.fromString('1200000000000000000000');
+
+        createTransaction(
+            maker,
+            side,
+            ccy,
+            maturity,
+            filledAmount,
+            unitPrice,
+            filledFutureValue,
+            Address.fromString('0x0000000000000000000000000000000000000001'),
+            1675845895 // Wednesday, February 8, 2023 8:44:55 AM GMT
+        );
+    });
+    test('Should create an user entity and attach the transaction to it', () => {
+        assert.fieldEquals(
+            'User',
+            maker.toHexString(),
+            'transactions',
+            toArrayString(['0x0000000000000000000000000000000000000001'])
+        );
+    });
+
+    test('Should attach the transactions to the existing user entity', () => {
+        const filledFutureValue = BigInt.fromString('1230000000000000000000');
+        const filledAmount = BigInt.fromString('1200000000000000000000');
+
+        createTransaction(
+            maker,
+            side,
+            ccy,
+            maturity,
+            filledAmount,
+            unitPrice,
+            filledFutureValue,
+            Address.fromString('0x0000000000000000000000000000000000000002')
+        );
+
+        assert.fieldEquals(
+            'User',
+            maker.toHexString(),
+            'transactions',
+            toArrayString([
+                '0x0000000000000000000000000000000000000002',
+                '0x0000000000000000000000000000000000000001',
+            ])
+        );
+    });
 });
 
 describe('Transaction Volume', () => {
