@@ -36,8 +36,6 @@ export function handleMakeOrder(event: MakeOrder): void {
     order.txHash = event.transaction.hash;
 
     order.save();
-    user.orders = user.orders.concat([order.id]);
-    user.save();
 }
 
 export function handleTakeOrders(event: TakeOrders): void {
@@ -80,8 +78,6 @@ export function handleTakeOrders(event: TakeOrders): void {
     }
 
     transaction.save();
-    user.transactions = user.transactions.concat([transaction.id]);
-    user.save();
 }
 
 export function handleCancelOrder(event: CancelOrder): void {
