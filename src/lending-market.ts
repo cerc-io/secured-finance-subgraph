@@ -24,8 +24,7 @@ export function handleMakeOrder(event: MakeOrder): void {
             originalOrder.save();
         }
     }
-    const user = getOrInitUser(event.params.maker);
-    order.maker = user.id;
+    order.maker = getOrInitUser(event.params.maker).id;
     order.currency = event.params.ccy;
     order.side = event.params.side;
     order.maturity = event.params.maturity;
@@ -40,10 +39,9 @@ export function handleMakeOrder(event: MakeOrder): void {
 
 export function handleTakeOrders(event: TakeOrders): void {
     const transaction = new Transaction(event.transaction.hash.toHexString());
-    const user = getOrInitUser(event.params.taker);
 
     transaction.orderPrice = event.params.unitPrice;
-    transaction.taker = user.id;
+    transaction.taker = getOrInitUser(event.params.taker).id;
     transaction.currency = event.params.ccy;
     transaction.maturity = event.params.maturity;
     transaction.side = event.params.side;
