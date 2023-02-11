@@ -74,3 +74,8 @@ type DailyVolume @entity {
   volume: BigInt!
   timestamp: BigInt!
 }
+
+type Protocol @entity {
+  id: ID! # ethereum
+  totalUsers: BigInt!
+}

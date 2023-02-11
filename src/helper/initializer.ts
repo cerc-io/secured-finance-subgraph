@@ -1,12 +1,29 @@
 import { BigInt, Bytes } from '@graphprotocol/graph-ts';
-import { DailyVolume, User } from '../../generated/schema';
+import { DailyVolume, Protocol, User } from '../../generated/schema';
 import { getDailyVolumeEntityId } from '../utils/id-generation';
+
+const PROTOCOL_ID = 'ethereum';
+
+const getProtocol = (): Protocol => {
+    let protocol = Protocol.load(PROTOCOL_ID);
+    if (protocol == null) {
+        protocol = new Protocol(PROTOCOL_ID);
+        protocol.totalUsers = BigInt.fromI32(0);
+        protocol.save();
+    }
+    return protocol as Protocol;
+};
 
 export const getOrInitUser = (address: Bytes): User => {
     let user = User.load(address.toHexString());
     if (user == null) {
         user = new User(address.toHexString());
         user.save();
+
+        // Add user to protocol
+        const protocol = getProtocol();
+        protocol.totalUsers = protocol.totalUsers.plus(BigInt.fromI32(1));
+        protocol.save();
     }
     return user as User;
 };
