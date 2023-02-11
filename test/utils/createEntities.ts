@@ -1,9 +1,6 @@
 import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts';
 import { LendingMarket } from '../../generated/schema';
-import {
-    handleTakeOrders,
-    handleTransactionVolume,
-} from '../../src/lending-market';
+import { handleTakeOrders } from '../../src/lending-market';
 import { buildLendingMarketId, toBytes32 } from '../../src/utils/string';
 import { createTakeOrdersEvent } from '../mocks';
 
@@ -37,7 +34,6 @@ export function createTransaction(
     );
     if (timestamp) takeOrdersEvent.block.timestamp = BigInt.fromI32(timestamp);
     handleTakeOrders(takeOrdersEvent);
-    handleTransactionVolume(takeOrdersEvent);
 }
 
 export function createLendingMarket(ccy: Bytes, maturity: BigInt): void {

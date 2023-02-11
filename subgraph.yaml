@@ -67,8 +67,6 @@ templates:
           handler: handleMakeOrder
         - event: TakeOrders(indexed address,uint8,bytes32,uint256,uint256,uint256,uint256)
           handler: handleTakeOrders
-        - event: TakeOrders(indexed address,uint8,bytes32,uint256,uint256,uint256,uint256)
-          handler: handleTransactionVolume
         - event: CleanOrders(uint48[],indexed address,uint8,indexed bytes32,uint256)
           handler: handleCleanOrders
         - event: CancelOrder(uint48,indexed address,uint8,bytes32,uint256,uint256,uint256)

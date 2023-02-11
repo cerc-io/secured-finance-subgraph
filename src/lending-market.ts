@@ -38,6 +38,35 @@ export function handleMakeOrder(event: MakeOrder): void {
 }
 
 export function handleTakeOrders(event: TakeOrders): void {
+    createTransaction(event);
+    addToTransactionVolume(event);
+}
+
+export function handleCancelOrder(event: CancelOrder): void {
+    const id = event.params.orderId;
+    let order = Order.load(id.toHexString());
+    if (order === null) {
+        order = new Order(id.toHexString());
+    }
+
+    order.status = 'Cancelled';
+    order.save();
+}
+
+export function handleCleanOrders(event: CleanOrders): void {
+    for (let i = 0; i < event.params.orderIds.length; i++) {
+        const id = event.params.orderIds[i];
+        let order = Order.load(id.toHexString());
+        if (order === null) {
+            order = new Order(id.toHexString());
+        }
+
+        order.status = 'Filled';
+        order.save();
+    }
+}
+
+function createTransaction(event: TakeOrders): void {
     const transaction = new Transaction(event.transaction.hash.toHexString());
 
     transaction.orderPrice = event.params.unitPrice;
@@ -77,32 +106,7 @@ export function handleTakeOrders(event: TakeOrders): void {
 
     transaction.save();
 }
-
-export function handleCancelOrder(event: CancelOrder): void {
-    const id = event.params.orderId;
-    let order = Order.load(id.toHexString());
-    if (order === null) {
-        order = new Order(id.toHexString());
-    }
-
-    order.status = 'Cancelled';
-    order.save();
-}
-
-export function handleCleanOrders(event: CleanOrders): void {
-    for (let i = 0; i < event.params.orderIds.length; i++) {
-        const id = event.params.orderIds[i];
-        let order = Order.load(id.toHexString());
-        if (order === null) {
-            order = new Order(id.toHexString());
-        }
-
-        order.status = 'Filled';
-        order.save();
-    }
-}
-
-export function handleTransactionVolume(event: TakeOrders): void {
+function addToTransactionVolume(event: TakeOrders): void {
     // We expect to have a transaction entity created in the handleTakeOrders
     const transaction = Transaction.load(event.transaction.hash.toHexString());
     if (transaction) {
