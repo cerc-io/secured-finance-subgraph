@@ -7,6 +7,7 @@ import {
     describe,
     test,
 } from 'matchstick-as/assembly/index';
+import { getProtocol, PROTOCOL_ID } from '../src/helper/initializer';
 import {
     handleCreateLendingMarket,
     handleRotateLendingMarkets,
@@ -53,7 +54,7 @@ const newAddress = Address.fromString(
 );
 
 const LENDING_MARKET_ENTITY_NAME = 'LendingMarket';
-const AVAILABLE_LENDING_MARKET_ENTITY_NAME = 'LendingMarketList';
+const PROTOCOL = 'Protocol';
 
 const TOTAL_NUMBER_PREPOPULATED_MARKET = 8;
 const assertLendingMarketCreated = (): void => {
@@ -61,7 +62,6 @@ const assertLendingMarketCreated = (): void => {
         LENDING_MARKET_ENTITY_NAME,
         TOTAL_NUMBER_PREPOPULATED_MARKET + 1
     );
-    assert.entityCount(AVAILABLE_LENDING_MARKET_ENTITY_NAME, 2);
 };
 
 describe('With no lending markets existing', () => {
@@ -91,7 +91,7 @@ describe('With no lending markets existing', () => {
         assert.fieldEquals(LENDING_MARKET_ENTITY_NAME, id, 'isActive', 'true');
     });
 
-    test('Creating a new lending market should create the LendingMarketList entity and add this lending market to it', () => {
+    test('Creating a new lending market should add it to the protocol', () => {
         const event = createCreateLendingMarketEvent(
             ethBytes,
             lendingMarketAddress,
@@ -101,18 +101,11 @@ describe('With no lending markets existing', () => {
         );
         handleCreateLendingMarket(event);
 
-        assert.entityCount(AVAILABLE_LENDING_MARKET_ENTITY_NAME, 1);
+        assert.entityCount(PROTOCOL, 1);
         assert.fieldEquals(
-            AVAILABLE_LENDING_MARKET_ENTITY_NAME,
-            ethBytes.toHexString(),
-            'currency',
-            ethBytes.toHexString()
-        );
-
-        assert.fieldEquals(
-            AVAILABLE_LENDING_MARKET_ENTITY_NAME,
-            ethBytes.toHexString(),
-            'markets',
+            PROTOCOL,
+            PROTOCOL_ID,
+            'lendingMarkets',
             toArrayString([buildLendingMarketId(ethBytes, maturity)])
         );
     });
@@ -144,34 +137,7 @@ describe('With lending markets already existing', () => {
         }
     });
 
-    test('Creating a new lending market should add it to the list of available markets', () => {
-        const event = createCreateLendingMarketEvent(
-            filBytes,
-            newAddress,
-            newAddress,
-            BigInt.fromI32(0),
-            newMaturity
-        );
-
-        handleCreateLendingMarket(event);
-
-        assertLendingMarketCreated();
-
-        assert.fieldEquals(
-            AVAILABLE_LENDING_MARKET_ENTITY_NAME,
-            filBytes.toHexString(),
-            'markets',
-            toArrayString(
-                maturityList
-                    .map<string>(maturity =>
-                        buildLendingMarketId(filBytes, maturity)
-                    )
-                    .concat([buildLendingMarketId(filBytes, newMaturity)])
-            )
-        );
-    });
-
-    test('Rotate lending market should create a new Lending Market', () => {
+    test('Rotate lending market should create the new Lending Market', () => {
         const event = createRotateLendingMarketsEvent(
             filBytes,
             maturityList[0],
@@ -179,8 +145,6 @@ describe('With lending markets already existing', () => {
         );
 
         handleRotateLendingMarkets(event);
-
-        assertLendingMarketCreated();
 
         const id = buildLendingMarketId(filBytes, newMaturity);
         assert.fieldEquals(LENDING_MARKET_ENTITY_NAME, id, 'isActive', 'true');
@@ -198,7 +162,7 @@ describe('With lending markets already existing', () => {
         );
     });
 
-    test('Rolling out a lending market with no transaction should only update the available markets', () => {
+    test('Rotate lending market should add the new maturity market to the protocol', () => {
         const event = createRotateLendingMarketsEvent(
             filBytes,
             maturityList[0],
@@ -207,20 +171,9 @@ describe('With lending markets already existing', () => {
 
         handleRotateLendingMarkets(event);
 
-        assertLendingMarketCreated();
-
-        assert.fieldEquals(
-            AVAILABLE_LENDING_MARKET_ENTITY_NAME,
-            filBytes.toHexString(),
-            'markets',
-            toArrayString([
-                buildLendingMarketId(filBytes, maturityList[0]),
-                buildLendingMarketId(filBytes, maturityList[1]),
-                buildLendingMarketId(filBytes, maturityList[2]),
-                buildLendingMarketId(filBytes, maturityList[3]),
-                buildLendingMarketId(filBytes, newMaturity),
-            ])
-        );
+        const protocol = getProtocol();
+        const lendingMarkets = protocol.lendingMarkets;
+        assert.i32Equals(lendingMarkets.length, 9);
     });
 
     test('Rolling out a lending market with existing transactions should update those transactions', () => {
@@ -281,9 +234,9 @@ describe('With lending markets already existing', () => {
 
         handleRotateLendingMarkets(event);
 
-        assertLendingMarketCreated();
-
         // Maturity of only the FIL transactions with maturity Dec 22 should be updated
+
+        // Transaction 0 is updated (FIL, Dec 22)
         assert.fieldEquals(
             'Transaction',
             hashList[0].toHexString(),
@@ -291,6 +244,7 @@ describe('With lending markets already existing', () => {
             maturityList[1].toString()
         );
 
+        // Transaction 1 is updated (FIL, Dec 22)
         assert.fieldEquals(
             'Transaction',
             hashList[1].toHexString(),
@@ -298,6 +252,7 @@ describe('With lending markets already existing', () => {
             maturityList[1].toString()
         );
 
+        // Transaction 2 is not updated (ETH, Dec 22)
         assert.fieldEquals(
             'Transaction',
             hashList[2].toHexString(),
@@ -305,6 +260,7 @@ describe('With lending markets already existing', () => {
             maturityList[0].toString()
         );
 
+        // Transaction 3 is not updated (FIL, Mar 23)
         assert.fieldEquals(
             'Transaction',
             hashList[3].toHexString(),

@@ -6,7 +6,6 @@ import {
     describe,
     test,
 } from 'matchstick-as/assembly/index';
-import { LendingMarket } from '../generated/schema';
 import {
     handleCancelOrder,
     handleCleanOrders,
@@ -14,7 +13,7 @@ import {
     handleTakeOrders,
 } from '../src/lending-market';
 import { getDailyVolumeEntityId } from '../src/utils/id-generation';
-import { buildLendingMarketId, toBytes32 } from '../src/utils/string';
+import { toBytes32 } from '../src/utils/string';
 import {
     createCancelOrderEvent,
     createCleanOrders,
@@ -183,15 +182,7 @@ test('Should updates the orders when the CleanOrders Event is raised', () => {
 
 test('Should create a Transaction when the TakeOrders Event is raised', () => {
     // Create the market first
-    const market = new LendingMarket(buildLendingMarketId(ccy, maturity));
-    market.currency = ccy;
-    market.maturity = maturity;
-    market.blockNumber = BigInt.fromI32(0);
-    market.txHash = toBytes32('0x0');
-    market.isActive = true;
-    market.transactions = [];
-    market.createdAt = BigInt.fromI32(0);
-    market.save();
+    createLendingMarket(ccy, maturity);
 
     const filledFutureValue = BigInt.fromString('1230000000000000000000');
     const filledAmount = BigInt.fromString('1200000000000000000000');

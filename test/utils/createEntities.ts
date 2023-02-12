@@ -1,7 +1,7 @@
 import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts';
-import { LendingMarket } from '../../generated/schema';
+import { newMockEvent } from 'matchstick-as';
+import { getOrInitLendingMarket } from '../../src/helper/initializer';
 import { handleTakeOrders } from '../../src/lending-market';
-import { buildLendingMarketId, toBytes32 } from '../../src/utils/string';
 import { createTakeOrdersEvent } from '../mocks';
 
 export const ALICE = Address.fromString(
@@ -37,13 +37,12 @@ export function createTransaction(
 }
 
 export function createLendingMarket(ccy: Bytes, maturity: BigInt): void {
-    const market = new LendingMarket(buildLendingMarketId(ccy, maturity));
-    market.currency = ccy;
-    market.maturity = maturity;
-    market.blockNumber = BigInt.fromI32(0);
-    market.txHash = toBytes32('0x0');
-    market.isActive = true;
-    market.transactions = [];
-    market.createdAt = BigInt.fromI32(0);
-    market.save();
+    const event = newMockEvent();
+    getOrInitLendingMarket(
+        ccy,
+        maturity,
+        event.block.timestamp,
+        event.block.number,
+        event.transaction.hash
+    );
 }

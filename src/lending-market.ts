@@ -1,13 +1,16 @@
 import { BigDecimal, log } from '@graphprotocol/graph-ts';
-import { LendingMarket, Order, Transaction } from '../generated/schema';
+import { Order, Transaction } from '../generated/schema';
 import {
     CancelOrder,
     CleanOrders,
     MakeOrder,
     TakeOrders,
 } from '../generated/templates/LendingMarket/LendingMarket';
-import { getOrInitDailyVolume, getOrInitUser } from './helper/initializer';
-import { buildLendingMarketId } from './utils/string';
+import {
+    getOrInitDailyVolume,
+    getOrInitLendingMarket,
+    getOrInitUser,
+} from './helper/initializer';
 
 export function handleMakeOrder(event: MakeOrder): void {
     const orderId = event.params.orderId.toHexString();
@@ -88,21 +91,13 @@ function createTransaction(event: TakeOrders): void {
     transaction.blockNumber = event.block.number;
     transaction.txHash = event.transaction.hash;
 
-    const lendingMarketId = buildLendingMarketId(
+    transaction.lendingMarket = getOrInitLendingMarket(
         transaction.currency,
-        transaction.maturity
-    );
-
-    const lendingMarket = LendingMarket.load(lendingMarketId);
-    if (lendingMarket) {
-        transaction.lendingMarket = lendingMarket.id;
-        lendingMarket.transactions = lendingMarket.transactions.concat([
-            transaction.id,
-        ]);
-        lendingMarket.save();
-    } else {
-        throw new Error(`Lending market not found: ${lendingMarketId}}`);
-    }
+        transaction.maturity,
+        event.block.timestamp,
+        event.block.number,
+        event.transaction.hash
+    ).id;
 
     transaction.save();
 }

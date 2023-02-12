@@ -1,69 +1,57 @@
-import { BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
+import { Bytes, log } from '@graphprotocol/graph-ts';
 import {
     CreateLendingMarket,
     RotateLendingMarkets,
 } from '../generated/LendingMarketController/LendingMarketController';
-import {
-    LendingMarket,
-    LendingMarketList,
-    Transaction,
-} from '../generated/schema';
+import { LendingMarket, Transaction } from '../generated/schema';
 import { LendingMarket as LendingMarketTemplate } from '../generated/templates';
-import { buildLendingMarketId } from './utils/string';
+import { getOrInitLendingMarket, getProtocol } from './helper/initializer';
 
 export function handleCreateLendingMarket(event: CreateLendingMarket): void {
     LendingMarketTemplate.create(event.params.marketAddr);
-    const market = createLendingMarket(
+    getOrInitLendingMarket(
         event.params.ccy,
         event.params.maturity,
-        event
+        event.block.timestamp,
+        event.block.number,
+        event.transaction.hash
     );
-
-    rollInMarket(event.params.ccy, market);
 }
 
 // Load all transactions for the rolling market, and change their maturity to the closest one
 export function handleRotateLendingMarkets(event: RotateLendingMarkets): void {
-    let rollingInMarket = LendingMarket.load(
-        buildLendingMarketId(event.params.ccy, event.params.newMaturity)
+    // Create the new market if it doesn't exist
+    getOrInitLendingMarket(
+        event.params.ccy,
+        event.params.newMaturity,
+        event.block.timestamp,
+        event.block.number,
+        event.transaction.hash
     );
 
-    if (!rollingInMarket) {
-        rollingInMarket = createLendingMarket(
-            event.params.ccy,
-            event.params.newMaturity,
-            event
-        );
-    }
-
-    rollInMarket(event.params.ccy, rollingInMarket);
-
-    const rollingOutMarket = LendingMarket.load(
-        buildLendingMarketId(event.params.ccy, event.params.oldMaturity)
+    const rollingOutMarket = getOrInitLendingMarket(
+        event.params.ccy,
+        event.params.oldMaturity,
+        event.block.timestamp,
+        event.block.number,
+        event.transaction.hash
     );
 
-    if (rollingOutMarket) {
-        rollOutMarket(rollingOutMarket);
-        updateTransactions(rollingOutMarket);
-    } else {
-        throw new Error('No market found');
-    }
+    rollOutMarket(rollingOutMarket);
+    updateTransactions(rollingOutMarket);
 }
 
 const getMarketList = (ccy: Bytes): LendingMarket[] => {
-    const availableMarkets = LendingMarketList.load(ccy);
-    if (availableMarkets) {
-        const markets = availableMarkets.markets;
-        if (markets) {
-            const marketList: LendingMarket[] = [];
-            for (let i = 0; i < markets.length; i++) {
-                const market = LendingMarket.load(markets[i]);
-                if (market) {
-                    marketList.push(market);
-                }
+    const markets = getProtocol().lendingMarkets;
+    if (markets.length > 0) {
+        const marketList: LendingMarket[] = [];
+        for (let i = 0; i < markets.length; i++) {
+            const market = LendingMarket.load(markets[i]);
+            if (market && market.currency == ccy && market.isActive) {
+                marketList.push(market);
             }
-            return marketList;
         }
+        return marketList;
     }
     return [];
 };
@@ -73,10 +61,6 @@ const getShortestMaturityActiveMarket = (ccy: Bytes): LendingMarket | null => {
     let market: LendingMarket | null = null;
     if (marketList && marketList.length > 0) {
         for (let i = 0; i < marketList.length; i++) {
-            if (!marketList[i].isActive) {
-                continue;
-            }
-
             if (market == null) {
                 market = marketList[i];
             }
@@ -94,45 +78,14 @@ const rollOutMarket = (market: LendingMarket): void => {
     market.save();
 };
 
-const rollInMarket = (ccy: Bytes, market: LendingMarket): void => {
-    const entity = LendingMarketList.load(ccy);
-    if (entity) {
-        // Array.push is not working with entities
-        entity.markets = entity.markets.concat([market.id]);
-        entity.save();
-    } else {
-        const newEntity = new LendingMarketList(ccy);
-        newEntity.markets = [market.id];
-        newEntity.currency = ccy;
-        newEntity.save();
-    }
-};
-
-const createLendingMarket = (
-    ccy: Bytes,
-    maturity: BigInt,
-    event: ethereum.Event
-): LendingMarket => {
-    const market = new LendingMarket(buildLendingMarketId(ccy, maturity));
-
-    market.currency = ccy;
-    market.maturity = maturity;
-    market.isActive = true;
-
-    market.createdAt = event.block.timestamp;
-    market.blockNumber = event.block.number;
-    market.txHash = event.transaction.hash;
-    market.transactions = [];
-    market.save();
-
-    return market;
-};
-
 const updateTransactions = (rolledOutMarket: LendingMarket): void => {
     const transactions = rolledOutMarket.transactions;
-    if (!transactions || transactions.length == 0) {
+
+    if (transactions == null) {
         return;
     }
+
+    log.debug('Rolling {} Transactions', [transactions.length.toString()]);
 
     const closestMarket = getShortestMaturityActiveMarket(
         rolledOutMarket.currency
@@ -144,22 +97,12 @@ const updateTransactions = (rolledOutMarket: LendingMarket): void => {
 
     for (let i = 0; i < transactions.length; i++) {
         const transaction = Transaction.load(transactions[i]);
-        if (!transaction) {
+        if (transaction == null) {
             continue;
         }
 
         transaction.maturity = closestMarket.maturity;
         transaction.lendingMarket = closestMarket.id;
         transaction.save();
-
-        if (!closestMarket.transactions) {
-            closestMarket.transactions = [transaction.id];
-        } else {
-            closestMarket.transactions = closestMarket.transactions.concat([
-                transaction.id,
-            ]);
-        }
-
-        closestMarket.save();
     }
 };
