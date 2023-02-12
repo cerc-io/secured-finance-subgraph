@@ -24,7 +24,11 @@ export const getOrInitUser = (address: Bytes): User => {
     let user = User.load(address.toHexString());
     if (user === null) {
         user = new User(address.toHexString());
+        user.transactions = [];
+        user.orders = [];
         user.save();
+
+        log.debug('New user: {}', [user.id]);
 
         // Add user to protocol
         const protocol = getProtocol();
