@@ -93,10 +93,7 @@ function createTransaction(event: TakeOrders): void {
 
     transaction.lendingMarket = getOrInitLendingMarket(
         transaction.currency,
-        transaction.maturity,
-        event.block.timestamp,
-        event.block.number,
-        event.transaction.hash
+        transaction.maturity
     ).id;
 
     transaction.save();

@@ -1,5 +1,4 @@
 import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts';
-import { newMockEvent } from 'matchstick-as';
 import { getOrInitLendingMarket } from '../../src/helper/initializer';
 import { handleTakeOrders } from '../../src/lending-market';
 import { createTakeOrdersEvent } from '../mocks';
@@ -37,12 +36,5 @@ export function createTransaction(
 }
 
 export function createLendingMarket(ccy: Bytes, maturity: BigInt): void {
-    const event = newMockEvent();
-    getOrInitLendingMarket(
-        ccy,
-        maturity,
-        event.block.timestamp,
-        event.block.number,
-        event.transaction.hash
-    );
+    getOrInitLendingMarket(ccy, maturity);
 }
