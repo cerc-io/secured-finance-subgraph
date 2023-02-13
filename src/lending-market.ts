@@ -1,13 +1,16 @@
 import { BigDecimal, log } from '@graphprotocol/graph-ts';
-import { LendingMarket, Order, Transaction } from '../generated/schema';
+import { Order, Transaction } from '../generated/schema';
 import {
     CancelOrder,
     CleanOrders,
     MakeOrder,
     TakeOrders,
 } from '../generated/templates/LendingMarket/LendingMarket';
-import { getOrInitDailyVolume, getOrInitUser } from './helper/initializer';
-import { buildLendingMarketId } from './utils/string';
+import {
+    getOrInitDailyVolume,
+    getOrInitLendingMarket,
+    getOrInitUser,
+} from './helper/initializer';
 
 export function handleMakeOrder(event: MakeOrder): void {
     const orderId = event.params.orderId.toHexString();
@@ -38,44 +41,8 @@ export function handleMakeOrder(event: MakeOrder): void {
 }
 
 export function handleTakeOrders(event: TakeOrders): void {
-    const transaction = new Transaction(event.transaction.hash.toHexString());
-
-    transaction.orderPrice = event.params.unitPrice;
-    transaction.taker = getOrInitUser(event.params.taker).id;
-    transaction.currency = event.params.ccy;
-    transaction.maturity = event.params.maturity;
-    transaction.side = event.params.side;
-
-    transaction.forwardValue = event.params.filledFutureValue;
-    transaction.amount = event.params.filledAmount;
-
-    transaction.averagePrice = !event.params.filledFutureValue.isZero()
-        ? event.params.filledAmount.divDecimal(
-              new BigDecimal(event.params.filledFutureValue)
-          )
-        : BigDecimal.zero();
-
-    transaction.createdAt = event.block.timestamp;
-    transaction.blockNumber = event.block.number;
-    transaction.txHash = event.transaction.hash;
-
-    const lendingMarketId = buildLendingMarketId(
-        transaction.currency,
-        transaction.maturity
-    );
-
-    const lendingMarket = LendingMarket.load(lendingMarketId);
-    if (lendingMarket) {
-        transaction.lendingMarket = lendingMarket.id;
-        lendingMarket.transactions = lendingMarket.transactions.concat([
-            transaction.id,
-        ]);
-        lendingMarket.save();
-    } else {
-        throw new Error(`Lending market not found: ${lendingMarketId}}`);
-    }
-
-    transaction.save();
+    createTransaction(event);
+    addToTransactionVolume(event);
 }
 
 export function handleCancelOrder(event: CancelOrder): void {
@@ -102,7 +69,39 @@ export function handleCleanOrders(event: CleanOrders): void {
     }
 }
 
-export function handleTransactionVolume(event: TakeOrders): void {
+function createTransaction(event: TakeOrders): void {
+    const transaction = new Transaction(event.transaction.hash.toHexString());
+
+    transaction.orderPrice = event.params.unitPrice;
+    transaction.taker = getOrInitUser(event.params.taker).id;
+    transaction.currency = event.params.ccy;
+    transaction.maturity = event.params.maturity;
+    transaction.side = event.params.side;
+
+    transaction.forwardValue = event.params.filledFutureValue;
+    transaction.amount = event.params.filledAmount;
+
+    transaction.averagePrice = !event.params.filledFutureValue.isZero()
+        ? event.params.filledAmount.divDecimal(
+              new BigDecimal(event.params.filledFutureValue)
+          )
+        : BigDecimal.zero();
+
+    transaction.createdAt = event.block.timestamp;
+    transaction.blockNumber = event.block.number;
+    transaction.txHash = event.transaction.hash;
+
+    transaction.lendingMarket = getOrInitLendingMarket(
+        transaction.currency,
+        transaction.maturity,
+        event.block.timestamp,
+        event.block.number,
+        event.transaction.hash
+    ).id;
+
+    transaction.save();
+}
+function addToTransactionVolume(event: TakeOrders): void {
     // We expect to have a transaction entity created in the handleTakeOrders
     const transaction = Transaction.load(event.transaction.hash.toHexString());
     if (transaction) {

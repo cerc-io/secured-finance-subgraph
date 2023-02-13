@@ -14,7 +14,7 @@ type Transaction @entity {
   blockNumber: BigInt!
   txHash: Bytes!
 
-  lendingMarket: LendingMarket
+  lendingMarket: LendingMarket!
 }
 
 type Order @entity {
@@ -44,20 +44,15 @@ type LendingMarket @entity {
   blockNumber: BigInt!
   txHash: Bytes!
 
-  transactions: [Transaction!]!
+  transactions: [Transaction!]! @derivedFrom(field: "lendingMarket")
+  protocol: Protocol!
+  volume: BigInt!
 }
 
 enum OrderStatus {
   Open
   Cancelled
   Filled
-}
-
-type LendingMarketList @entity {
-  id: Bytes! # currency
-  currency: Bytes!
-
-  markets: [LendingMarket!]!
 }
 
 type User @entity(immutable: true) {
@@ -73,4 +68,10 @@ type DailyVolume @entity {
   day: String! # dd-mm-yyyy
   volume: BigInt!
   timestamp: BigInt!
+}
+
+type Protocol @entity {
+  id: ID! # ethereum
+  totalUsers: BigInt!
+  lendingMarkets: [LendingMarket!]! @derivedFrom(field: "protocol")
 }
