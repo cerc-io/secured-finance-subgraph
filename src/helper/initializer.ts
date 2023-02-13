@@ -24,8 +24,6 @@ export const getOrInitUser = (address: Bytes): User => {
     let user = User.load(address.toHexString());
     if (user === null) {
         user = new User(address.toHexString());
-        user.transactions = [];
-        user.orders = [];
         user.save();
 
         log.debug('New user: {}', [user.id]);
@@ -75,6 +73,7 @@ export const getOrInitLendingMarket = (
         lendingMarket = new LendingMarket(id);
         lendingMarket.currency = ccy;
         lendingMarket.maturity = maturity;
+        lendingMarket.prettyName = ccy.toString() + '-' + maturity.toString();
         lendingMarket.isActive = true;
         lendingMarket.protocol = getProtocol().id;
         lendingMarket.volume = BigInt.fromI32(0);
@@ -83,14 +82,8 @@ export const getOrInitLendingMarket = (
         lendingMarket.blockNumber = blockNumber;
         lendingMarket.txHash = txHash;
 
-        // Initialize empty array
-        lendingMarket.transactions = [];
-
         lendingMarket.save();
-        log.debug('Created lending market for currency: {}, maturity: {}', [
-            ccy.toString(),
-            maturity.toString(),
-        ]);
+        log.debug('Created lending market: {}', [lendingMarket.prettyName]);
     }
     return lendingMarket as LendingMarket;
 };

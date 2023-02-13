@@ -79,6 +79,12 @@ const rollOutMarket = (market: LendingMarket): void => {
 };
 
 const updateTransactions = (rolledOutMarket: LendingMarket): void => {
+    if (!rolledOutMarket.isSet('transactions')) {
+        log.debug('No transactions found for market {}', [
+            rolledOutMarket.prettyName,
+        ]);
+        return;
+    }
     const transactions = rolledOutMarket.transactions;
 
     if (transactions == null) {

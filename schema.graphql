@@ -36,6 +36,7 @@ type Order @entity {
 
 type LendingMarket @entity {
   id: ID!
+  prettyName: String!
   currency: Bytes!
   maturity: BigInt!
   isActive: Boolean!
@@ -55,7 +56,7 @@ enum OrderStatus {
   Filled
 }
 
-type User @entity(immutable: true) {
+type User @entity {
   id: ID! # wallet address
   transactions: [Transaction!]! @derivedFrom(field: "taker")
   orders: [Order!]! @derivedFrom(field: "maker")
