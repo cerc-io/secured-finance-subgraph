@@ -9,32 +9,17 @@ import { getOrInitLendingMarket, getProtocol } from './helper/initializer';
 
 export function handleCreateLendingMarket(event: CreateLendingMarket): void {
     LendingMarketTemplate.create(event.params.marketAddr);
-    getOrInitLendingMarket(
-        event.params.ccy,
-        event.params.maturity,
-        event.block.timestamp,
-        event.block.number,
-        event.transaction.hash
-    );
+    getOrInitLendingMarket(event.params.ccy, event.params.maturity);
 }
 
 // Load all transactions for the rolling market, and change their maturity to the closest one
 export function handleRotateLendingMarkets(event: RotateLendingMarkets): void {
     // Create the new market if it doesn't exist
-    getOrInitLendingMarket(
-        event.params.ccy,
-        event.params.newMaturity,
-        event.block.timestamp,
-        event.block.number,
-        event.transaction.hash
-    );
+    getOrInitLendingMarket(event.params.ccy, event.params.newMaturity);
 
     const rollingOutMarket = getOrInitLendingMarket(
         event.params.ccy,
-        event.params.oldMaturity,
-        event.block.timestamp,
-        event.block.number,
-        event.transaction.hash
+        event.params.oldMaturity
     );
 
     rollOutMarket(rollingOutMarket);
@@ -79,6 +64,12 @@ const rollOutMarket = (market: LendingMarket): void => {
 };
 
 const updateTransactions = (rolledOutMarket: LendingMarket): void => {
+    if (!rolledOutMarket.isSet('transactions')) {
+        log.debug('No transactions found for market {}', [
+            rolledOutMarket.prettyName,
+        ]);
+        return;
+    }
     const transactions = rolledOutMarket.transactions;
 
     if (transactions == null) {

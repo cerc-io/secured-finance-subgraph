@@ -235,7 +235,6 @@ describe('With lending markets already existing', () => {
         handleRotateLendingMarkets(event);
 
         // Maturity of only the FIL transactions with maturity Dec 22 should be updated
-
         // Transaction 0 is updated (FIL, Dec 22)
         assert.fieldEquals(
             'Transaction',

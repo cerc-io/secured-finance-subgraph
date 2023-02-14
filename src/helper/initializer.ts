@@ -20,12 +20,31 @@ export const getProtocol = (): Protocol => {
     return protocol as Protocol;
 };
 
+export const getOrInitLendingMarket = (
+    ccy: Bytes,
+    maturity: BigInt
+): LendingMarket => {
+    const id = buildLendingMarketId(ccy, maturity);
+    let lendingMarket = LendingMarket.load(id);
+    if (lendingMarket == null) {
+        lendingMarket = new LendingMarket(id);
+        lendingMarket.currency = ccy;
+        lendingMarket.maturity = maturity;
+        lendingMarket.prettyName = ccy.toString() + '-' + maturity.toString();
+        lendingMarket.isActive = true;
+        lendingMarket.protocol = getProtocol().id;
+        lendingMarket.volume = BigInt.fromI32(0);
+
+        lendingMarket.save();
+        log.debug('Created lending market: {}', [lendingMarket.prettyName]);
+    }
+    return lendingMarket as LendingMarket;
+};
+
 export const getOrInitUser = (address: Bytes): User => {
     let user = User.load(address.toHexString());
     if (user === null) {
         user = new User(address.toHexString());
-        user.transactions = [];
-        user.orders = [];
         user.save();
 
         log.debug('New user: {}', [user.id]);
@@ -57,40 +76,8 @@ export const getOrInitDailyVolume = (
             Date.parse(dayStr).getTime() / 1000
         );
         dailyVolume.volume = BigInt.fromI32(0);
+        dailyVolume.lendingMarket = getOrInitLendingMarket(ccy, maturity).id;
         dailyVolume.save();
     }
     return dailyVolume as DailyVolume;
-};
-
-export const getOrInitLendingMarket = (
-    ccy: Bytes,
-    maturity: BigInt,
-    timestamp: BigInt,
-    blockNumber: BigInt,
-    txHash: Bytes
-): LendingMarket => {
-    const id = buildLendingMarketId(ccy, maturity);
-    let lendingMarket = LendingMarket.load(id);
-    if (lendingMarket == null) {
-        lendingMarket = new LendingMarket(id);
-        lendingMarket.currency = ccy;
-        lendingMarket.maturity = maturity;
-        lendingMarket.isActive = true;
-        lendingMarket.protocol = getProtocol().id;
-        lendingMarket.volume = BigInt.fromI32(0);
-
-        lendingMarket.createdAt = timestamp;
-        lendingMarket.blockNumber = blockNumber;
-        lendingMarket.txHash = txHash;
-
-        // Initialize empty array
-        lendingMarket.transactions = [];
-
-        lendingMarket.save();
-        log.debug('Created lending market for currency: {}, maturity: {}', [
-            ccy.toString(),
-            maturity.toString(),
-        ]);
-    }
-    return lendingMarket as LendingMarket;
 };

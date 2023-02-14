@@ -36,17 +36,14 @@ type Order @entity {
 
 type LendingMarket @entity {
   id: ID!
+  prettyName: String!
   currency: Bytes!
   maturity: BigInt!
   isActive: Boolean!
-
-  createdAt: BigInt!
-  blockNumber: BigInt!
-  txHash: Bytes!
-
   transactions: [Transaction!]! @derivedFrom(field: "lendingMarket")
   protocol: Protocol!
   volume: BigInt!
+  dailyVolume: [DailyVolume!]! @derivedFrom(field: "lendingMarket")
 }
 
 enum OrderStatus {
@@ -55,7 +52,7 @@ enum OrderStatus {
   Filled
 }
 
-type User @entity(immutable: true) {
+type User @entity {
   id: ID! # wallet address
   transactions: [Transaction!]! @derivedFrom(field: "taker")
   orders: [Order!]! @derivedFrom(field: "maker")
@@ -68,6 +65,7 @@ type DailyVolume @entity {
   day: String! # dd-mm-yyyy
   volume: BigInt!
   timestamp: BigInt!
+  lendingMarket: LendingMarket!
 }
 
 type Protocol @entity {
