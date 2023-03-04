@@ -7,18 +7,18 @@ import {
     test,
 } from 'matchstick-as/assembly/index';
 import {
-    handleCancelOrder,
-    handleCleanOrders,
-    handleMakeOrder,
-    handleTakeOrders,
+    handleOrderCanceled,
+    handleOrdersCleaned,
+    handleOrderMade,
+    handleOrdersTaken,
 } from '../src/lending-market';
 import { getDailyVolumeEntityId } from '../src/utils/id-generation';
 import { toBytes32 } from '../src/utils/string';
 import {
-    createCancelOrderEvent,
-    createCleanOrders,
-    createMakeOrderEvent,
-    createTakeOrdersEvent,
+    createOrderCanceledEvent,
+    createOrdersCleaned,
+    createOrderMadeEvent,
+    createOrdersTakenEvent,
     toArrayString,
 } from './mocks';
 import { createLendingMarket, createTransaction } from './utils/createEntities';
@@ -31,11 +31,11 @@ const maturity = BigInt.fromI32(1677628800); // 1st Mar 23
 const amount = BigInt.fromI32(100);
 const unitPrice = BigInt.fromI32(100);
 
-test('Should create a Order when the MakeOrder Event is raised', () => {
+test('Should create a Order when the OrderMade Event is raised', () => {
     const orderId = BigInt.fromI32(1);
     const id = orderId.toHexString();
 
-    const event = createMakeOrderEvent(
+    const event = createOrderMadeEvent(
         orderId,
         originalOrderId,
         maker,
@@ -45,7 +45,7 @@ test('Should create a Order when the MakeOrder Event is raised', () => {
         amount,
         unitPrice
     );
-    handleMakeOrder(event);
+    handleOrderMade(event);
 
     assert.fieldEquals('Order', id, 'orderId', orderId.toString());
     assert.fieldEquals(
@@ -63,13 +63,13 @@ test('Should create a Order when the MakeOrder Event is raised', () => {
     assert.fieldEquals('Order', id, 'status', 'Open');
 });
 
-test('Should update the original order amount when the MakeOrder Event is raised', () => {
+test('Should update the original order amount when the OrderMade Event is raised', () => {
     const orderId = BigInt.fromI32(10);
     const id = orderId.toHexString();
     const originalOrderId = BigInt.fromI32(11);
     const originalId = originalOrderId.toHexString();
 
-    const originalEvent = createMakeOrderEvent(
+    const originalEvent = createOrderMadeEvent(
         originalOrderId,
         BigInt.fromI32(0),
         maker,
@@ -80,10 +80,10 @@ test('Should update the original order amount when the MakeOrder Event is raised
         unitPrice
     );
 
-    handleMakeOrder(originalEvent);
+    handleOrderMade(originalEvent);
     assert.fieldEquals('Order', originalId, 'amount', '150');
 
-    const event = createMakeOrderEvent(
+    const event = createOrderMadeEvent(
         orderId,
         originalOrderId,
         maker,
@@ -94,17 +94,17 @@ test('Should update the original order amount when the MakeOrder Event is raised
         unitPrice
     );
 
-    handleMakeOrder(event);
+    handleOrderMade(event);
 
     assert.fieldEquals('Order', id, 'orderId', orderId.toString());
     assert.fieldEquals('Order', originalId, 'amount', '50');
 });
 
-test('Should update the Order when the CancelOrder Event is raised', () => {
+test('Should update the Order when the OrderCanceled Event is raised', () => {
     const orderId = BigInt.fromI32(2);
     const id = orderId.toHexString();
 
-    const makeOrderEvent = createMakeOrderEvent(
+    const makeOrderEvent = createOrderMadeEvent(
         orderId,
         originalOrderId,
         maker,
@@ -114,11 +114,11 @@ test('Should update the Order when the CancelOrder Event is raised', () => {
         amount,
         unitPrice
     );
-    handleMakeOrder(makeOrderEvent);
+    handleOrderMade(makeOrderEvent);
 
     assert.fieldEquals('Order', id, 'status', 'Open');
 
-    const event = createCancelOrderEvent(
+    const event = createOrderCanceledEvent(
         orderId,
         maker,
         side,
@@ -128,19 +128,19 @@ test('Should update the Order when the CancelOrder Event is raised', () => {
         unitPrice
     );
 
-    handleCancelOrder(event);
+    handleOrderCanceled(event);
 
     assert.fieldEquals('Order', id, 'orderId', orderId.toString());
     assert.fieldEquals('Order', id, 'status', 'Cancelled');
 });
 
-test('Should updates the orders when the CleanOrders Event is raised', () => {
+test('Should updates the orders when the OrdersCleaned Event is raised', () => {
     const orderId1 = BigInt.fromI32(3);
     const id1 = orderId1.toHexString();
     const orderId2 = BigInt.fromI32(4);
     const id2 = orderId2.toHexString();
 
-    const makeOrderEvent1 = createMakeOrderEvent(
+    const makeOrderEvent1 = createOrderMadeEvent(
         orderId1,
         originalOrderId,
         maker,
@@ -150,8 +150,8 @@ test('Should updates the orders when the CleanOrders Event is raised', () => {
         amount,
         unitPrice
     );
-    handleMakeOrder(makeOrderEvent1);
-    const makeOrderEvent2 = createMakeOrderEvent(
+    handleOrderMade(makeOrderEvent1);
+    const makeOrderEvent2 = createOrderMadeEvent(
         orderId2,
         originalOrderId,
         maker,
@@ -161,12 +161,12 @@ test('Should updates the orders when the CleanOrders Event is raised', () => {
         amount,
         unitPrice
     );
-    handleMakeOrder(makeOrderEvent2);
+    handleOrderMade(makeOrderEvent2);
 
     assert.fieldEquals('Order', id1, 'status', 'Open');
     assert.fieldEquals('Order', id2, 'status', 'Open');
 
-    const event = createCleanOrders(
+    const event = createOrdersCleaned(
         [orderId1, orderId2],
         maker,
         side,
@@ -174,13 +174,13 @@ test('Should updates the orders when the CleanOrders Event is raised', () => {
         maturity
     );
 
-    handleCleanOrders(event);
+    handleOrdersCleaned(event);
 
     assert.fieldEquals('Order', id1, 'status', 'Filled');
     assert.fieldEquals('Order', id2, 'status', 'Filled');
 });
 
-test('Should create a Transaction when the TakeOrders Event is raised', () => {
+test('Should create a Transaction when the OrdersTaken Event is raised', () => {
     // Create the market first
     createLendingMarket(ccy, maturity);
 
@@ -191,7 +191,7 @@ test('Should create a Transaction when the TakeOrders Event is raised', () => {
         new BigDecimal(filledFutureValue)
     );
 
-    const takeOrdersEvent = createTakeOrdersEvent(
+    const takeOrdersEvent = createOrdersTakenEvent(
         maker,
         side,
         ccy,
@@ -200,7 +200,7 @@ test('Should create a Transaction when the TakeOrders Event is raised', () => {
         unitPrice,
         filledFutureValue
     );
-    handleTakeOrders(takeOrdersEvent);
+    handleOrdersTaken(takeOrdersEvent);
     const id = takeOrdersEvent.transaction.hash.toHexString();
     assert.fieldEquals('Transaction', id, 'amount', filledAmount.toString());
     assert.fieldEquals(
@@ -298,7 +298,7 @@ describe('Transaction Volume', () => {
             1675845895 // Wednesday, February 8, 2023 8:44:55 AM GMT
         );
     });
-    test('Should create the daily volume of the market when the TakeOrders Event is raised', () => {
+    test('Should create the daily volume of the market when the OrdersTaken Event is raised', () => {
         const id = getDailyVolumeEntityId(ccy, maturity, '2023-02-08');
 
         assert.fieldEquals(
@@ -313,7 +313,7 @@ describe('Transaction Volume', () => {
         assert.fieldEquals('DailyVolume', id, 'timestamp', '1675814400');
     });
 
-    test('Should update the daily volume of the market when the TakeOrders Event is raised the same day', () => {
+    test('Should update the daily volume of the market when the OrdersTaken Event is raised the same day', () => {
         const amount = BigInt.fromString('2230000000000000000000');
         createTransaction(
             maker,

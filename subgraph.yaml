@@ -19,10 +19,10 @@ dataSources:
           file: >-
             ./abis/LendingMarketController.sol/LendingMarketController.json
       eventHandlers:
-        - event: CreateLendingMarket(indexed bytes32,indexed address,address,uint256,uint256)
-          handler: handleCreateLendingMarket
-        - event: RotateLendingMarkets(bytes32,uint256,uint256)
-          handler: handleRotateLendingMarkets
+        - event: LendingMarketCreated(indexed bytes32,indexed address,address,uint256,uint256)
+          handler: handleLendingMarketCreated
+        - event: LendingMarketsRotated(bytes32,uint256,uint256)
+          handler: handleLendingMarketsRotated
       file: ./src/lending-controller.ts
   - kind: ethereum
     name: TokenVault
@@ -63,12 +63,12 @@ templates:
           file: >-
             ./abis/LendingMarket.sol/LendingMarket.json
       eventHandlers:
-        - event: MakeOrder(uint48,uint48,indexed address,uint8,bytes32,uint256,uint256,uint256)
-          handler: handleMakeOrder
-        - event: TakeOrders(indexed address,uint8,bytes32,uint256,uint256,uint256,uint256)
-          handler: handleTakeOrders
-        - event: CleanOrders(uint48[],indexed address,uint8,indexed bytes32,uint256)
-          handler: handleCleanOrders
-        - event: CancelOrder(uint48,indexed address,uint8,bytes32,uint256,uint256,uint256)
-          handler: handleCancelOrder
+        - event: OrderMade(uint48,uint48,indexed address,uint8,bytes32,uint256,uint256,uint256)
+          handler: handleOrderMade
+        - event: OrdersTaken(indexed address,uint8,bytes32,uint256,uint256,uint256,uint256)
+          handler: handleOrdersTaken
+        - event: OrdersCleaned(uint48[],indexed address,uint8,indexed bytes32,uint256)
+          handler: handleOrdersCleaned
+        - event: OrderCanceled(uint48,indexed address,uint8,bytes32,uint256,uint256,uint256)
+          handler: handleOrderCanceled
       file: ./src/lending-market.ts

@@ -1,19 +1,19 @@
 import { Bytes, log } from '@graphprotocol/graph-ts';
 import {
-    CreateLendingMarket,
-    RotateLendingMarkets,
+    LendingMarketCreated,
+    LendingMarketsRotated,
 } from '../generated/LendingMarketController/LendingMarketController';
 import { LendingMarket, Transaction } from '../generated/schema';
 import { LendingMarket as LendingMarketTemplate } from '../generated/templates';
 import { getOrInitLendingMarket, getProtocol } from './helper/initializer';
 
-export function handleCreateLendingMarket(event: CreateLendingMarket): void {
+export function handleLendingMarketCreated(event: LendingMarketCreated): void {
     LendingMarketTemplate.create(event.params.marketAddr);
     getOrInitLendingMarket(event.params.ccy, event.params.maturity);
 }
 
 // Load all transactions for the rolling market, and change their maturity to the closest one
-export function handleRotateLendingMarkets(event: RotateLendingMarkets): void {
+export function handleLendingMarketsRotated(event: LendingMarketsRotated): void {
     // Create the new market if it doesn't exist
     getOrInitLendingMarket(event.params.ccy, event.params.newMaturity);
 
