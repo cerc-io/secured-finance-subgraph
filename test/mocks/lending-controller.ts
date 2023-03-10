@@ -10,6 +10,7 @@ export function createLendingMarketCreatedEvent(
     lendingMarketAddress: Address,
     futureValueVault: Address,
     index: BigInt,
+    openingDate: BigInt,
     maturity: BigInt
 ): LendingMarketCreated {
     const mockEvent = changetype<LendingMarketCreated>(newMockEvent());
@@ -44,6 +45,12 @@ export function createLendingMarketCreatedEvent(
         new ethereum.EventParam(
             'index',
             ethereum.Value.fromUnsignedBigInt(index)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'openingDate',
+            ethereum.Value.fromUnsignedBigInt(openingDate)
         )
     );
     event.parameters.push(

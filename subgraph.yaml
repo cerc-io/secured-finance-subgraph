@@ -19,7 +19,7 @@ dataSources:
           file: >-
             ./abis/LendingMarketController.sol/LendingMarketController.json
       eventHandlers:
-        - event: LendingMarketCreated(indexed bytes32,indexed address,address,uint256,uint256)
+        - event: LendingMarketCreated(indexed bytes32,indexed address,address,uint256,uint256,uint256)
           handler: handleLendingMarketCreated
         - event: LendingMarketsRotated(bytes32,uint256,uint256)
           handler: handleLendingMarketsRotated
