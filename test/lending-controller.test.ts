@@ -9,22 +9,23 @@ import {
 } from 'matchstick-as/assembly/index';
 import { getProtocol, PROTOCOL_ID } from '../src/helper/initializer';
 import {
-    handleCreateLendingMarket,
-    handleRotateLendingMarkets,
+    handleLendingMarketCreated,
+    handleLendingMarketsRotated,
 } from '../src/lending-controller';
 
 import { buildLendingMarketId, toBytes32 } from '../src/utils/string';
 import {
-    createCreateLendingMarketEvent,
-    createRotateLendingMarketsEvent,
+    createLendingMarketCreatedEvent,
+    createLendingMarketsRotatedEvent,
     toArrayString,
 } from './mocks/lending-controller';
 import { ALICE, BOB, createTransaction } from './utils/createEntities';
 
 const lendingMarketAddress = Address.zero();
 const futureValueVault = Address.zero();
-const maturity = BigInt.fromI32(365);
 const index = BigInt.fromI32(0);
+const openingDate = BigInt.fromI32(1);
+const maturity = BigInt.fromI32(365);
 
 afterEach(() => {
     clearStore();
@@ -39,6 +40,13 @@ const addressList = [
     Address.fromString('0x0000000000000000000000000000000000000001'), // Mar 23
     Address.fromString('0x0000000000000000000000000000000000000010'), // Jun 23
     Address.fromString('0x0000000000000000000000000000000000000100'), // Sep 23
+];
+
+const openingDateList = [
+    BigInt.fromI32(1659852800),
+    BigInt.fromI32(1667628800),
+    BigInt.fromI32(1675577600),
+    BigInt.fromI32(1683526400),
 ];
 
 const maturityList = [
@@ -66,14 +74,15 @@ const assertLendingMarketCreated = (): void => {
 
 describe('With no lending markets existing', () => {
     test('Creating a new lending market should create the entity', () => {
-        const event = createCreateLendingMarketEvent(
+        const event = createLendingMarketCreatedEvent(
             ethBytes,
             lendingMarketAddress,
             futureValueVault,
             index,
+            openingDate,
             maturity
         );
-        handleCreateLendingMarket(event);
+        handleLendingMarketCreated(event);
 
         const id = buildLendingMarketId(ethBytes, maturity);
         assert.fieldEquals(
@@ -92,14 +101,15 @@ describe('With no lending markets existing', () => {
     });
 
     test('Creating a new lending market should add it to the protocol', () => {
-        const event = createCreateLendingMarketEvent(
+        const event = createLendingMarketCreatedEvent(
             ethBytes,
             lendingMarketAddress,
             futureValueVault,
             index,
+            openingDate,
             maturity
         );
-        handleCreateLendingMarket(event);
+        handleLendingMarketCreated(event);
 
         assert.entityCount(PROTOCOL, 1);
         assert.fieldEquals(
@@ -115,22 +125,25 @@ describe('With lending markets already existing', () => {
     beforeEach(() => {
         for (let i = 0; i < addressList.length; i++) {
             const address = addressList[i];
+            const openingDate = openingDateList[i];
             const maturity = maturityList[i];
-            handleCreateLendingMarket(
-                createCreateLendingMarketEvent(
+            handleLendingMarketCreated(
+                createLendingMarketCreatedEvent(
                     filBytes,
                     address,
                     address,
                     BigInt.fromI32(i),
+                    openingDate,
                     maturity
                 )
             );
-            handleCreateLendingMarket(
-                createCreateLendingMarketEvent(
+            handleLendingMarketCreated(
+                createLendingMarketCreatedEvent(
                     ethBytes,
                     address,
                     address,
                     BigInt.fromI32(i),
+                    openingDate,
                     maturity
                 )
             );
@@ -138,13 +151,13 @@ describe('With lending markets already existing', () => {
     });
 
     test('Rotate lending market should create the new Lending Market', () => {
-        const event = createRotateLendingMarketsEvent(
+        const event = createLendingMarketsRotatedEvent(
             filBytes,
             maturityList[0],
             newMaturity
         );
 
-        handleRotateLendingMarkets(event);
+        handleLendingMarketsRotated(event);
 
         const id = buildLendingMarketId(filBytes, newMaturity);
         assert.fieldEquals(LENDING_MARKET_ENTITY_NAME, id, 'isActive', 'true');
@@ -163,13 +176,13 @@ describe('With lending markets already existing', () => {
     });
 
     test('Rotate lending market should add the new maturity market to the protocol', () => {
-        const event = createRotateLendingMarketsEvent(
+        const event = createLendingMarketsRotatedEvent(
             filBytes,
             maturityList[0],
             newMaturity
         );
 
-        handleRotateLendingMarkets(event);
+        handleLendingMarketsRotated(event);
 
         const protocol = getProtocol();
         const lendingMarkets = protocol.lendingMarkets;
@@ -177,7 +190,7 @@ describe('With lending markets already existing', () => {
     });
 
     test('Rolling out a lending market with existing transactions should update those transactions', () => {
-        const event = createRotateLendingMarketsEvent(
+        const event = createLendingMarketsRotatedEvent(
             filBytes,
             maturityList[0],
             newMaturity
@@ -232,7 +245,7 @@ describe('With lending markets already existing', () => {
         );
         assert.entityCount('Transaction', 4);
 
-        handleRotateLendingMarkets(event);
+        handleLendingMarketsRotated(event);
 
         // Maturity of only the FIL transactions with maturity Dec 22 should be updated
         // Transaction 0 is updated (FIL, Dec 22)

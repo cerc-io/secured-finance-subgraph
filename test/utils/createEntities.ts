@@ -1,7 +1,7 @@
 import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts';
 import { getOrInitLendingMarket } from '../../src/helper/initializer';
-import { handleTakeOrders } from '../../src/lending-market';
-import { createTakeOrdersEvent } from '../mocks';
+import { handleOrdersTaken } from '../../src/lending-market';
+import { createOrdersTakenEvent } from '../mocks';
 
 export const ALICE = Address.fromString(
     '0xc0ffee254729296a45a3885639AC7E10F9d54979'
@@ -21,7 +21,7 @@ export function createTransaction(
     hash: Address | null = null,
     timestamp: i32 = 0
 ): void {
-    const takeOrdersEvent = createTakeOrdersEvent(
+    const takeOrdersEvent = createOrdersTakenEvent(
         taker,
         side,
         ccy,
@@ -32,7 +32,7 @@ export function createTransaction(
         hash
     );
     if (timestamp) takeOrdersEvent.block.timestamp = BigInt.fromI32(timestamp);
-    handleTakeOrders(takeOrdersEvent);
+    handleOrdersTaken(takeOrdersEvent);
 }
 
 export function createLendingMarket(ccy: Bytes, maturity: BigInt): void {

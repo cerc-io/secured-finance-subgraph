@@ -2,13 +2,13 @@
 import { Address, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import { newMockEvent } from 'matchstick-as/assembly/index';
 import {
-    CancelOrder,
-    CleanOrders,
-    MakeOrder,
-    TakeOrders,
+    OrderCanceled,
+    OrdersCleaned,
+    OrderMade,
+    OrdersTaken,
 } from '../../generated/templates/LendingMarket/LendingMarket';
 
-export function createMakeOrderEvent(
+export function createOrderMadeEvent(
     orderId: BigInt,
     originalOrderId: BigInt,
     maker: Address,
@@ -17,9 +17,9 @@ export function createMakeOrderEvent(
     maturity: BigInt,
     amount: BigInt,
     unitPrice: BigInt
-): MakeOrder {
-    const mockEvent = changetype<MakeOrder>(newMockEvent());
-    const event = new MakeOrder(
+): OrderMade {
+    const mockEvent = changetype<OrderMade>(newMockEvent());
+    const event = new OrderMade(
         mockEvent.address,
         mockEvent.logIndex,
         mockEvent.transactionLogIndex,
@@ -74,7 +74,7 @@ export function createMakeOrderEvent(
     return event;
 }
 
-export function createTakeOrdersEvent(
+export function createOrdersTakenEvent(
     taker: Address,
     side: i32,
     ccy: Bytes,
@@ -83,13 +83,13 @@ export function createTakeOrdersEvent(
     unitPrice: BigInt,
     filledFutureValue: BigInt,
     hash: Address | null = null
-): TakeOrders {
-    const mockEvent = changetype<TakeOrders>(newMockEvent());
+): OrdersTaken {
+    const mockEvent = changetype<OrdersTaken>(newMockEvent());
     if (hash) {
         mockEvent.transaction.hash = hash;
     }
 
-    const event = new TakeOrders(
+    const event = new OrdersTaken(
         mockEvent.address,
         mockEvent.logIndex,
         mockEvent.transactionLogIndex,
@@ -138,7 +138,7 @@ export function createTakeOrdersEvent(
     return event;
 }
 
-export function createCancelOrderEvent(
+export function createOrderCanceledEvent(
     orderId: BigInt,
     maker: Address,
     side: i32,
@@ -146,9 +146,9 @@ export function createCancelOrderEvent(
     maturity: BigInt,
     amount: BigInt,
     unitPrice: BigInt
-): CancelOrder {
-    const mockEvent = changetype<CancelOrder>(newMockEvent());
-    const event = new CancelOrder(
+): OrderCanceled {
+    const mockEvent = changetype<OrderCanceled>(newMockEvent());
+    const event = new OrderCanceled(
         mockEvent.address,
         mockEvent.logIndex,
         mockEvent.transactionLogIndex,
@@ -197,15 +197,15 @@ export function createCancelOrderEvent(
     return event;
 }
 
-export function createCleanOrders(
+export function createOrdersCleaned(
     orderIds: Array<BigInt>,
     maker: Address,
     side: i32,
     ccy: Bytes,
     maturity: BigInt
-): CleanOrders {
-    const mockEvent = changetype<CleanOrders>(newMockEvent());
-    const event = new CleanOrders(
+): OrdersCleaned {
+    const mockEvent = changetype<OrdersCleaned>(newMockEvent());
+    const event = new OrdersCleaned(
         mockEvent.address,
         mockEvent.logIndex,
         mockEvent.transactionLogIndex,
