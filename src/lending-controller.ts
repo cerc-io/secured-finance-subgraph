@@ -13,7 +13,9 @@ export function handleLendingMarketCreated(event: LendingMarketCreated): void {
 }
 
 // Load all transactions for the rolling market, and change their maturity to the closest one
-export function handleLendingMarketsRotated(event: LendingMarketsRotated): void {
+export function handleLendingMarketsRotated(
+    event: LendingMarketsRotated
+): void {
     // Create the new market if it doesn't exist
     getOrInitLendingMarket(event.params.ccy, event.params.newMaturity);
 
