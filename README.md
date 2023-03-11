@@ -13,17 +13,11 @@ This subgraph tracks of the current state of Secured Finance Protocol smart cont
 
 ## Quick start
 
-Follow the steps bellow to start the subgraph on a local machine
+1. Use established node version by running `nvm use`
+2. Set your personal access token issued on your Github account `export NPM_AUTH_TOKEN=<your access token>`
+3. Install repository dependencies by running `npm install`
+4. Execute `npm run test` to run the tests.
 
-* Clone the graph node from this [repository](https://github.com/graphprotocol/graph-node)
-* Change node version with nvm by executing `nvm use`
-* Run the docker container by executing `docker compose up` in the docker/ folder
-* Start local ethereum network using [Ganache](https://github.com/trufflesuite/ganache)
-* Deploy the Secured Finance Protocol [protocol](https://github.com/Secured-Finance/smart-contracts) localy by running deployment script or integation test
-* Run `npm run create-local` to create a local subgraph on the graph node
-* Run `npm run deploy-local` to deploy the subgraph on the local graph node
-
-After following steps above you should be able to access GraphQL client for testing on this [link](http://127.0.0.1:8000/subgraphs/name/bahadylbekov/secured-finance-protocol)
 
 ## Deployment
 Follow the steps bellow to deploy the subgraph

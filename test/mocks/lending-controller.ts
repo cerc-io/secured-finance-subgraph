@@ -1,19 +1,20 @@
 import { Address, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import { newMockEvent } from 'matchstick-as/assembly/index';
 import {
-    CreateLendingMarket,
-    RotateLendingMarkets,
+    LendingMarketCreated,
+    LendingMarketsRotated,
 } from '../../generated/LendingMarketController/LendingMarketController';
 
-export function createCreateLendingMarketEvent(
+export function createLendingMarketCreatedEvent(
     ccy: Bytes,
     lendingMarketAddress: Address,
     futureValueVault: Address,
     index: BigInt,
+    openingDate: BigInt,
     maturity: BigInt
-): CreateLendingMarket {
-    const mockEvent = changetype<CreateLendingMarket>(newMockEvent());
-    const event = new CreateLendingMarket(
+): LendingMarketCreated {
+    const mockEvent = changetype<LendingMarketCreated>(newMockEvent());
+    const event = new LendingMarketCreated(
         mockEvent.address,
         mockEvent.logIndex,
         mockEvent.transactionLogIndex,
@@ -48,6 +49,12 @@ export function createCreateLendingMarketEvent(
     );
     event.parameters.push(
         new ethereum.EventParam(
+            'openingDate',
+            ethereum.Value.fromUnsignedBigInt(openingDate)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
             'maturity',
             ethereum.Value.fromUnsignedBigInt(maturity)
         )
@@ -56,13 +63,13 @@ export function createCreateLendingMarketEvent(
     return event;
 }
 
-export function createRotateLendingMarketsEvent(
+export function createLendingMarketsRotatedEvent(
     ccy: Bytes,
     oldMaturity: BigInt,
     newMaturity: BigInt
-): RotateLendingMarkets {
-    const mockEvent = changetype<RotateLendingMarkets>(newMockEvent());
-    const event = new RotateLendingMarkets(
+): LendingMarketsRotated {
+    const mockEvent = changetype<LendingMarketsRotated>(newMockEvent());
+    const event = new LendingMarketsRotated(
         mockEvent.address,
         mockEvent.logIndex,
         mockEvent.transactionLogIndex,

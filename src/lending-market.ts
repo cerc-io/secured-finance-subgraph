@@ -1,10 +1,10 @@
 import { BigDecimal, log } from '@graphprotocol/graph-ts';
 import { Order, Transaction } from '../generated/schema';
 import {
-    CancelOrder,
-    CleanOrders,
-    MakeOrder,
-    TakeOrders,
+    OrderCanceled,
+    OrdersCleaned,
+    OrderMade,
+    OrdersTaken,
 } from '../generated/templates/LendingMarket/LendingMarket';
 import {
     getOrInitDailyVolume,
@@ -12,7 +12,7 @@ import {
     getOrInitUser,
 } from './helper/initializer';
 
-export function handleMakeOrder(event: MakeOrder): void {
+export function handleOrderMade(event: OrderMade): void {
     const orderId = event.params.orderId.toHexString();
     const order = new Order(orderId);
 
@@ -40,12 +40,12 @@ export function handleMakeOrder(event: MakeOrder): void {
     order.save();
 }
 
-export function handleTakeOrders(event: TakeOrders): void {
+export function handleOrdersTaken(event: OrdersTaken): void {
     createTransaction(event);
     addToTransactionVolume(event);
 }
 
-export function handleCancelOrder(event: CancelOrder): void {
+export function handleOrderCanceled(event: OrderCanceled): void {
     const id = event.params.orderId;
     let order = Order.load(id.toHexString());
     if (order === null) {
@@ -56,7 +56,7 @@ export function handleCancelOrder(event: CancelOrder): void {
     order.save();
 }
 
-export function handleCleanOrders(event: CleanOrders): void {
+export function handleOrdersCleaned(event: OrdersCleaned): void {
     for (let i = 0; i < event.params.orderIds.length; i++) {
         const id = event.params.orderIds[i];
         let order = Order.load(id.toHexString());
@@ -69,7 +69,7 @@ export function handleCleanOrders(event: CleanOrders): void {
     }
 }
 
-function createTransaction(event: TakeOrders): void {
+function createTransaction(event: OrdersTaken): void {
     const transaction = new Transaction(event.transaction.hash.toHexString());
 
     transaction.orderPrice = event.params.unitPrice;
@@ -98,8 +98,8 @@ function createTransaction(event: TakeOrders): void {
 
     transaction.save();
 }
-function addToTransactionVolume(event: TakeOrders): void {
-    // We expect to have a transaction entity created in the handleTakeOrders
+function addToTransactionVolume(event: OrdersTaken): void {
+    // We expect to have a transaction entity created in the handleOrdersTaken
     const transaction = Transaction.load(event.transaction.hash.toHexString());
     if (transaction) {
         const dailyVolume = getOrInitDailyVolume(
