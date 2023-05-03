@@ -11,6 +11,7 @@ import {
     handleOrdersCleaned,
     handleOrderMade,
     handleOrdersTaken,
+    handleOrderPartiallyTaken,
 } from '../src/lending-market';
 import { getDailyVolumeEntityId } from '../src/utils/id-generation';
 import { toBytes32 } from '../src/utils/string';
@@ -19,6 +20,7 @@ import {
     createOrdersCleaned,
     createOrderMadeEvent,
     createOrdersTakenEvent,
+    createOrderPartiallyTakenEvent,
     toArrayString,
 } from './mocks';
 import { createLendingMarket, createTransaction } from './utils/createEntities';
@@ -217,6 +219,67 @@ test('Should create a Transaction when the OrdersTaken Event is raised', () => {
     assert.fieldEquals(
         'Transaction',
         id,
+        'averagePrice',
+        averagePrice.toString()
+    );
+});
+
+test('should update the order amount and create a transaction, when order is partially field', () => {
+    const orderId = BigInt.fromI32(21);
+    const id = orderId.toHexString();
+
+    const makeOrderEvent = createOrderMadeEvent(
+        orderId,
+        originalOrderId,
+        maker,
+        side,
+        ccy,
+        maturity,
+        amount,
+        unitPrice
+    );
+    handleOrderMade(makeOrderEvent);
+
+    assert.fieldEquals('Order', id, 'status', 'Open');
+    assert.fieldEquals('Order', id, 'amount', '100');
+
+    const filledAmount = BigInt.fromI32(10);
+    const filledFutureValue = BigInt.fromI32(11);
+
+    const averagePrice = filledAmount.divDecimal(
+        new BigDecimal(filledFutureValue)
+    );
+
+    const partialOrderEvent = createOrderPartiallyTakenEvent(
+        orderId,
+        maker,
+        side,
+        ccy,
+        maturity,
+        filledAmount,
+        filledFutureValue
+    );
+    handleOrderPartiallyTaken(partialOrderEvent);
+
+    assert.fieldEquals('Order', id, 'status', 'Open');
+    assert.fieldEquals('Order', id, 'amount', '90');
+
+    const txId = partialOrderEvent.transaction.hash.toHexString();
+    assert.fieldEquals('Transaction', txId, 'amount', filledAmount.toString());
+    assert.fieldEquals(
+        'Transaction',
+        txId,
+        'forwardValue',
+        filledFutureValue.toString()
+    );
+    assert.fieldEquals('Transaction', txId, 'orderPrice', unitPrice.toString());
+    assert.fieldEquals('Transaction', txId, 'currency', ccy.toHexString());
+    assert.fieldEquals('Transaction', txId, 'maturity', maturity.toString());
+    assert.fieldEquals('Transaction', txId, 'side', side.toString());
+    assert.fieldEquals('Transaction', txId, 'taker', maker.toHexString());
+    assert.fieldEquals(
+        'Transaction',
+        txId,
         'averagePrice',
         averagePrice.toString()
     );

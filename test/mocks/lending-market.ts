@@ -6,6 +6,7 @@ import {
     OrdersCleaned,
     OrderMade,
     OrdersTaken,
+    OrderPartiallyTaken,
 } from '../../generated/templates/LendingMarket/LendingMarket';
 
 export function createOrderMadeEvent(
@@ -239,5 +240,63 @@ export function createOrdersCleaned(
         )
     );
 
+    return event;
+}
+
+export function createOrderPartiallyTakenEvent(
+    orderId: BigInt,
+    maker: Address,
+    side: i32,
+    ccy: Bytes,
+    maturity: BigInt,
+    filledAmount: BigInt,
+    filledFutureValue: BigInt
+): OrderPartiallyTaken {
+    const mockEvent = newMockEvent();
+    const event = new OrderPartiallyTaken(
+        mockEvent.address,
+        mockEvent.logIndex,
+        mockEvent.transactionLogIndex,
+        mockEvent.logType,
+        mockEvent.block,
+        mockEvent.transaction,
+        mockEvent.parameters,
+        mockEvent.receipt
+    );
+
+    event.parameters = new Array();
+    event.parameters.push(
+        new ethereum.EventParam(
+            'orderId',
+            ethereum.Value.fromUnsignedBigInt(orderId)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam('maker', ethereum.Value.fromAddress(maker))
+    );
+    event.parameters.push(
+        new ethereum.EventParam('side', ethereum.Value.fromI32(side))
+    );
+    event.parameters.push(
+        new ethereum.EventParam('ccy', ethereum.Value.fromBytes(ccy))
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'maturity',
+            ethereum.Value.fromUnsignedBigInt(maturity)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'filledAmount',
+            ethereum.Value.fromUnsignedBigInt(filledAmount)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'filledFutureValue',
+            ethereum.Value.fromUnsignedBigInt(filledFutureValue)
+        )
+    );
     return event;
 }

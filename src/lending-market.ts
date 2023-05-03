@@ -1,10 +1,11 @@
-import { BigDecimal, log } from '@graphprotocol/graph-ts';
+import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts';
 import { Order, Transaction } from '../generated/schema';
 import {
     OrderCanceled,
     OrdersCleaned,
     OrderMade,
     OrdersTaken,
+    OrderPartiallyTaken,
 } from '../generated/templates/LendingMarket/LendingMarket';
 import {
     getOrInitDailyVolume,
@@ -69,6 +70,18 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
     }
 }
 
+export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
+    const id = event.params.orderId;
+    let order = Order.load(id.toHexString());
+    if (order) {
+        order.amount -= event.params.filledAmount;
+
+        createTransactionForPartialTakenOrder(event, order.unitPrice);
+
+        order.save();
+    }
+}
+
 function createTransaction(event: OrdersTaken): void {
     const transaction = new Transaction(event.transaction.hash.toHexString());
 
@@ -98,6 +111,40 @@ function createTransaction(event: OrdersTaken): void {
 
     transaction.save();
 }
+
+function createTransactionForPartialTakenOrder(
+    event: OrderPartiallyTaken,
+    unitPrice: BigInt
+): void {
+    const transaction = new Transaction(event.transaction.hash.toHexString());
+
+    transaction.orderPrice = unitPrice;
+    transaction.taker = getOrInitUser(event.params.maker).id;
+    transaction.currency = event.params.ccy;
+    transaction.maturity = event.params.maturity;
+    transaction.side = event.params.side;
+
+    transaction.forwardValue = event.params.filledFutureValue;
+    transaction.amount = event.params.filledAmount;
+
+    transaction.averagePrice = !event.params.filledFutureValue.isZero()
+        ? event.params.filledAmount.divDecimal(
+              new BigDecimal(event.params.filledFutureValue)
+          )
+        : BigDecimal.zero();
+
+    transaction.createdAt = event.block.timestamp;
+    transaction.blockNumber = event.block.number;
+    transaction.txHash = event.transaction.hash;
+
+    transaction.lendingMarket = getOrInitLendingMarket(
+        transaction.currency,
+        transaction.maturity
+    ).id;
+
+    transaction.save();
+}
+
 function addToTransactionVolume(event: OrdersTaken): void {
     // We expect to have a transaction entity created in the handleOrdersTaken
     const transaction = Transaction.load(event.transaction.hash.toHexString());

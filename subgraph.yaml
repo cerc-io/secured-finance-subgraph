@@ -71,4 +71,6 @@ templates:
           handler: handleOrdersCleaned
         - event: OrderCanceled(uint48,indexed address,uint8,bytes32,uint256,uint256,uint256)
           handler: handleOrderCanceled
+        - event: OrderPartiallyTaken(uint48,indexed address,uint8,indexed bytes32,uint256,uint256,uint256)
+          handler: handleOrderPartiallyTaken
       file: ./src/lending-market.ts
