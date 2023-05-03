@@ -141,9 +141,10 @@ function createTransactionForMadeOrders(event: OrdersCleaned): void {
         const id = event.params.orderIds[i].toHexString();
         const order = Order.load(id);
 
-        if(order != null) {
-
-            const transaction = new Transaction(event.transaction.hash.toHexString() + "-" + i.toString());
+        if (order != null) {
+            const transaction = new Transaction(
+                event.transaction.hash.toHexString() + '-' + i.toString()
+            );
 
             transaction.orderPrice = order.unitPrice;
             transaction.taker = order.maker;
@@ -152,12 +153,15 @@ function createTransactionForMadeOrders(event: OrdersCleaned): void {
             transaction.side = order.side;
 
             transaction.amount = order.amount;
-            transaction.forwardValue = calculateForwardValue(order.amount, order.unitPrice);
+            transaction.forwardValue = calculateForwardValue(
+                order.amount,
+                order.unitPrice
+            );
 
             transaction.averagePrice = !transaction.forwardValue.isZero()
                 ? order.amount.divDecimal(
-                    new BigDecimal(transaction.forwardValue)
-                )
+                      new BigDecimal(transaction.forwardValue)
+                  )
                 : BigDecimal.zero();
 
             transaction.createdAt = event.block.timestamp;
@@ -171,7 +175,7 @@ function createTransactionForMadeOrders(event: OrdersCleaned): void {
 
             transaction.save();
 
-            store.remove("Order", id);
+            store.remove('Order', id);
         }
     }
 }
