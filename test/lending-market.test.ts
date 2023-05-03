@@ -32,6 +32,8 @@ const ccy = toBytes32('ETH');
 const maturity = BigInt.fromI32(1677628800); // 1st Mar 23
 const amount = BigInt.fromI32(100);
 const unitPrice = BigInt.fromI32(100);
+const amount2 = BigInt.fromI32(200);
+const unitPrice2 = BigInt.fromI32(200);
 
 test('Should create a Order when the OrderMade Event is raised', () => {
     const orderId = BigInt.fromI32(1);
@@ -136,7 +138,7 @@ test('Should update the Order when the OrderCanceled Event is raised', () => {
     assert.fieldEquals('Order', id, 'status', 'Cancelled');
 });
 
-test('Should updates the orders when the OrdersCleaned Event is raised', () => {
+test('Should remove the orders and add transactions when the OrdersCleaned Event is raised', () => {
     const orderId1 = BigInt.fromI32(3);
     const id1 = orderId1.toHexString();
     const orderId2 = BigInt.fromI32(4);
@@ -160,8 +162,8 @@ test('Should updates the orders when the OrdersCleaned Event is raised', () => {
         side,
         ccy,
         maturity,
-        amount,
-        unitPrice
+        amount2,
+        unitPrice2
     );
     handleOrderMade(makeOrderEvent2);
 
@@ -178,8 +180,24 @@ test('Should updates the orders when the OrdersCleaned Event is raised', () => {
 
     handleOrdersCleaned(event);
 
-    assert.fieldEquals('Order', id1, 'status', 'Filled');
-    assert.fieldEquals('Order', id2, 'status', 'Filled');
+    assert.notInStore('Order', id1);
+    assert.notInStore('Order', id2);
+
+    const txId = event.transaction.hash.toHexString();
+
+    assert.fieldEquals('Transaction', txId+"-0", 'amount', amount.toString());
+    assert.fieldEquals('Transaction', txId+"-0", 'orderPrice', unitPrice.toString());
+    assert.fieldEquals('Transaction', txId+"-0", 'currency', ccy.toHexString());
+    assert.fieldEquals('Transaction', txId+"-0", 'maturity', maturity.toString());
+    assert.fieldEquals('Transaction', txId+"-0", 'side', side.toString());
+    assert.fieldEquals('Transaction', txId+"-0", 'taker', maker.toHexString());
+
+    assert.fieldEquals('Transaction', txId+"-1", 'amount', amount2.toString());
+    assert.fieldEquals('Transaction', txId+"-1", 'orderPrice', unitPrice2.toString());
+    assert.fieldEquals('Transaction', txId+"-1", 'currency', ccy.toHexString());
+    assert.fieldEquals('Transaction', txId+"-1", 'maturity', maturity.toString());
+    assert.fieldEquals('Transaction', txId+"-1", 'side', side.toString());
+    assert.fieldEquals('Transaction', txId+"-1", 'taker', maker.toHexString());
 });
 
 test('Should create a Transaction when the OrdersTaken Event is raised', () => {

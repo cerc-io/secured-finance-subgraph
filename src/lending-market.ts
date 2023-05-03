@@ -1,4 +1,4 @@
-import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts';
+import { BigDecimal, BigInt, log, store } from '@graphprotocol/graph-ts';
 import { Order, Transaction } from '../generated/schema';
 import {
     OrderCanceled,
@@ -58,23 +58,14 @@ export function handleOrderCanceled(event: OrderCanceled): void {
 }
 
 export function handleOrdersCleaned(event: OrdersCleaned): void {
-    for (let i = 0; i < event.params.orderIds.length; i++) {
-        const id = event.params.orderIds[i];
-        let order = Order.load(id.toHexString());
-        if (order === null) {
-            order = new Order(id.toHexString());
-        }
-
-        order.status = 'Filled';
-        order.save();
-    }
+    createTransactionForMadeOrders(event);
 }
 
 export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
     const id = event.params.orderId;
     let order = Order.load(id.toHexString());
     if (order) {
-        order.amount -= event.params.filledAmount;
+        order.amount = order.amount.minus(event.params.filledAmount);
 
         createTransactionForPartialTakenOrder(event, order.unitPrice);
 
@@ -145,6 +136,46 @@ function createTransactionForPartialTakenOrder(
     transaction.save();
 }
 
+function createTransactionForMadeOrders(event: OrdersCleaned): void {
+    for (let i = 0; i < event.params.orderIds.length; i++) {
+        const id = event.params.orderIds[i].toHexString();
+        const order = Order.load(id);
+
+        if(order != null) {
+
+            const transaction = new Transaction(event.transaction.hash.toHexString() + "-" + i.toString());
+
+            transaction.orderPrice = order.unitPrice;
+            transaction.taker = order.maker;
+            transaction.currency = order.currency;
+            transaction.maturity = order.maturity;
+            transaction.side = order.side;
+
+            transaction.amount = order.amount;
+            transaction.forwardValue = calculateForwardValue(order.amount, order.unitPrice);
+
+            transaction.averagePrice = !transaction.forwardValue.isZero()
+                ? order.amount.divDecimal(
+                    new BigDecimal(transaction.forwardValue)
+                )
+                : BigDecimal.zero();
+
+            transaction.createdAt = event.block.timestamp;
+            transaction.blockNumber = event.block.number;
+            transaction.txHash = event.transaction.hash;
+
+            transaction.lendingMarket = getOrInitLendingMarket(
+                transaction.currency,
+                transaction.maturity
+            ).id;
+
+            transaction.save();
+
+            store.remove("Order", id);
+        }
+    }
+}
+
 function addToTransactionVolume(event: OrdersTaken): void {
     // We expect to have a transaction entity created in the handleOrdersTaken
     const transaction = Transaction.load(event.transaction.hash.toHexString());
@@ -161,4 +192,8 @@ function addToTransactionVolume(event: OrdersTaken): void {
             event.transaction.hash.toHexString(),
         ]);
     }
+}
+
+function calculateForwardValue(amount: BigInt, unitPrice: BigInt): BigInt {
+    return (amount * BigInt.fromI32(100)).div(unitPrice);
 }
