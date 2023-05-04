@@ -1,4 +1,11 @@
-import { BigDecimal, BigInt, log, store } from '@graphprotocol/graph-ts';
+import {
+    Address,
+    BigDecimal,
+    BigInt,
+    Bytes,
+    log,
+    store,
+} from '@graphprotocol/graph-ts';
 import { Order, Transaction } from '../generated/schema';
 import {
     OrderCanceled,
@@ -42,7 +49,19 @@ export function handleOrderMade(event: OrderMade): void {
 }
 
 export function handleOrdersTaken(event: OrdersTaken): void {
-    createTransaction(event);
+    createTransaction(
+        event.transaction.hash.toHexString(),
+        event.params.unitPrice,
+        event.params.taker,
+        event.params.ccy,
+        event.params.maturity,
+        event.params.side,
+        event.params.filledAmount,
+        event.params.filledFutureValue,
+        event.block.timestamp,
+        event.block.number,
+        event.transaction.hash
+    );
     addToTransactionVolume(event);
 }
 
@@ -58,7 +77,27 @@ export function handleOrderCanceled(event: OrderCanceled): void {
 }
 
 export function handleOrdersCleaned(event: OrdersCleaned): void {
-    createTransactionForMadeOrders(event);
+    for (let i = 0; i < event.params.orderIds.length; i++) {
+        const id = event.params.orderIds[i].toHexString();
+        const order = Order.load(id);
+
+        if (order != null) {
+            createTransaction(
+                event.transaction.hash.toHexString() + '-' + i.toString(),
+                order.unitPrice,
+                Address.fromString(order.maker),
+                order.currency,
+                order.maturity,
+                order.side,
+                order.amount,
+                calculateForwardValue(order.amount, order.unitPrice),
+                event.block.timestamp,
+                event.block.number,
+                event.transaction.hash
+            );
+            store.remove('Order', id);
+        }
+    }
 }
 
 export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
@@ -67,117 +106,59 @@ export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
     if (order) {
         order.amount = order.amount.minus(event.params.filledAmount);
 
-        createTransactionForPartialTakenOrder(event, order.unitPrice);
+        createTransaction(
+            event.transaction.hash.toHexString(),
+            order.unitPrice,
+            event.params.maker,
+            event.params.ccy,
+            event.params.maturity,
+            event.params.side,
+            event.params.filledAmount,
+            event.params.filledFutureValue,
+            event.block.timestamp,
+            event.block.number,
+            event.transaction.hash
+        );
 
         order.save();
     }
 }
 
-function createTransaction(event: OrdersTaken): void {
-    const transaction = new Transaction(event.transaction.hash.toHexString());
-
-    transaction.orderPrice = event.params.unitPrice;
-    transaction.taker = getOrInitUser(event.params.taker).id;
-    transaction.currency = event.params.ccy;
-    transaction.maturity = event.params.maturity;
-    transaction.side = event.params.side;
-
-    transaction.forwardValue = event.params.filledFutureValue;
-    transaction.amount = event.params.filledAmount;
-
-    transaction.averagePrice = !event.params.filledFutureValue.isZero()
-        ? event.params.filledAmount.divDecimal(
-              new BigDecimal(event.params.filledFutureValue)
-          )
-        : BigDecimal.zero();
-
-    transaction.createdAt = event.block.timestamp;
-    transaction.blockNumber = event.block.number;
-    transaction.txHash = event.transaction.hash;
-
-    transaction.lendingMarket = getOrInitLendingMarket(
-        transaction.currency,
-        transaction.maturity
-    ).id;
-
-    transaction.save();
-}
-
-function createTransactionForPartialTakenOrder(
-    event: OrderPartiallyTaken,
-    unitPrice: BigInt
+function createTransaction(
+    txId: string,
+    unitPrice: BigInt,
+    taker: Address,
+    ccy: Bytes,
+    maturity: BigInt,
+    side: i32,
+    filledAmount: BigInt,
+    filledFutureValue: BigInt,
+    timestamp: BigInt,
+    blockNumber: BigInt,
+    txHash: Bytes
 ): void {
-    const transaction = new Transaction(event.transaction.hash.toHexString());
+    const transaction = new Transaction(txId);
 
     transaction.orderPrice = unitPrice;
-    transaction.taker = getOrInitUser(event.params.maker).id;
-    transaction.currency = event.params.ccy;
-    transaction.maturity = event.params.maturity;
-    transaction.side = event.params.side;
+    transaction.taker = getOrInitUser(taker).id;
+    transaction.currency = ccy;
+    transaction.maturity = maturity;
+    transaction.side = side;
 
-    transaction.forwardValue = event.params.filledFutureValue;
-    transaction.amount = event.params.filledAmount;
+    transaction.forwardValue = filledFutureValue;
+    transaction.amount = filledAmount;
 
-    transaction.averagePrice = !event.params.filledFutureValue.isZero()
-        ? event.params.filledAmount.divDecimal(
-              new BigDecimal(event.params.filledFutureValue)
-          )
+    transaction.averagePrice = !filledFutureValue.isZero()
+        ? filledAmount.divDecimal(new BigDecimal(filledFutureValue))
         : BigDecimal.zero();
 
-    transaction.createdAt = event.block.timestamp;
-    transaction.blockNumber = event.block.number;
-    transaction.txHash = event.transaction.hash;
+    transaction.createdAt = timestamp;
+    transaction.blockNumber = blockNumber;
+    transaction.txHash = txHash;
 
-    transaction.lendingMarket = getOrInitLendingMarket(
-        transaction.currency,
-        transaction.maturity
-    ).id;
+    transaction.lendingMarket = getOrInitLendingMarket(ccy, maturity).id;
 
     transaction.save();
-}
-
-function createTransactionForMadeOrders(event: OrdersCleaned): void {
-    for (let i = 0; i < event.params.orderIds.length; i++) {
-        const id = event.params.orderIds[i].toHexString();
-        const order = Order.load(id);
-
-        if (order != null) {
-            const transaction = new Transaction(
-                event.transaction.hash.toHexString() + '-' + i.toString()
-            );
-
-            transaction.orderPrice = order.unitPrice;
-            transaction.taker = order.maker;
-            transaction.currency = order.currency;
-            transaction.maturity = order.maturity;
-            transaction.side = order.side;
-
-            transaction.amount = order.amount;
-            transaction.forwardValue = calculateForwardValue(
-                order.amount,
-                order.unitPrice
-            );
-
-            transaction.averagePrice = !transaction.forwardValue.isZero()
-                ? order.amount.divDecimal(
-                      new BigDecimal(transaction.forwardValue)
-                  )
-                : BigDecimal.zero();
-
-            transaction.createdAt = event.block.timestamp;
-            transaction.blockNumber = event.block.number;
-            transaction.txHash = event.transaction.hash;
-
-            transaction.lendingMarket = getOrInitLendingMarket(
-                transaction.currency,
-                transaction.maturity
-            ).id;
-
-            transaction.save();
-
-            store.remove('Order', id);
-        }
-    }
 }
 
 function addToTransactionVolume(event: OrdersTaken): void {
