@@ -11,6 +11,7 @@ import {
     handleOrdersCleaned,
     handleOrderMade,
     handleOrdersTaken,
+    handleOrderPartiallyTaken,
 } from '../src/lending-market';
 import { getDailyVolumeEntityId } from '../src/utils/id-generation';
 import { toBytes32 } from '../src/utils/string';
@@ -19,6 +20,7 @@ import {
     createOrdersCleaned,
     createOrderMadeEvent,
     createOrdersTakenEvent,
+    createOrderPartiallyTakenEvent,
     toArrayString,
 } from './mocks';
 import { createLendingMarket, createTransaction } from './utils/createEntities';
@@ -30,6 +32,8 @@ const ccy = toBytes32('ETH');
 const maturity = BigInt.fromI32(1677628800); // 1st Mar 23
 const amount = BigInt.fromI32(100);
 const unitPrice = BigInt.fromI32(100);
+const amount2 = BigInt.fromI32(200);
+const unitPrice2 = BigInt.fromI32(200);
 
 test('Should create a Order when the OrderMade Event is raised', () => {
     const orderId = BigInt.fromI32(1);
@@ -134,7 +138,7 @@ test('Should update the Order when the OrderCanceled Event is raised', () => {
     assert.fieldEquals('Order', id, 'status', 'Cancelled');
 });
 
-test('Should updates the orders when the OrdersCleaned Event is raised', () => {
+test('Should remove the orders and add transactions when the OrdersCleaned Event is raised', () => {
     const orderId1 = BigInt.fromI32(3);
     const id1 = orderId1.toHexString();
     const orderId2 = BigInt.fromI32(4);
@@ -158,8 +162,8 @@ test('Should updates the orders when the OrdersCleaned Event is raised', () => {
         side,
         ccy,
         maturity,
-        amount,
-        unitPrice
+        amount2,
+        unitPrice2
     );
     handleOrderMade(makeOrderEvent2);
 
@@ -176,8 +180,71 @@ test('Should updates the orders when the OrdersCleaned Event is raised', () => {
 
     handleOrdersCleaned(event);
 
+    assert.fieldEquals('Order', id1, 'filledAmount', amount.toString());
     assert.fieldEquals('Order', id1, 'status', 'Filled');
+    assert.fieldEquals('Order', id2, 'filledAmount', amount2.toString());
     assert.fieldEquals('Order', id2, 'status', 'Filled');
+
+    const txId = event.transaction.hash.toHexString();
+
+    assert.fieldEquals('Transaction', txId + '-0', 'amount', amount.toString());
+    assert.fieldEquals(
+        'Transaction',
+        txId + '-0',
+        'orderPrice',
+        unitPrice.toString()
+    );
+    assert.fieldEquals(
+        'Transaction',
+        txId + '-0',
+        'currency',
+        ccy.toHexString()
+    );
+    assert.fieldEquals(
+        'Transaction',
+        txId + '-0',
+        'maturity',
+        maturity.toString()
+    );
+    assert.fieldEquals('Transaction', txId + '-0', 'side', side.toString());
+    assert.fieldEquals(
+        'Transaction',
+        txId + '-0',
+        'taker',
+        maker.toHexString()
+    );
+
+    assert.fieldEquals(
+        'Transaction',
+        txId + '-1',
+        'amount',
+        amount2.toString()
+    );
+    assert.fieldEquals(
+        'Transaction',
+        txId + '-1',
+        'orderPrice',
+        unitPrice2.toString()
+    );
+    assert.fieldEquals(
+        'Transaction',
+        txId + '-1',
+        'currency',
+        ccy.toHexString()
+    );
+    assert.fieldEquals(
+        'Transaction',
+        txId + '-1',
+        'maturity',
+        maturity.toString()
+    );
+    assert.fieldEquals('Transaction', txId + '-1', 'side', side.toString());
+    assert.fieldEquals(
+        'Transaction',
+        txId + '-1',
+        'taker',
+        maker.toHexString()
+    );
 });
 
 test('Should create a Transaction when the OrdersTaken Event is raised', () => {
@@ -217,6 +284,68 @@ test('Should create a Transaction when the OrdersTaken Event is raised', () => {
     assert.fieldEquals(
         'Transaction',
         id,
+        'averagePrice',
+        averagePrice.toString()
+    );
+});
+
+test('should update the order amount and create a transaction, when order is partially field', () => {
+    const orderId = BigInt.fromI32(21);
+    const id = orderId.toHexString();
+
+    const makeOrderEvent = createOrderMadeEvent(
+        orderId,
+        originalOrderId,
+        maker,
+        side,
+        ccy,
+        maturity,
+        amount,
+        unitPrice
+    );
+    handleOrderMade(makeOrderEvent);
+
+    assert.fieldEquals('Order', id, 'status', 'Open');
+    assert.fieldEquals('Order', id, 'amount', '100');
+
+    const filledAmount = BigInt.fromI32(10);
+    const filledFutureValue = BigInt.fromI32(11);
+
+    const averagePrice = filledAmount.divDecimal(
+        new BigDecimal(filledFutureValue)
+    );
+
+    const partialOrderEvent = createOrderPartiallyTakenEvent(
+        orderId,
+        maker,
+        side,
+        ccy,
+        maturity,
+        filledAmount,
+        filledFutureValue
+    );
+    handleOrderPartiallyTaken(partialOrderEvent);
+
+    assert.fieldEquals('Order', id, 'status', 'Open');
+    assert.fieldEquals('Order', id, 'amount', '100');
+    assert.fieldEquals('Order', id, 'filledAmount', '10');
+
+    const txId = partialOrderEvent.transaction.hash.toHexString();
+    assert.fieldEquals('Transaction', txId, 'amount', filledAmount.toString());
+    assert.fieldEquals(
+        'Transaction',
+        txId,
+        'forwardValue',
+        filledFutureValue.toString()
+    );
+    assert.fieldEquals('Transaction', txId, 'orderPrice', unitPrice.toString());
+    assert.fieldEquals('Transaction', txId, 'currency', ccy.toHexString());
+    assert.fieldEquals('Transaction', txId, 'maturity', maturity.toString());
+    assert.fieldEquals('Transaction', txId, 'side', side.toString());
+    assert.fieldEquals('Transaction', txId, 'taker', maker.toHexString());
+    assert.fieldEquals(
+        'Transaction',
+        txId,
         'averagePrice',
         averagePrice.toString()
     );
