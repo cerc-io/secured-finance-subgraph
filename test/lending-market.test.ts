@@ -180,8 +180,10 @@ test('Should remove the orders and add transactions when the OrdersCleaned Event
 
     handleOrdersCleaned(event);
 
-    assert.notInStore('Order', id1);
-    assert.notInStore('Order', id2);
+    assert.fieldEquals('Order', id1, 'filledAmount', amount.toString());
+    assert.fieldEquals('Order', id1, 'status', 'Filled');
+    assert.fieldEquals('Order', id2, 'filledAmount', amount2.toString());
+    assert.fieldEquals('Order', id2, 'status', 'Filled');
 
     const txId = event.transaction.hash.toHexString();
 
@@ -325,7 +327,8 @@ test('should update the order amount and create a transaction, when order is par
     handleOrderPartiallyTaken(partialOrderEvent);
 
     assert.fieldEquals('Order', id, 'status', 'Open');
-    assert.fieldEquals('Order', id, 'amount', '90');
+    assert.fieldEquals('Order', id, 'amount', '100');
+    assert.fieldEquals('Order', id, 'filledAmount', '10');
 
     const txId = partialOrderEvent.transaction.hash.toHexString();
     assert.fieldEquals('Transaction', txId, 'amount', filledAmount.toString());

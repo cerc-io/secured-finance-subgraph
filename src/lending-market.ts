@@ -28,6 +28,7 @@ export function handleOrderMade(event: OrderMade): void {
     order.orderId = event.params.orderId;
     order.originalOrderId = event.params.originalOrderId;
     order.amount = event.params.amount;
+    order.filledAmount = BigInt.fromI32(0);
     if (order.originalOrderId) {
         const originalOrder = Order.load(order.originalOrderId.toHexString());
         if (originalOrder) {
@@ -89,13 +90,16 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
                 order.currency,
                 order.maturity,
                 order.side,
-                order.amount,
+                order.amount.minus(order.filledAmount),
                 calculateForwardValue(order.amount, order.unitPrice),
                 event.block.timestamp,
                 event.block.number,
                 event.transaction.hash
             );
-            store.remove('Order', id);
+
+            order.filledAmount = order.amount;
+            order.status = 'Filled';
+            order.save();
         }
     }
 }
@@ -104,7 +108,7 @@ export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
     const id = event.params.orderId;
     let order = Order.load(id.toHexString());
     if (order) {
-        order.amount = order.amount.minus(event.params.filledAmount);
+        order.filledAmount = event.params.filledAmount;
 
         createTransaction(
             event.transaction.hash.toHexString(),
