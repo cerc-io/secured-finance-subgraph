@@ -17,7 +17,7 @@ dataSources:
       abis:
         - name: LendingMarketController
           file: >-
-            ./abis/LendingMarketController.sol/LendingMarketController.json
+            ./abis/protocol/LendingMarketController.sol/LendingMarketController.json
       eventHandlers:
         - event: LendingMarketCreated(indexed bytes32,indexed address,address,uint256,uint256,uint256)
           handler: handleLendingMarketCreated
@@ -38,7 +38,7 @@ dataSources:
       abis:
         - name: TokenVault
           file: >-
-            ./abis/TokenVault.sol/TokenVault.json
+            ./abis/protocol/TokenVault.sol/TokenVault.json
       eventHandlers:
         - event: Deposit(indexed address,bytes32,uint256)
           handler: handleDeposit
@@ -61,7 +61,7 @@ templates:
       abis:
         - name: LendingMarket
           file: >-
-            ./abis/LendingMarket.sol/LendingMarket.json
+            ./abis/protocol/LendingMarket.sol/LendingMarket.json
       eventHandlers:
         - event: OrderMade(uint48,uint48,indexed address,uint8,bytes32,uint256,uint256,uint256)
           handler: handleOrderMade
