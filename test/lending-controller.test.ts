@@ -12,13 +12,16 @@ import {
     handleLendingMarketCreated,
     handleLendingMarketsRotated,
 } from '../src/lending-controller';
+import { handleOrderMade, handleOrderCanceled } from '../src/lending-market';
 
 import { buildLendingMarketId, toBytes32 } from '../src/utils/string';
 import {
     createLendingMarketCreatedEvent,
     createLendingMarketsRotatedEvent,
+    createOrderMadeEvent,
+    createOrderCanceledEvent,
     toArrayString,
-} from './mocks/lending-controller';
+} from './mocks';
 import { ALICE, BOB, createTransaction } from './utils/createEntities';
 
 const lendingMarketAddress = Address.zero();
@@ -26,6 +29,13 @@ const futureValueVault = Address.zero();
 const index = BigInt.fromI32(0);
 const openingDate = BigInt.fromI32(1);
 const maturity = BigInt.fromI32(365);
+
+const originalOrderId = BigInt.fromI32(0);
+const maker = Address.zero();
+const side = BigInt.fromI32(0).toI32();
+const ccy = toBytes32('ETH');
+const amount = BigInt.fromI32(100);
+const unitPrice = BigInt.fromI32(100);
 
 afterEach(() => {
     clearStore();
@@ -279,5 +289,106 @@ describe('With lending markets already existing', () => {
             'maturity',
             maturityList[1].toString()
         );
+    });
+
+    test('Rolling out a market should change the status of open orders with oldMaturity to expired', () => {
+        const orderId = BigInt.fromI32(1);
+        const id = orderId.toHexString();
+
+        handleOrderMade(
+            createOrderMadeEvent(
+                orderId,
+                originalOrderId,
+                maker,
+                side,
+                ccy,
+                maturityList[0],
+                amount,
+                unitPrice
+            )
+        );
+
+        const orderId2 = BigInt.fromI32(2);
+        const id2 = orderId2.toHexString();
+
+        handleOrderMade(
+            createOrderMadeEvent(
+                orderId2,
+                originalOrderId,
+                maker,
+                side,
+                ccy,
+                maturityList[2],
+                amount,
+                unitPrice
+            )
+        );
+
+        const orderId3 = BigInt.fromI32(3);
+        const id3 = orderId3.toHexString();
+
+        handleOrderMade(
+            createOrderMadeEvent(
+                orderId3,
+                originalOrderId,
+                maker,
+                side,
+                ccy,
+                maturityList[0],
+                amount,
+                unitPrice
+            )
+        );
+        const event = createLendingMarketsRotatedEvent(
+            filBytes,
+            maturityList[0],
+            newMaturity
+        );
+
+        handleLendingMarketsRotated(event);
+
+        assert.fieldEquals('Order', id, 'status', 'Expired');
+        assert.fieldEquals('Order', id2, 'status', 'Open');
+        assert.fieldEquals('Order', id3, 'status', 'Expired');
+    });
+
+    test('Rolling out a market should not change the status of cancelled orders to expired', () => {
+        const orderId = BigInt.fromI32(1);
+        const id = orderId.toHexString();
+
+        handleOrderMade(
+            createOrderMadeEvent(
+                orderId,
+                originalOrderId,
+                maker,
+                side,
+                ccy,
+                maturityList[0],
+                amount,
+                unitPrice
+            )
+        );
+
+        handleOrderCanceled(
+            createOrderCanceledEvent(
+                orderId,
+                maker,
+                side,
+                ccy,
+                maturity,
+                amount,
+                unitPrice
+            )
+        );
+        assert.fieldEquals('Order', id, 'status', 'Cancelled');
+        const event = createLendingMarketsRotatedEvent(
+            filBytes,
+            maturityList[0],
+            newMaturity
+        );
+
+        handleLendingMarketsRotated(event);
+
+        assert.fieldEquals('Order', id, 'status', 'Cancelled');
     });
 });

@@ -6,6 +6,7 @@ import {
 import { LendingMarket, Transaction } from '../generated/schema';
 import { LendingMarket as LendingMarketTemplate } from '../generated/templates';
 import { getOrInitLendingMarket, getProtocol } from './helper/initializer';
+import { setOrdersAsExpired } from './lending-market';
 
 export function handleLendingMarketCreated(event: LendingMarketCreated): void {
     LendingMarketTemplate.create(event.params.marketAddr);
@@ -26,6 +27,8 @@ export function handleLendingMarketsRotated(
 
     rollOutMarket(rollingOutMarket);
     updateTransactions(rollingOutMarket);
+
+    setOrdersAsExpired(event.params.oldMaturity);
 }
 
 const getMarketList = (ccy: Bytes): LendingMarket[] => {

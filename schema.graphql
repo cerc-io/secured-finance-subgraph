@@ -29,6 +29,7 @@ type Order @entity {
   amount: BigInt!
   filledAmount: BigInt!
   status: OrderStatus!
+  orderProtocol: OrderProtocol!
 
   createdAt: BigInt!
   blockNumber: BigInt!
@@ -51,6 +52,7 @@ enum OrderStatus {
   Open
   Cancelled
   Filled
+  Expired
 }
 
 type User @entity {
@@ -73,4 +75,9 @@ type Protocol @entity {
   id: ID! # ethereum
   totalUsers: BigInt!
   lendingMarkets: [LendingMarket!]! @derivedFrom(field: "protocol")
+}
+
+type OrderProtocol @entity {
+  id: ID!
+  orders: [Order!]! @derivedFrom(field: "orderProtocol")
 }
