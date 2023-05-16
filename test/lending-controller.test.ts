@@ -7,7 +7,7 @@ import {
     describe,
     test,
 } from 'matchstick-as/assembly/index';
-import { getProtocol, PROTOCOL_ID, getOrInitLendingMarket, } from '../src/helper/initializer';
+import { getProtocol, PROTOCOL_ID, } from '../src/helper/initializer';
 import {
     handleLendingMarketCreated,
     handleLendingMarketsRotated,
