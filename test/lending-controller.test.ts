@@ -7,7 +7,7 @@ import {
     describe,
     test,
 } from 'matchstick-as/assembly/index';
-import { getProtocol, PROTOCOL_ID } from '../src/helper/initializer';
+import { getProtocol, PROTOCOL_ID, getOrInitLendingMarket, } from '../src/helper/initializer';
 import {
     handleLendingMarketCreated,
     handleLendingMarketsRotated,
@@ -340,7 +340,7 @@ describe('With lending markets already existing', () => {
             )
         );
         const event = createLendingMarketsRotatedEvent(
-            filBytes,
+            ccy,
             maturityList[0],
             newMaturity
         );
@@ -382,7 +382,7 @@ describe('With lending markets already existing', () => {
         );
         assert.fieldEquals('Order', id, 'status', 'Cancelled');
         const event = createLendingMarketsRotatedEvent(
-            filBytes,
+            ccy,
             maturityList[0],
             newMaturity
         );

@@ -6,7 +6,7 @@ import {
     log,
     store,
 } from '@graphprotocol/graph-ts';
-import { Order, Transaction, OrderProtocol } from '../generated/schema';
+import { Order, Transaction } from '../generated/schema';
 import {
     OrderCanceled,
     OrdersCleaned,
@@ -18,7 +18,6 @@ import {
     getOrInitDailyVolume,
     getOrInitLendingMarket,
     getOrInitUser,
-    getOrderProtocol,
 } from './helper/initializer';
 
 export function handleOrderMade(event: OrderMade): void {
@@ -42,8 +41,7 @@ export function handleOrderMade(event: OrderMade): void {
     order.side = event.params.side;
     order.maturity = event.params.maturity;
     order.unitPrice = event.params.unitPrice;
-    let id = getOrderProtocol(event.params.maturity.toString()).id;
-    order.orderProtocol = id;
+    order.lendingMarket = getOrInitLendingMarket(event.params.ccy, event.params.maturity).id;
 
     order.createdAt = event.block.timestamp;
     order.blockNumber = event.block.number;
@@ -128,19 +126,6 @@ export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
         );
 
         order.save();
-    }
-}
-
-export function setOrdersAsExpired(maturity: BigInt): void {
-    let orders = getOrderProtocol(maturity.toString()).orders;
-
-    for (let i = 0; i < orders.length; i++) {
-        const order = Order.load(orders[i]);
-
-        if (order && order.status == 'Open') {
-            order.status = 'Expired';
-            order.save();
-        }
     }
 }
 

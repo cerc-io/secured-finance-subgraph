@@ -4,7 +4,6 @@ import {
     LendingMarket,
     Protocol,
     User,
-    OrderProtocol,
 } from '../../generated/schema';
 import { getDailyVolumeEntityId } from '../utils/id-generation';
 import { buildLendingMarketId } from '../utils/string';
@@ -19,17 +18,6 @@ export const getProtocol = (): Protocol => {
         protocol.save();
     }
     return protocol as Protocol;
-};
-
-export const getOrderProtocol = (maturity: string): OrderProtocol => {
-    let orderProtocol = OrderProtocol.load(maturity);
-
-    if (orderProtocol == null) {
-        orderProtocol = new OrderProtocol(maturity);
-        orderProtocol.orders = [];
-        orderProtocol.save();
-    }
-    return orderProtocol as OrderProtocol;
 };
 
 export const getOrInitLendingMarket = (

@@ -3,10 +3,9 @@ import {
     LendingMarketCreated,
     LendingMarketsRotated,
 } from '../generated/LendingMarketController/LendingMarketController';
-import { LendingMarket, Transaction } from '../generated/schema';
+import { LendingMarket, Transaction, Order } from '../generated/schema';
 import { LendingMarket as LendingMarketTemplate } from '../generated/templates';
 import { getOrInitLendingMarket, getProtocol } from './helper/initializer';
-import { setOrdersAsExpired } from './lending-market';
 
 export function handleLendingMarketCreated(event: LendingMarketCreated): void {
     LendingMarketTemplate.create(event.params.marketAddr);
@@ -28,7 +27,7 @@ export function handleLendingMarketsRotated(
     rollOutMarket(rollingOutMarket);
     updateTransactions(rollingOutMarket);
 
-    setOrdersAsExpired(event.params.oldMaturity);
+    setOrdersAsExpired(rollingOutMarket);
 }
 
 const getMarketList = (ccy: Bytes): LendingMarket[] => {
@@ -102,3 +101,29 @@ const updateTransactions = (rolledOutMarket: LendingMarket): void => {
         transaction.save();
     }
 };
+
+
+const setOrdersAsExpired = (rolledOutMarket: LendingMarket): void => {
+    if (!rolledOutMarket.isSet('orders')) {
+        log.debug('No orders found for market {}', [
+            rolledOutMarket.prettyName,
+        ]);
+        return;
+    }
+
+    const orders = rolledOutMarket.orders;
+
+    if(orders == null) {
+        return;
+    }
+    log.debug('Rolling {} Orders', [orders.length.toString()]);
+
+    for (let i = 0; i < orders.length; i++) {
+        const order = Order.load(orders[i]);
+
+        if (order && order.status == 'Open') {
+            order.status = 'Expired';
+            order.save();
+        }
+    }
+}
