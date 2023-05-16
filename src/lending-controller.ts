@@ -102,7 +102,6 @@ const updateTransactions = (rolledOutMarket: LendingMarket): void => {
     }
 };
 
-
 const setOrdersAsExpired = (rolledOutMarket: LendingMarket): void => {
     if (!rolledOutMarket.isSet('orders')) {
         log.debug('No orders found for market {}', [
@@ -113,7 +112,7 @@ const setOrdersAsExpired = (rolledOutMarket: LendingMarket): void => {
 
     const orders = rolledOutMarket.orders;
 
-    if(orders == null) {
+    if (orders == null) {
         return;
     }
     log.debug('Rolling {} Orders', [orders.length.toString()]);
@@ -126,4 +125,4 @@ const setOrdersAsExpired = (rolledOutMarket: LendingMarket): void => {
             order.save();
         }
     }
-}
+};
