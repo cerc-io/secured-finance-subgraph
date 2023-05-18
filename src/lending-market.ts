@@ -41,6 +41,10 @@ export function handleOrderMade(event: OrderMade): void {
     order.side = event.params.side;
     order.maturity = event.params.maturity;
     order.unitPrice = event.params.unitPrice;
+    order.lendingMarket = getOrInitLendingMarket(
+        event.params.ccy,
+        event.params.maturity
+    ).id;
 
     order.createdAt = event.block.timestamp;
     order.blockNumber = event.block.number;

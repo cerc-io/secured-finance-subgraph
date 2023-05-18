@@ -29,6 +29,7 @@ type Order @entity {
   amount: BigInt!
   filledAmount: BigInt!
   status: OrderStatus!
+  lendingMarket: LendingMarket!
 
   createdAt: BigInt!
   blockNumber: BigInt!
@@ -42,6 +43,7 @@ type LendingMarket @entity {
   maturity: BigInt!
   isActive: Boolean!
   transactions: [Transaction!]! @derivedFrom(field: "lendingMarket")
+  orders: [Order!]! @derivedFrom(field: "lendingMarket")
   protocol: Protocol!
   volume: BigInt!
   dailyVolume: [DailyVolume!]! @derivedFrom(field: "lendingMarket")
@@ -51,6 +53,7 @@ enum OrderStatus {
   Open
   Cancelled
   Filled
+  Expired
 }
 
 type User @entity {
