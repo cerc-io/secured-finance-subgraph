@@ -7,19 +7,19 @@ import {
     describe,
     test,
 } from 'matchstick-as/assembly/index';
-import { getProtocol, PROTOCOL_ID } from '../src/helper/initializer';
+import { PROTOCOL_ID, getProtocol } from '../src/helper/initializer';
 import {
     handleLendingMarketCreated,
     handleLendingMarketsRotated,
 } from '../src/lending-controller';
-import { handleOrderMade, handleOrderCanceled } from '../src/lending-market';
+import { handleOrderCanceled, handleOrderMade } from '../src/lending-market';
 
 import { buildLendingMarketId, toBytes32 } from '../src/utils/string';
 import {
     createLendingMarketCreatedEvent,
     createLendingMarketsRotatedEvent,
-    createOrderMadeEvent,
     createOrderCanceledEvent,
+    createOrderMadeEvent,
     toArrayString,
 } from './mocks';
 import { ALICE, BOB, createTransaction } from './utils/createEntities';
@@ -30,7 +30,6 @@ const index = BigInt.fromI32(0);
 const openingDate = BigInt.fromI32(1);
 const maturity = BigInt.fromI32(365);
 
-const originalOrderId = BigInt.fromI32(0);
 const maker = Address.zero();
 const side = BigInt.fromI32(0).toI32();
 const ccy = toBytes32('ETH');
@@ -298,7 +297,6 @@ describe('With lending markets already existing', () => {
         handleOrderMade(
             createOrderMadeEvent(
                 orderId,
-                originalOrderId,
                 maker,
                 side,
                 ccy,
@@ -314,7 +312,6 @@ describe('With lending markets already existing', () => {
         handleOrderMade(
             createOrderMadeEvent(
                 orderId2,
-                originalOrderId,
                 maker,
                 side,
                 ccy,
@@ -330,7 +327,6 @@ describe('With lending markets already existing', () => {
         handleOrderMade(
             createOrderMadeEvent(
                 orderId3,
-                originalOrderId,
                 maker,
                 side,
                 ccy,
@@ -359,7 +355,6 @@ describe('With lending markets already existing', () => {
         handleOrderMade(
             createOrderMadeEvent(
                 orderId,
-                originalOrderId,
                 maker,
                 side,
                 ccy,
