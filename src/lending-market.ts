@@ -26,7 +26,6 @@ export function handleOrderMade(event: OrderMade): void {
     order.status = 'Open';
     order.orderId = event.params.orderId;
     order.amount = event.params.amount;
-    order.filledAmount = BigInt.fromI32(0);
     order.maker = getOrInitUser(event.params.maker).id;
     order.currency = event.params.ccy;
     order.side = event.params.side;
@@ -85,14 +84,12 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
                 order.currency,
                 order.maturity,
                 order.side,
-                order.amount.minus(order.filledAmount),
+                order.amount,
                 calculateForwardValue(order.amount, order.unitPrice),
                 event.block.timestamp,
                 event.block.number,
                 event.transaction.hash
             );
-
-            order.filledAmount = order.amount;
             order.status = 'Filled';
             order.save();
         }
@@ -103,7 +100,7 @@ export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
     const id = event.params.orderId;
     let order = Order.load(id.toHexString());
     if (order) {
-        order.filledAmount = event.params.filledAmount;
+        order.amount = order.amount.minus(event.params.filledAmount);
 
         createTransaction(
             event.transaction.hash.toHexString(),
@@ -179,5 +176,5 @@ function addToTransactionVolume(event: OrdersTaken): void {
 }
 
 function calculateForwardValue(amount: BigInt, unitPrice: BigInt): BigInt {
-    return (amount * BigInt.fromI32(100)).div(unitPrice);
+    return (amount * BigInt.fromI32(10000)).div(unitPrice);
 }
