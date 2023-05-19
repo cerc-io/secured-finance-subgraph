@@ -176,5 +176,5 @@ function addToTransactionVolume(event: OrdersTaken): void {
 }
 
 function calculateForwardValue(amount: BigInt, unitPrice: BigInt): BigInt {
-    return (amount * BigInt.fromI32(100)).div(unitPrice);
+    return (amount * BigInt.fromI32(10000)).div(unitPrice);
 }
