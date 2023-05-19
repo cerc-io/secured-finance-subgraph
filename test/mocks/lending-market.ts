@@ -3,15 +3,14 @@ import { Address, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import { newMockEvent } from 'matchstick-as/assembly/index';
 import {
     OrderCanceled,
-    OrdersCleaned,
     OrderMade,
-    OrdersTaken,
     OrderPartiallyTaken,
+    OrdersCleaned,
+    OrdersTaken,
 } from '../../generated/templates/LendingMarket/LendingMarket';
 
 export function createOrderMadeEvent(
     orderId: BigInt,
-    originalOrderId: BigInt,
     maker: Address,
     side: i32,
     ccy: Bytes,
@@ -36,12 +35,6 @@ export function createOrderMadeEvent(
         new ethereum.EventParam(
             'orderId',
             ethereum.Value.fromUnsignedBigInt(orderId)
-        )
-    );
-    event.parameters.push(
-        new ethereum.EventParam(
-            'originalOrderId',
-            ethereum.Value.fromUnsignedBigInt(originalOrderId)
         )
     );
     event.parameters.push(

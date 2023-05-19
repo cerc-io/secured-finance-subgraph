@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { dump, load } from 'js-yaml';
 
 const arrowedEnvironments = ['development', 'staging', 'production'] as const;
-const arrowedNetworks = ['goerli', 'mainnet'] as const;
+const arrowedNetworks = ['sepolia', 'mainnet'] as const;
 type Environment = (typeof arrowedEnvironments)[number];
 type Network = (typeof arrowedNetworks)[number];
 

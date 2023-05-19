@@ -4,15 +4,14 @@ import {
     BigInt,
     Bytes,
     log,
-    store,
 } from '@graphprotocol/graph-ts';
 import { Order, Transaction } from '../generated/schema';
 import {
     OrderCanceled,
-    OrdersCleaned,
     OrderMade,
-    OrdersTaken,
     OrderPartiallyTaken,
+    OrdersCleaned,
+    OrdersTaken,
 } from '../generated/templates/LendingMarket/LendingMarket';
 import {
     getOrInitDailyVolume,
@@ -26,16 +25,8 @@ export function handleOrderMade(event: OrderMade): void {
 
     order.status = 'Open';
     order.orderId = event.params.orderId;
-    order.originalOrderId = event.params.originalOrderId;
     order.amount = event.params.amount;
     order.filledAmount = BigInt.fromI32(0);
-    if (order.originalOrderId) {
-        const originalOrder = Order.load(order.originalOrderId.toHexString());
-        if (originalOrder) {
-            originalOrder.amount = originalOrder.amount.minus(order.amount);
-            originalOrder.save();
-        }
-    }
     order.maker = getOrInitUser(event.params.maker).id;
     order.currency = event.params.ccy;
     order.side = event.params.side;
