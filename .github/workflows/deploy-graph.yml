@@ -97,3 +97,10 @@ jobs:
           git add .
           git commit -m "chore: update .subgraphrc"
           git push
+      - name: Merge main into develop
+        shell: bash
+        if: ${{ steps.extract_branch.outputs.branch == 'main' }}
+        run: |
+          git switch develop
+          git merge main
+          git push
