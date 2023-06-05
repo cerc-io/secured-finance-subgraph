@@ -25,6 +25,7 @@ type Order @entity {
   side: Int!
   maturity: BigInt!
   unitPrice: BigInt!
+  filledAmount: BigInt!
   amount: BigInt!
   status: OrderStatus!
   lendingMarket: LendingMarket!
@@ -52,6 +53,7 @@ enum OrderStatus {
   Cancelled
   Filled
   Expired
+  Partially Filled
 }
 
 type User @entity {
