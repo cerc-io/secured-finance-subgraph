@@ -17,7 +17,7 @@ dataSources:
       abis:
         - name: LendingMarketController
           file: >-
-            ./abis/protocol/LendingMarketController.sol/LendingMarketController.json
+            ./abis/protocol/libraries/logics/LendingMarketOperationLogic.sol/LendingMarketOperationLogic.json
       eventHandlers:
         - event: LendingMarketCreated(indexed bytes32,indexed address,address,uint256,uint256,uint256)
           handler: handleLendingMarketCreated
