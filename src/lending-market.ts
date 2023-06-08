@@ -45,8 +45,8 @@ export function handleOrderMade(event: OrderMade): void {
 }
 
 export function handleOrdersTaken(event: OrdersTaken): void {
-    createTransaction(
-        event.transaction.hash.toHexString(),
+    const txId = createTransaction(
+        event.transaction.hash.toHexString() + '-ot',
         event.params.unitPrice,
         event.params.taker,
         event.params.ccy,
@@ -58,7 +58,7 @@ export function handleOrdersTaken(event: OrdersTaken): void {
         event.block.number,
         event.transaction.hash
     );
-    addToTransactionVolume(event);
+    addToTransactionVolume(event, txId);
 }
 
 export function handleOrderCanceled(event: OrderCanceled): void {
@@ -79,7 +79,7 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
 
         if (order != null) {
             createTransaction(
-                event.transaction.hash.toHexString() + '-' + i.toString(),
+                event.transaction.hash.toHexString() + '-oc' + i.toString(),
                 order.unitPrice,
                 Address.fromString(order.maker),
                 order.currency,
@@ -106,7 +106,7 @@ export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
         order.status = 'Partially Filled';
 
         createTransaction(
-            event.transaction.hash.toHexString(),
+            event.transaction.hash.toHexString() + '-opt',
             order.unitPrice,
             event.params.maker,
             event.params.ccy,
@@ -135,8 +135,16 @@ function createTransaction(
     timestamp: BigInt,
     blockNumber: BigInt,
     txHash: Bytes
-): void {
-    const transaction = new Transaction(txId);
+): string {
+    let index = 1;
+    let tempId = txId;
+    let tempTransaction = Transaction.load(tempId);
+    while(tempTransaction != null) {
+        tempId = txId + index.toString();
+        tempTransaction = Transaction.load(tempId);
+        index++;
+    }
+    const transaction = new Transaction(tempId);
 
     transaction.orderPrice = unitPrice;
     transaction.taker = getOrInitUser(taker).id;
@@ -158,11 +166,12 @@ function createTransaction(
     transaction.lendingMarket = getOrInitLendingMarket(ccy, maturity).id;
 
     transaction.save();
+    return tempId;
 }
 
-function addToTransactionVolume(event: OrdersTaken): void {
+function addToTransactionVolume(event: OrdersTaken, txId: string): void {
     // We expect to have a transaction entity created in the handleOrdersTaken
-    const transaction = Transaction.load(event.transaction.hash.toHexString());
+    const transaction = Transaction.load(txId);
     if (transaction) {
         const dailyVolume = getOrInitDailyVolume(
             transaction.currency,

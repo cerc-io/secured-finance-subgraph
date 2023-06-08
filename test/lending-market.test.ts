@@ -157,61 +157,61 @@ test('Should remove the orders and add transactions when the OrdersCleaned Event
 
     const txId = event.transaction.hash.toHexString();
 
-    assert.fieldEquals('Transaction', txId + '-0', 'amount', '90');
+    assert.fieldEquals('Transaction', txId + '-oc0', 'amount', '90');
     assert.fieldEquals(
         'Transaction',
-        txId + '-0',
+        txId + '-oc0',
         'orderPrice',
         unitPrice.toString()
     );
     assert.fieldEquals(
         'Transaction',
-        txId + '-0',
+        txId + '-oc0',
         'currency',
         ccy.toHexString()
     );
     assert.fieldEquals(
         'Transaction',
-        txId + '-0',
+        txId + '-oc0',
         'maturity',
         maturity.toString()
     );
-    assert.fieldEquals('Transaction', txId + '-0', 'side', side.toString());
+    assert.fieldEquals('Transaction', txId + '-oc0', 'side', side.toString());
     assert.fieldEquals(
         'Transaction',
-        txId + '-0',
+        txId + '-oc0',
         'taker',
         maker.toHexString()
     );
 
     assert.fieldEquals(
         'Transaction',
-        txId + '-1',
+        txId + '-oc1',
         'amount',
         amount2.toString()
     );
     assert.fieldEquals(
         'Transaction',
-        txId + '-1',
+        txId + '-oc1',
         'orderPrice',
         unitPrice2.toString()
     );
     assert.fieldEquals(
         'Transaction',
-        txId + '-1',
+        txId + '-oc1',
         'currency',
         ccy.toHexString()
     );
     assert.fieldEquals(
         'Transaction',
-        txId + '-1',
+        txId + '-oc1',
         'maturity',
         maturity.toString()
     );
-    assert.fieldEquals('Transaction', txId + '-1', 'side', side.toString());
+    assert.fieldEquals('Transaction', txId + '-oc1', 'side', side.toString());
     assert.fieldEquals(
         'Transaction',
-        txId + '-1',
+        txId + '-oc1',
         'taker',
         maker.toHexString()
     );
@@ -238,7 +238,7 @@ test('Should create a Transaction when the OrdersTaken Event is raised', () => {
         filledFutureValue
     );
     handleOrdersTaken(takeOrdersEvent);
-    const id = takeOrdersEvent.transaction.hash.toHexString();
+    const id = takeOrdersEvent.transaction.hash.toHexString() + '-ot';
     assert.fieldEquals('Transaction', id, 'amount', filledAmount.toString());
     assert.fieldEquals(
         'Transaction',
@@ -257,6 +257,63 @@ test('Should create a Transaction when the OrdersTaken Event is raised', () => {
         'averagePrice',
         averagePrice.toString()
     );
+});
+
+test('Should create multiple Transaction when the multiple OrdersTaken Events are emitted under same transaction', () => {
+    // Create the market first
+    createLendingMarket(ccy, maturity);
+
+    const filledFutureValue = BigInt.fromString('1230000000000000000000');
+    const filledAmount = BigInt.fromString('1200000000000000000000');
+
+    const averagePrice = filledAmount.divDecimal(
+        new BigDecimal(filledFutureValue)
+    );
+
+    const takeOrdersEvent1 = createOrdersTakenEvent(
+        maker,
+        side,
+        ccy,
+        maturity,
+        filledAmount,
+        BigInt.fromString('9500'),
+        filledFutureValue,
+        Address.fromString('0x0000000000000000000000000000000000000001'),
+    );
+    handleOrdersTaken(takeOrdersEvent1);
+
+    const takeOrdersEvent2 = createOrdersTakenEvent(
+        maker,
+        side,
+        ccy,
+        maturity,
+        filledAmount,
+        BigInt.fromString('9200'),
+        filledFutureValue,
+        Address.fromString('0x0000000000000000000000000000000000000001'),
+    );
+    handleOrdersTaken(takeOrdersEvent2);
+
+    const takeOrdersEvent3 = createOrdersTakenEvent(
+        maker,
+        side,
+        ccy,
+        maturity,
+        filledAmount,
+        BigInt.fromString('9000'),
+        filledFutureValue,
+        Address.fromString('0x0000000000000000000000000000000000000001'),
+    );
+    handleOrdersTaken(takeOrdersEvent3);
+
+    const id1 = takeOrdersEvent1.transaction.hash.toHexString() + '-ot';
+    assert.fieldEquals('Transaction', id1, 'orderPrice', '9500');
+
+    const id2 = takeOrdersEvent2.transaction.hash.toHexString() + '-ot1';
+    assert.fieldEquals('Transaction', id2, 'orderPrice', '9200');
+
+    const id3 = takeOrdersEvent2.transaction.hash.toHexString() + '-ot2';
+    assert.fieldEquals('Transaction', id3, 'orderPrice', '9000');
 });
 
 test('should update the order amount and create a transaction, when order is partially field', () => {
@@ -299,7 +356,7 @@ test('should update the order amount and create a transaction, when order is par
     assert.fieldEquals('Order', id, 'filledAmount', '10');
     assert.fieldEquals('Order', id, 'amount', '100');
 
-    const txId = partialOrderEvent.transaction.hash.toHexString();
+    const txId = partialOrderEvent.transaction.hash.toHexString() + '-opt';
     assert.fieldEquals('Transaction', txId, 'amount', filledAmount.toString());
     assert.fieldEquals(
         'Transaction',
@@ -345,7 +402,7 @@ describe('User entity', () => {
             'User',
             maker.toHexString(),
             'transactions',
-            toArrayString(['0x0000000000000000000000000000000000000001'])
+            toArrayString(['0x0000000000000000000000000000000000000001-ot'])
         );
     });
 
@@ -369,8 +426,8 @@ describe('User entity', () => {
             maker.toHexString(),
             'transactions',
             toArrayString([
-                '0x0000000000000000000000000000000000000001',
-                '0x0000000000000000000000000000000000000002',
+                '0x0000000000000000000000000000000000000001-ot',
+                '0x0000000000000000000000000000000000000002-ot',
             ])
         );
     });
