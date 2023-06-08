@@ -46,7 +46,7 @@ export function handleOrderMade(event: OrderMade): void {
 
 export function handleOrdersTaken(event: OrdersTaken): void {
     createTransaction(
-        event.transaction.hash.toHexString() + '-ot',
+        event.transaction.hash.toHexString(),
         event.params.unitPrice,
         event.params.taker,
         event.params.ccy,
@@ -106,7 +106,7 @@ export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
         order.status = 'Partially Filled';
 
         createTransaction(
-            event.transaction.hash.toHexString() + '-opt',
+            event.transaction.hash.toHexString(),
             order.unitPrice,
             event.params.maker,
             event.params.ccy,
@@ -163,7 +163,7 @@ function createTransaction(
 function addToTransactionVolume(event: OrdersTaken): void {
     // We expect to have a transaction entity created in the handleOrdersTaken
     const transaction = Transaction.load(
-        event.transaction.hash.toHexString() + '-ot'
+        event.transaction.hash.toHexString()
     );
     if (transaction) {
         const dailyVolume = getOrInitDailyVolume(

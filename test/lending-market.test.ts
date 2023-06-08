@@ -238,7 +238,7 @@ test('Should create a Transaction when the OrdersTaken Event is raised', () => {
         filledFutureValue
     );
     handleOrdersTaken(takeOrdersEvent);
-    const id = takeOrdersEvent.transaction.hash.toHexString() + '-ot';
+    const id = takeOrdersEvent.transaction.hash.toHexString();
     assert.fieldEquals('Transaction', id, 'amount', filledAmount.toString());
     assert.fieldEquals(
         'Transaction',
@@ -299,7 +299,7 @@ test('should update the order amount and create a transaction, when order is par
     assert.fieldEquals('Order', id, 'filledAmount', '10');
     assert.fieldEquals('Order', id, 'amount', '100');
 
-    const txId = partialOrderEvent.transaction.hash.toHexString() + '-opt';
+    const txId = partialOrderEvent.transaction.hash.toHexString();
     assert.fieldEquals('Transaction', txId, 'amount', filledAmount.toString());
     assert.fieldEquals(
         'Transaction',
@@ -345,7 +345,7 @@ describe('User entity', () => {
             'User',
             maker.toHexString(),
             'transactions',
-            toArrayString(['0x0000000000000000000000000000000000000001-ot'])
+            toArrayString(['0x0000000000000000000000000000000000000001'])
         );
     });
 
@@ -369,8 +369,8 @@ describe('User entity', () => {
             maker.toHexString(),
             'transactions',
             toArrayString([
-                '0x0000000000000000000000000000000000000001-ot',
-                '0x0000000000000000000000000000000000000002-ot',
+                '0x0000000000000000000000000000000000000001',
+                '0x0000000000000000000000000000000000000002',
             ])
         );
     });
