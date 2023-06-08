@@ -53,7 +53,7 @@ enum OrderStatus {
   Cancelled
   Filled
   Expired
-  Partially Filled
+  PartiallyFilled
 }
 
 type User @entity {

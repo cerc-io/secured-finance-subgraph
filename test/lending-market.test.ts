@@ -136,7 +136,7 @@ test('Should remove the orders and add transactions when the OrdersCleaned Event
     );
     handleOrderPartiallyTaken(partialOrderEvent);
 
-    assert.fieldEquals('Order', id1, 'status', 'Partially Filled');
+    assert.fieldEquals('Order', id1, 'status', 'PartiallyFilled');
     assert.fieldEquals('Order', id1, 'filledAmount', '10');
     assert.fieldEquals('Order', id1, 'amount', '100');
 
@@ -295,7 +295,7 @@ test('should update the order amount and create a transaction, when order is par
     );
     handleOrderPartiallyTaken(partialOrderEvent);
 
-    assert.fieldEquals('Order', id, 'status', 'Partially Filled');
+    assert.fieldEquals('Order', id, 'status', 'PartiallyFilled');
     assert.fieldEquals('Order', id, 'filledAmount', '10');
     assert.fieldEquals('Order', id, 'amount', '100');
 
