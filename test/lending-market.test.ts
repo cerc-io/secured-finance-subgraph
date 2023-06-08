@@ -122,6 +122,24 @@ test('Should remove the orders and add transactions when the OrdersCleaned Event
     assert.fieldEquals('Order', id1, 'status', 'Open');
     assert.fieldEquals('Order', id2, 'status', 'Open');
 
+    const filledAmount = BigInt.fromI32(10);
+    const filledFutureValue = BigInt.fromI32(11);
+
+    const partialOrderEvent = createOrderPartiallyTakenEvent(
+        orderId1,
+        maker,
+        side,
+        ccy,
+        maturity,
+        filledAmount,
+        filledFutureValue
+    );
+    handleOrderPartiallyTaken(partialOrderEvent);
+
+    assert.fieldEquals('Order', id1, 'status', 'Partially Filled');
+    assert.fieldEquals('Order', id1, 'filledAmount', '10');
+    assert.fieldEquals('Order', id1, 'amount', '100');
+
     const event = createOrdersCleaned(
         [orderId1, orderId2],
         maker,
@@ -133,11 +151,13 @@ test('Should remove the orders and add transactions when the OrdersCleaned Event
     handleOrdersCleaned(event);
 
     assert.fieldEquals('Order', id1, 'status', 'Filled');
+    assert.fieldEquals('Order', id1, 'filledAmount', '100');
     assert.fieldEquals('Order', id2, 'status', 'Filled');
+    assert.fieldEquals('Order', id2, 'filledAmount', '200');
 
     const txId = event.transaction.hash.toHexString();
 
-    assert.fieldEquals('Transaction', txId + '-0', 'amount', amount.toString());
+    assert.fieldEquals('Transaction', txId + '-0', 'amount', '90');
     assert.fieldEquals(
         'Transaction',
         txId + '-0',
@@ -275,8 +295,9 @@ test('should update the order amount and create a transaction, when order is par
     );
     handleOrderPartiallyTaken(partialOrderEvent);
 
-    assert.fieldEquals('Order', id, 'status', 'Open');
-    assert.fieldEquals('Order', id, 'amount', '90');
+    assert.fieldEquals('Order', id, 'status', 'Partially Filled');
+    assert.fieldEquals('Order', id, 'filledAmount', '10');
+    assert.fieldEquals('Order', id, 'amount', '100');
 
     const txId = partialOrderEvent.transaction.hash.toHexString();
     assert.fieldEquals('Transaction', txId, 'amount', filledAmount.toString());
