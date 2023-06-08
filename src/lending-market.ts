@@ -162,9 +162,7 @@ function createTransaction(
 
 function addToTransactionVolume(event: OrdersTaken): void {
     // We expect to have a transaction entity created in the handleOrdersTaken
-    const transaction = Transaction.load(
-        event.transaction.hash.toHexString()
-    );
+    const transaction = Transaction.load(event.transaction.hash.toHexString());
     if (transaction) {
         const dailyVolume = getOrInitDailyVolume(
             transaction.currency,
