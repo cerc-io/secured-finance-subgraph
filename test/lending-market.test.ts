@@ -278,7 +278,7 @@ test('Should create multiple Transaction when the multiple OrdersTaken Events ar
         filledAmount,
         BigInt.fromString('9500'),
         filledFutureValue,
-        Address.fromString('0x0000000000000000000000000000000000000001'),
+        Address.fromString('0x0000000000000000000000000000000000000001')
     );
     handleOrdersTaken(takeOrdersEvent1);
 
@@ -290,7 +290,7 @@ test('Should create multiple Transaction when the multiple OrdersTaken Events ar
         filledAmount,
         BigInt.fromString('9200'),
         filledFutureValue,
-        Address.fromString('0x0000000000000000000000000000000000000001'),
+        Address.fromString('0x0000000000000000000000000000000000000001')
     );
     handleOrdersTaken(takeOrdersEvent2);
 
@@ -302,7 +302,7 @@ test('Should create multiple Transaction when the multiple OrdersTaken Events ar
         filledAmount,
         BigInt.fromString('9000'),
         filledFutureValue,
-        Address.fromString('0x0000000000000000000000000000000000000001'),
+        Address.fromString('0x0000000000000000000000000000000000000001')
     );
     handleOrdersTaken(takeOrdersEvent3);
 

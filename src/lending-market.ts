@@ -139,7 +139,7 @@ function createTransaction(
     let index = 1;
     let tempId = txId;
     let tempTransaction = Transaction.load(tempId);
-    while(tempTransaction != null) {
+    while (tempTransaction != null) {
         tempId = txId + index.toString();
         tempTransaction = Transaction.load(tempId);
         index++;
