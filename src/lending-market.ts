@@ -60,7 +60,7 @@ export function handleOrdersTaken(event: OrdersTaken): void {
         event.block.number,
         event.transaction.hash
     );
-    addToTransactionVolume(event, txId);
+    addToTransactionVolume(event);
 }
 
 export function handleOrderCanceled(event: OrderCanceled): void {
@@ -172,8 +172,10 @@ function createTransaction(
     return txId;
 }
 
-function addToTransactionVolume(event: OrdersTaken, txId: string): void {
+function addToTransactionVolume(event: OrdersTaken): void {
     // We expect to have a transaction entity created in the handleOrdersTaken
+    const txId =
+        event.transaction.hash.toHexString() + ':' + event.logIndex.toString();
     const transaction = Transaction.load(txId);
     if (transaction) {
         const dailyVolume = getOrInitDailyVolume(
