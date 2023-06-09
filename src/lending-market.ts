@@ -45,8 +45,10 @@ export function handleOrderMade(event: OrderMade): void {
 }
 
 export function handleOrdersTaken(event: OrdersTaken): void {
+    const txId =
+        event.transaction.hash.toHexString() + ':' + event.logIndex.toString();
     createTransaction(
-        event.transaction.hash.toHexString(),
+        txId,
         event.params.unitPrice,
         event.params.taker,
         event.params.ccy,
@@ -78,8 +80,14 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
         const order = Order.load(id);
 
         if (order != null) {
+            const txId =
+                event.transaction.hash.toHexString() +
+                '-' +
+                i.toString() +
+                ':' +
+                event.logIndex.toString();
             createTransaction(
-                event.transaction.hash.toHexString() + '-' + i.toString(),
+                txId,
                 order.unitPrice,
                 Address.fromString(order.maker),
                 order.currency,
@@ -104,9 +112,12 @@ export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
     if (order) {
         order.filledAmount = order.filledAmount.plus(event.params.filledAmount);
         order.status = 'PartiallyFilled';
-
+        const txId =
+            event.transaction.hash.toHexString() +
+            ':' +
+            event.logIndex.toString();
         createTransaction(
-            event.transaction.hash.toHexString(),
+            txId,
             order.unitPrice,
             event.params.maker,
             event.params.ccy,
@@ -162,7 +173,9 @@ function createTransaction(
 
 function addToTransactionVolume(event: OrdersTaken): void {
     // We expect to have a transaction entity created in the handleOrdersTaken
-    const transaction = Transaction.load(event.transaction.hash.toHexString());
+    const txId =
+        event.transaction.hash.toHexString() + ':' + event.logIndex.toString();
+    const transaction = Transaction.load(txId);
     if (transaction) {
         const dailyVolume = getOrInitDailyVolume(
             transaction.currency,

@@ -260,7 +260,7 @@ describe('With lending markets already existing', () => {
         // Transaction 0 is updated (FIL, Dec 22)
         assert.fieldEquals(
             'Transaction',
-            hashList[0].toHexString(),
+            hashList[0].toHexString() + ':1',
             'maturity',
             maturityList[1].toString()
         );
@@ -268,7 +268,7 @@ describe('With lending markets already existing', () => {
         // Transaction 1 is updated (FIL, Dec 22)
         assert.fieldEquals(
             'Transaction',
-            hashList[1].toHexString(),
+            hashList[1].toHexString() + ':1',
             'maturity',
             maturityList[1].toString()
         );
@@ -276,7 +276,7 @@ describe('With lending markets already existing', () => {
         // Transaction 2 is not updated (ETH, Dec 22)
         assert.fieldEquals(
             'Transaction',
-            hashList[2].toHexString(),
+            hashList[2].toHexString() + ':1',
             'maturity',
             maturityList[0].toString()
         );
@@ -284,7 +284,7 @@ describe('With lending markets already existing', () => {
         // Transaction 3 is not updated (FIL, Mar 23)
         assert.fieldEquals(
             'Transaction',
-            hashList[3].toHexString(),
+            hashList[3].toHexString() + ':1',
             'maturity',
             maturityList[1].toString()
         );
