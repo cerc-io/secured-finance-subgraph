@@ -146,7 +146,7 @@ function createTransaction(
     timestamp: BigInt,
     blockNumber: BigInt,
     txHash: Bytes
-): string {
+): void {
     const transaction = new Transaction(txId);
 
     transaction.orderPrice = unitPrice;
@@ -169,7 +169,6 @@ function createTransaction(
     transaction.lendingMarket = getOrInitLendingMarket(ccy, maturity).id;
 
     transaction.save();
-    return txId;
 }
 
 function addToTransactionVolume(event: OrdersTaken): void {
