@@ -45,8 +45,10 @@ export function handleOrderMade(event: OrderMade): void {
 }
 
 export function handleOrdersTaken(event: OrdersTaken): void {
-    const txId = createTransaction(
-        event.transaction.hash.toHexString() + '-ot',
+    const txId =
+        event.transaction.hash.toHexString() + ':' + event.logIndex.toString();
+    createTransaction(
+        txId,
         event.params.unitPrice,
         event.params.taker,
         event.params.ccy,
@@ -78,8 +80,14 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
         const order = Order.load(id);
 
         if (order != null) {
+            const txId =
+                event.transaction.hash.toHexString() +
+                '-' +
+                i.toString() +
+                ':' +
+                event.logIndex.toString();
             createTransaction(
-                event.transaction.hash.toHexString() + '-oc' + i.toString(),
+                txId,
                 order.unitPrice,
                 Address.fromString(order.maker),
                 order.currency,
@@ -104,9 +112,9 @@ export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
     if (order) {
         order.filledAmount = order.filledAmount.plus(event.params.filledAmount);
         order.status = 'Partially Filled';
-
+        const txId = event.transaction.hash.toHexString() + ':' + event.logIndex.toString();
         createTransaction(
-            event.transaction.hash.toHexString() + '-opt',
+            txId,
             order.unitPrice,
             event.params.maker,
             event.params.ccy,
@@ -136,15 +144,7 @@ function createTransaction(
     blockNumber: BigInt,
     txHash: Bytes
 ): string {
-    let index = 1;
-    let tempId = txId;
-    let tempTransaction = Transaction.load(tempId);
-    while (tempTransaction != null) {
-        tempId = txId + index.toString();
-        tempTransaction = Transaction.load(tempId);
-        index++;
-    }
-    const transaction = new Transaction(tempId);
+    const transaction = new Transaction(txId);
 
     transaction.orderPrice = unitPrice;
     transaction.taker = getOrInitUser(taker).id;
@@ -166,7 +166,7 @@ function createTransaction(
     transaction.lendingMarket = getOrInitLendingMarket(ccy, maturity).id;
 
     transaction.save();
-    return tempId;
+    return txId;
 }
 
 function addToTransactionVolume(event: OrdersTaken, txId: string): void {
