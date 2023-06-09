@@ -77,7 +77,7 @@ export function createOrdersTakenEvent(
     unitPrice: BigInt,
     filledFutureValue: BigInt,
     hash: Address | null = null,
-    logIndex: BigInt = BigInt.fromI32(1),
+    logIndex: BigInt = BigInt.fromI32(1)
 ): OrdersTaken {
     const mockEvent = changetype<OrdersTaken>(newMockEvent());
     if (hash) {

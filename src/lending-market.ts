@@ -112,7 +112,10 @@ export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
     if (order) {
         order.filledAmount = order.filledAmount.plus(event.params.filledAmount);
         order.status = 'Partially Filled';
-        const txId = event.transaction.hash.toHexString() + ':' + event.logIndex.toString();
+        const txId =
+            event.transaction.hash.toHexString() +
+            ':' +
+            event.logIndex.toString();
         createTransaction(
             txId,
             order.unitPrice,
