@@ -13,7 +13,10 @@ import {
     handleOrdersCleaned,
     handleOrdersTaken,
 } from '../src/lending-market';
-import { getDailyVolumeEntityId, getOrderEntityId } from '../src/utils/id-generation';
+import {
+    getDailyVolumeEntityId,
+    getOrderEntityId,
+} from '../src/utils/id-generation';
 import { toBytes32 } from '../src/utils/string';
 import {
     createOrderCanceledEvent,

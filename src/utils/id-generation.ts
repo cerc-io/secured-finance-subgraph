@@ -13,5 +13,7 @@ export function getOrderEntityId(
     ccy: Bytes,
     maturity: BigInt
 ): string {
-    return orderId.toHexString() + ':' + ccy.toString() + ':' + maturity.toString();
+    return (
+        orderId.toHexString() + ':' + ccy.toString() + ':' + maturity.toString()
+    );
 }
