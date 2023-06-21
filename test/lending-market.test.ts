@@ -62,6 +62,102 @@ test('Should create a Order when the OrderMade Event is raised', () => {
     assert.fieldEquals('Order', id, 'status', 'Open');
 });
 
+test('Should create different orders when orderId is same and currency is different', () => {
+    const orderId = BigInt.fromI32(1);
+    const id1 = getOrderEntityId(orderId, ccy, maturity);
+
+    const event1 = createOrderMadeEvent(
+        orderId,
+        maker,
+        side,
+        ccy,
+        maturity,
+        amount,
+        unitPrice
+    );
+    handleOrderMade(event1);
+
+    const maturity2 = BigInt.fromI32(1667628800);
+    const id2 = getOrderEntityId(orderId, ccy, maturity2);
+
+    const event2 = createOrderMadeEvent(
+        orderId,
+        maker,
+        side,
+        ccy,
+        maturity2,
+        amount2,
+        unitPrice2
+    );
+    handleOrderMade(event2);
+
+    assert.fieldEquals('Order', id1, 'orderId', orderId.toString());
+    assert.fieldEquals('Order', id1, 'maker', maker.toHexString());
+    assert.fieldEquals('Order', id1, 'side', side.toString());
+    assert.fieldEquals('Order', id1, 'currency', ccy.toHexString());
+    assert.fieldEquals('Order', id1, 'maturity', maturity.toString());
+    assert.fieldEquals('Order', id1, 'amount', amount.toString());
+    assert.fieldEquals('Order', id1, 'unitPrice', unitPrice.toString());
+    assert.fieldEquals('Order', id1, 'status', 'Open');
+
+    assert.fieldEquals('Order', id2, 'orderId', orderId.toString());
+    assert.fieldEquals('Order', id2, 'maker', maker.toHexString());
+    assert.fieldEquals('Order', id2, 'side', side.toString());
+    assert.fieldEquals('Order', id2, 'currency', ccy.toHexString());
+    assert.fieldEquals('Order', id2, 'maturity', maturity2.toString());
+    assert.fieldEquals('Order', id2, 'amount', amount2.toString());
+    assert.fieldEquals('Order', id2, 'unitPrice', unitPrice2.toString());
+    assert.fieldEquals('Order', id2, 'status', 'Open');
+});
+
+test('Should create different orders when orderId is same and maturity is different', () => {
+    const orderId = BigInt.fromI32(1);
+    const id1 = getOrderEntityId(orderId, ccy, maturity);
+
+    const event1 = createOrderMadeEvent(
+        orderId,
+        maker,
+        side,
+        ccy,
+        maturity,
+        amount,
+        unitPrice
+    );
+    handleOrderMade(event1);
+
+    const ccy2 = toBytes32('EFIL');
+    const id2 = getOrderEntityId(orderId, ccy2, maturity);
+
+    const event2 = createOrderMadeEvent(
+        orderId,
+        maker,
+        side,
+        ccy2,
+        maturity,
+        amount2,
+        unitPrice2
+    );
+    handleOrderMade(event2);
+
+    assert.fieldEquals('Order', id1, 'orderId', orderId.toString());
+    assert.fieldEquals('Order', id1, 'maker', maker.toHexString());
+    assert.fieldEquals('Order', id1, 'side', side.toString());
+    assert.fieldEquals('Order', id1, 'currency', ccy.toHexString());
+    assert.fieldEquals('Order', id1, 'maturity', maturity.toString());
+    assert.fieldEquals('Order', id1, 'amount', amount.toString());
+    assert.fieldEquals('Order', id1, 'unitPrice', unitPrice.toString());
+    assert.fieldEquals('Order', id1, 'status', 'Open');
+
+    assert.fieldEquals('Order', id2, 'orderId', orderId.toString());
+    assert.fieldEquals('Order', id2, 'maker', maker.toHexString());
+    assert.fieldEquals('Order', id2, 'side', side.toString());
+    assert.fieldEquals('Order', id2, 'currency', ccy2.toHexString());
+    assert.fieldEquals('Order', id2, 'maturity', maturity.toString());
+    assert.fieldEquals('Order', id2, 'amount', amount2.toString());
+    assert.fieldEquals('Order', id2, 'unitPrice', unitPrice2.toString());
+    assert.fieldEquals('Order', id2, 'status', 'Open');
+});
+
 test('Should update the Order when the OrderCanceled Event is raised', () => {
     const orderId = BigInt.fromI32(2);
     const id = getOrderEntityId(orderId, ccy, maturity);
