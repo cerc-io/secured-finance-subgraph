@@ -13,7 +13,7 @@ import {
     handleOrdersCleaned,
     handleOrdersTaken,
 } from '../src/lending-market';
-import { getDailyVolumeEntityId } from '../src/utils/id-generation';
+import { getDailyVolumeEntityId, getOrderEntityId } from '../src/utils/id-generation';
 import { toBytes32 } from '../src/utils/string';
 import {
     createOrderCanceledEvent,
@@ -36,12 +36,7 @@ const unitPrice2 = BigInt.fromI32(200);
 
 test('Should create a Order when the OrderMade Event is raised', () => {
     const orderId = BigInt.fromI32(1);
-    const id =
-        orderId.toHexString() +
-        ':' +
-        ccy.toString() +
-        ':' +
-        maturity.toString();
+    const id = getOrderEntityId(orderId, ccy, maturity);
 
     const event = createOrderMadeEvent(
         orderId,
@@ -66,12 +61,7 @@ test('Should create a Order when the OrderMade Event is raised', () => {
 
 test('Should update the Order when the OrderCanceled Event is raised', () => {
     const orderId = BigInt.fromI32(2);
-    const id =
-        orderId.toHexString() +
-        ':' +
-        ccy.toString() +
-        ':' +
-        maturity.toString();
+    const id = getOrderEntityId(orderId, ccy, maturity);
 
     const makeOrderEvent = createOrderMadeEvent(
         orderId,
@@ -104,19 +94,9 @@ test('Should update the Order when the OrderCanceled Event is raised', () => {
 
 test('Should remove the orders and add transactions when the OrdersCleaned Event is raised', () => {
     const orderId1 = BigInt.fromI32(3);
-    const id1 =
-        orderId1.toHexString() +
-        ':' +
-        ccy.toString() +
-        ':' +
-        maturity.toString();
+    const id1 = getOrderEntityId(orderId1, ccy, maturity);
     const orderId2 = BigInt.fromI32(4);
-    const id2 =
-        orderId2.toHexString() +
-        ':' +
-        ccy.toString() +
-        ':' +
-        maturity.toString();
+    const id2 = getOrderEntityId(orderId2, ccy, maturity);
 
     const makeOrderEvent1 = createOrderMadeEvent(
         orderId1,
@@ -341,12 +321,7 @@ test('Should create multiple Transaction when the multiple OrdersTaken Events ar
 
 test('should update the order amount and create a transaction, when order is partially field', () => {
     const orderId = BigInt.fromI32(21);
-    const id =
-        orderId.toHexString() +
-        ':' +
-        ccy.toString() +
-        ':' +
-        maturity.toString();
+    const id = getOrderEntityId(orderId, ccy, maturity);
 
     const makeOrderEvent = createOrderMadeEvent(
         orderId,
