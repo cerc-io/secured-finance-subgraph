@@ -50,7 +50,7 @@ const getShortestMaturityActiveMarket = (ccy: Bytes): LendingMarket | null => {
     let market: LendingMarket | null = null;
     if (marketList && marketList.length > 0) {
         for (let i = 0; i < marketList.length; i++) {
-            if (market == null) {
+            if (!market) {
                 market = marketList[i];
             }
 
@@ -76,7 +76,7 @@ const updateTransactions = (rolledOutMarket: LendingMarket): void => {
     }
     const transactions = rolledOutMarket.transactions;
 
-    if (transactions == null) {
+    if (!transactions) {
         return;
     }
 
@@ -92,7 +92,7 @@ const updateTransactions = (rolledOutMarket: LendingMarket): void => {
 
     for (let i = 0; i < transactions.length; i++) {
         const transaction = Transaction.load(transactions[i]);
-        if (transaction == null) {
+        if (!transaction) {
             continue;
         }
 
@@ -112,7 +112,7 @@ const setOrdersAsExpired = (rolledOutMarket: LendingMarket): void => {
 
     const orders = rolledOutMarket.orders;
 
-    if (orders == null) {
+    if (!orders) {
         return;
     }
     log.debug('Rolling {} Orders', [orders.length.toString()]);

@@ -21,9 +21,11 @@ import {
 
 export function handleOrderMade(event: OrderMade): void {
     const orderId = event.params.orderId.toHexString();
-    const order = new Order(orderId);
-
-    order.status = 'Open';
+    let order = Order.load(orderId);
+    if (!order) {
+        order = new Order(orderId);
+        order.status = 'Open';
+    }
     order.orderId = event.params.orderId;
     order.filledAmount = BigInt.fromI32(0);
     order.amount = event.params.amount;
@@ -64,10 +66,27 @@ export function handleOrdersTaken(event: OrdersTaken): void {
 }
 
 export function handleOrderCanceled(event: OrderCanceled): void {
-    const id = event.params.orderId;
-    let order = Order.load(id.toHexString());
-    if (order === null) {
-        order = new Order(id.toHexString());
+    const orderId = event.params.orderId.toHexString();
+    let order = Order.load(orderId);
+    if (!order) {
+        order = new Order(orderId);
+
+        order.orderId = event.params.orderId;
+        order.filledAmount = BigInt.fromI32(0);
+        order.amount = event.params.amount;
+        order.maker = getOrInitUser(event.params.maker).id;
+        order.currency = event.params.ccy;
+        order.side = event.params.side;
+        order.maturity = event.params.maturity;
+        order.unitPrice = event.params.unitPrice;
+        order.lendingMarket = getOrInitLendingMarket(
+            event.params.ccy,
+            event.params.maturity
+        ).id;
+
+        order.createdAt = event.block.timestamp;
+        order.blockNumber = event.block.number;
+        order.txHash = event.transaction.hash;
     }
 
     order.status = 'Cancelled';
@@ -79,7 +98,7 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
         const id = event.params.orderIds[i].toHexString();
         const order = Order.load(id);
 
-        if (order != null) {
+        if (order) {
             const txId =
                 event.transaction.hash.toHexString() +
                 '-' +

@@ -12,7 +12,7 @@ export const PROTOCOL_ID = 'ethereum';
 
 export const getProtocol = (): Protocol => {
     let protocol = Protocol.load(PROTOCOL_ID);
-    if (protocol == null) {
+    if (!protocol) {
         protocol = new Protocol(PROTOCOL_ID);
         protocol.totalUsers = BigInt.fromI32(0);
         protocol.save();
@@ -26,7 +26,7 @@ export const getOrInitLendingMarket = (
 ): LendingMarket => {
     const id = buildLendingMarketId(ccy, maturity);
     let lendingMarket = LendingMarket.load(id);
-    if (lendingMarket == null) {
+    if (!lendingMarket) {
         lendingMarket = new LendingMarket(id);
         lendingMarket.currency = ccy;
         lendingMarket.maturity = maturity;
@@ -43,7 +43,7 @@ export const getOrInitLendingMarket = (
 
 export const getOrInitUser = (address: Bytes): User => {
     let user = User.load(address.toHexString());
-    if (user === null) {
+    if (!user) {
         user = new User(address.toHexString());
         user.save();
 
@@ -67,7 +67,7 @@ export const getOrInitDailyVolume = (
 
     let id = getDailyVolumeEntityId(ccy, maturity, dayStr);
     let dailyVolume = DailyVolume.load(id);
-    if (dailyVolume === null) {
+    if (!dailyVolume) {
         dailyVolume = new DailyVolume(id);
         dailyVolume.currency = ccy;
         dailyVolume.maturity = maturity;
