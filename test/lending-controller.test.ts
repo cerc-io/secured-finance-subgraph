@@ -292,7 +292,12 @@ describe('With lending markets already existing', () => {
 
     test('Rolling out a market should change the status of open orders with oldMaturity to expired', () => {
         const orderId = BigInt.fromI32(1);
-        const id = orderId.toHexString();
+        const id =
+            orderId.toHexString() +
+            ':' +
+            ccy.toString() +
+            ':' +
+            maturityList[0].toString();
 
         handleOrderMade(
             createOrderMadeEvent(
@@ -307,7 +312,12 @@ describe('With lending markets already existing', () => {
         );
 
         const orderId2 = BigInt.fromI32(2);
-        const id2 = orderId2.toHexString();
+        const id2 =
+            orderId2.toHexString() +
+            ':' +
+            ccy.toString() +
+            ':' +
+            maturityList[2].toString();
 
         handleOrderMade(
             createOrderMadeEvent(
@@ -322,7 +332,12 @@ describe('With lending markets already existing', () => {
         );
 
         const orderId3 = BigInt.fromI32(3);
-        const id3 = orderId3.toHexString();
+        const id3 =
+            orderId3.toHexString() +
+            ':' +
+            ccy.toString() +
+            ':' +
+            maturityList[0].toString();
 
         handleOrderMade(
             createOrderMadeEvent(
@@ -350,7 +365,12 @@ describe('With lending markets already existing', () => {
 
     test('Rolling out a market should not change the status of cancelled orders to expired', () => {
         const orderId = BigInt.fromI32(1);
-        const id = orderId.toHexString();
+        const id =
+            orderId.toHexString() +
+            ':' +
+            ccy.toString() +
+            ':' +
+            maturityList[0].toString();
 
         handleOrderMade(
             createOrderMadeEvent(
@@ -370,7 +390,7 @@ describe('With lending markets already existing', () => {
                 maker,
                 side,
                 ccy,
-                maturity,
+                maturityList[0],
                 amount,
                 unitPrice
             )

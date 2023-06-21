@@ -20,24 +20,26 @@ import {
 } from './helper/initializer';
 
 export function handleOrderMade(event: OrderMade): void {
-    const orderId = event.params.orderId.toHexString();
-    let order = Order.load(orderId);
-    if (!order) {
-        order = new Order(orderId);
-        order.status = 'Open';
-        order.orderId = event.params.orderId;
-        order.filledAmount = BigInt.fromI32(0);
-        order.amount = event.params.amount;
-        order.maker = getOrInitUser(event.params.maker).id;
-        order.currency = event.params.ccy;
-        order.side = event.params.side;
-        order.maturity = event.params.maturity;
-        order.unitPrice = event.params.unitPrice;
-        order.lendingMarket = getOrInitLendingMarket(
-            event.params.ccy,
-            event.params.maturity
-        ).id;
-    }
+    const id =
+        event.params.orderId.toHexString() +
+        ':' +
+        event.params.ccy.toString() +
+        ':' +
+        event.params.maturity.toString();
+    const order = new Order(id);
+    order.status = 'Open';
+    order.orderId = event.params.orderId;
+    order.filledAmount = BigInt.fromI32(0);
+    order.amount = event.params.amount;
+    order.maker = getOrInitUser(event.params.maker).id;
+    order.currency = event.params.ccy;
+    order.side = event.params.side;
+    order.maturity = event.params.maturity;
+    order.unitPrice = event.params.unitPrice;
+    order.lendingMarket = getOrInitLendingMarket(
+        event.params.ccy,
+        event.params.maturity
+    ).id;
 
     order.createdAt = event.block.timestamp;
     order.blockNumber = event.block.number;
@@ -66,36 +68,27 @@ export function handleOrdersTaken(event: OrdersTaken): void {
 }
 
 export function handleOrderCanceled(event: OrderCanceled): void {
-    const orderId = event.params.orderId.toHexString();
-    let order = Order.load(orderId);
-    if (!order) {
-        order = new Order(orderId);
-
-        order.orderId = event.params.orderId;
-        order.filledAmount = BigInt.fromI32(0);
-        order.amount = event.params.amount;
-        order.maker = getOrInitUser(event.params.maker).id;
-        order.currency = event.params.ccy;
-        order.side = event.params.side;
-        order.maturity = event.params.maturity;
-        order.unitPrice = event.params.unitPrice;
-        order.lendingMarket = getOrInitLendingMarket(
-            event.params.ccy,
-            event.params.maturity
-        ).id;
-
-        order.createdAt = event.block.timestamp;
-        order.blockNumber = event.block.number;
-        order.txHash = event.transaction.hash;
+    const id =
+        event.params.orderId.toHexString() +
+        ':' +
+        event.params.ccy.toString() +
+        ':' +
+        event.params.maturity.toString();
+    const order = Order.load(id);
+    if (order) {
+        order.status = 'Cancelled';
+        order.save();
     }
-
-    order.status = 'Cancelled';
-    order.save();
 }
 
 export function handleOrdersCleaned(event: OrdersCleaned): void {
     for (let i = 0; i < event.params.orderIds.length; i++) {
-        const id = event.params.orderIds[i].toHexString();
+        const id =
+            event.params.orderIds[i].toHexString() +
+            ':' +
+            event.params.ccy.toString() +
+            ':' +
+            event.params.maturity.toString();
         const order = Order.load(id);
 
         if (order) {
@@ -126,8 +119,13 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
 }
 
 export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
-    const id = event.params.orderId;
-    let order = Order.load(id.toHexString());
+    const id =
+        event.params.orderId.toHexString() +
+        ':' +
+        event.params.ccy.toString() +
+        ':' +
+        event.params.maturity.toString();
+    let order = Order.load(id);
     if (order) {
         order.filledAmount = order.filledAmount.plus(event.params.filledAmount);
         order.status = 'PartiallyFilled';

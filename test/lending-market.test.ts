@@ -36,7 +36,12 @@ const unitPrice2 = BigInt.fromI32(200);
 
 test('Should create a Order when the OrderMade Event is raised', () => {
     const orderId = BigInt.fromI32(1);
-    const id = orderId.toHexString();
+    const id =
+        orderId.toHexString() +
+        ':' +
+        ccy.toString() +
+        ':' +
+        maturity.toString();
 
     const event = createOrderMadeEvent(
         orderId,
@@ -61,7 +66,12 @@ test('Should create a Order when the OrderMade Event is raised', () => {
 
 test('Should update the Order when the OrderCanceled Event is raised', () => {
     const orderId = BigInt.fromI32(2);
-    const id = orderId.toHexString();
+    const id =
+        orderId.toHexString() +
+        ':' +
+        ccy.toString() +
+        ':' +
+        maturity.toString();
 
     const makeOrderEvent = createOrderMadeEvent(
         orderId,
@@ -94,9 +104,19 @@ test('Should update the Order when the OrderCanceled Event is raised', () => {
 
 test('Should remove the orders and add transactions when the OrdersCleaned Event is raised', () => {
     const orderId1 = BigInt.fromI32(3);
-    const id1 = orderId1.toHexString();
+    const id1 =
+        orderId1.toHexString() +
+        ':' +
+        ccy.toString() +
+        ':' +
+        maturity.toString();
     const orderId2 = BigInt.fromI32(4);
-    const id2 = orderId2.toHexString();
+    const id2 =
+        orderId2.toHexString() +
+        ':' +
+        ccy.toString() +
+        ':' +
+        maturity.toString();
 
     const makeOrderEvent1 = createOrderMadeEvent(
         orderId1,
@@ -321,7 +341,12 @@ test('Should create multiple Transaction when the multiple OrdersTaken Events ar
 
 test('should update the order amount and create a transaction, when order is partially field', () => {
     const orderId = BigInt.fromI32(21);
-    const id = orderId.toHexString();
+    const id =
+        orderId.toHexString() +
+        ':' +
+        ccy.toString() +
+        ':' +
+        maturity.toString();
 
     const makeOrderEvent = createOrderMadeEvent(
         orderId,
