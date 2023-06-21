@@ -23,6 +23,7 @@ import {
     toArrayString,
 } from './mocks';
 import { ALICE, BOB, createTransaction } from './utils/createEntities';
+import { getOrderEntityId } from '../src/utils/id-generation';
 
 const lendingMarketAddress = Address.zero();
 const futureValueVault = Address.zero();
@@ -292,7 +293,7 @@ describe('With lending markets already existing', () => {
 
     test('Rolling out a market should change the status of open orders with oldMaturity to expired', () => {
         const orderId = BigInt.fromI32(1);
-        const id = orderId.toHexString();
+        const id = getOrderEntityId(orderId, ccy, maturityList[0]);
 
         handleOrderMade(
             createOrderMadeEvent(
@@ -307,7 +308,7 @@ describe('With lending markets already existing', () => {
         );
 
         const orderId2 = BigInt.fromI32(2);
-        const id2 = orderId2.toHexString();
+        const id2 = getOrderEntityId(orderId2, ccy, maturityList[2]);
 
         handleOrderMade(
             createOrderMadeEvent(
@@ -322,7 +323,7 @@ describe('With lending markets already existing', () => {
         );
 
         const orderId3 = BigInt.fromI32(3);
-        const id3 = orderId3.toHexString();
+        const id3 = getOrderEntityId(orderId3, ccy, maturityList[0]);
 
         handleOrderMade(
             createOrderMadeEvent(
@@ -350,7 +351,7 @@ describe('With lending markets already existing', () => {
 
     test('Rolling out a market should not change the status of cancelled orders to expired', () => {
         const orderId = BigInt.fromI32(1);
-        const id = orderId.toHexString();
+        const id = getOrderEntityId(orderId, ccy, maturityList[0]);
 
         handleOrderMade(
             createOrderMadeEvent(
@@ -370,7 +371,7 @@ describe('With lending markets already existing', () => {
                 maker,
                 side,
                 ccy,
-                maturity,
+                maturityList[0],
                 amount,
                 unitPrice
             )

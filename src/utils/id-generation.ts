@@ -7,3 +7,13 @@ export function getDailyVolumeEntityId(
 ): string {
     return `${ccy}-${maturity.toString()}-${date}`;
 }
+
+export function getOrderEntityId(
+    orderId: BigInt,
+    ccy: Bytes,
+    maturity: BigInt
+): string {
+    return (
+        orderId.toHexString() + ':' + ccy.toString() + ':' + maturity.toString()
+    );
+}
