@@ -25,19 +25,19 @@ export function handleOrderMade(event: OrderMade): void {
     if (!order) {
         order = new Order(orderId);
         order.status = 'Open';
+        order.orderId = event.params.orderId;
+        order.filledAmount = BigInt.fromI32(0);
+        order.amount = event.params.amount;
+        order.maker = getOrInitUser(event.params.maker).id;
+        order.currency = event.params.ccy;
+        order.side = event.params.side;
+        order.maturity = event.params.maturity;
+        order.unitPrice = event.params.unitPrice;
+        order.lendingMarket = getOrInitLendingMarket(
+            event.params.ccy,
+            event.params.maturity
+        ).id;
     }
-    order.orderId = event.params.orderId;
-    order.filledAmount = BigInt.fromI32(0);
-    order.amount = event.params.amount;
-    order.maker = getOrInitUser(event.params.maker).id;
-    order.currency = event.params.ccy;
-    order.side = event.params.side;
-    order.maturity = event.params.maturity;
-    order.unitPrice = event.params.unitPrice;
-    order.lendingMarket = getOrInitLendingMarket(
-        event.params.ccy,
-        event.params.maturity
-    ).id;
 
     order.createdAt = event.block.timestamp;
     order.blockNumber = event.block.number;
