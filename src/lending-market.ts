@@ -165,7 +165,7 @@ function createTransaction(
     blockNumber: BigInt,
     txHash: Bytes
 ): void {
-    if(filledAmount.isZero()) return;
+    if (filledAmount.isZero()) return;
     const transaction = new Transaction(txId);
 
     transaction.orderPrice = unitPrice;
