@@ -282,12 +282,7 @@ test('Should remove the orders and add transactions when the OrdersCleaned Event
         'taker',
         maker.toHexString()
     );
-    assert.fieldEquals(
-        'Transaction',
-        txId + '-0:1',
-        'forwardValue',
-        '100'
-    );
+    assert.fieldEquals('Transaction', txId + '-0:1', 'forwardValue', '100');
 
     assert.fieldEquals(
         'Transaction',
@@ -320,12 +315,7 @@ test('Should remove the orders and add transactions when the OrdersCleaned Event
         'taker',
         maker.toHexString()
     );
-    assert.fieldEquals(
-        'Transaction',
-        txId + '-1:1',
-        'forwardValue',
-        '250'
-    );
+    assert.fieldEquals('Transaction', txId + '-1:1', 'forwardValue', '250');
 });
 
 test('Should create a Transaction when the OrdersTaken Event is raised', () => {
