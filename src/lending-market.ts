@@ -105,7 +105,10 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
                 order.maturity,
                 order.side,
                 order.amount.minus(order.filledAmount),
-                calculateForwardValue(order.amount.minus(order.filledAmount), order.unitPrice),
+                calculateForwardValue(
+                    order.amount.minus(order.filledAmount),
+                    order.unitPrice
+                ),
                 event.block.timestamp,
                 event.block.number,
                 event.transaction.hash
