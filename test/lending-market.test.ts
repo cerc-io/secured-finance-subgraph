@@ -33,9 +33,9 @@ const side = BigInt.fromI32(0).toI32();
 const ccy = toBytes32('ETH');
 const maturity = BigInt.fromI32(1677628800); // 1st Mar 23
 const amount = BigInt.fromI32(100);
-const unitPrice = BigInt.fromI32(100);
+const unitPrice = BigInt.fromI32(9000);
 const amount2 = BigInt.fromI32(200);
-const unitPrice2 = BigInt.fromI32(200);
+const unitPrice2 = BigInt.fromI32(8000);
 
 test('Should create a Order when the OrderMade Event is raised', () => {
     const orderId = BigInt.fromI32(1);
@@ -282,6 +282,12 @@ test('Should remove the orders and add transactions when the OrdersCleaned Event
         'taker',
         maker.toHexString()
     );
+    assert.fieldEquals(
+        'Transaction',
+        txId + '-0:1',
+        'forwardValue',
+        '100'
+    );
 
     assert.fieldEquals(
         'Transaction',
@@ -313,6 +319,12 @@ test('Should remove the orders and add transactions when the OrdersCleaned Event
         txId + '-1:1',
         'taker',
         maker.toHexString()
+    );
+    assert.fieldEquals(
+        'Transaction',
+        txId + '-1:1',
+        'forwardValue',
+        '250'
     );
 });
 
