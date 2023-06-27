@@ -12,7 +12,7 @@ import {
     handleLendingMarketCreated,
     handleLendingMarketsRotated,
 } from '../src/lending-controller';
-import { handleOrderCanceled, handleOrderMade } from '../src/lending-market';
+import { handleOrderCanceled, handleOrderMade, handleOrderPartiallyTaken } from '../src/lending-market';
 
 import { buildLendingMarketId, toBytes32 } from '../src/utils/string';
 import {
@@ -20,6 +20,7 @@ import {
     createLendingMarketsRotatedEvent,
     createOrderCanceledEvent,
     createOrderMadeEvent,
+    createOrderPartiallyTakenEvent,
     toArrayString,
 } from './mocks';
 import { ALICE, BOB, createTransaction } from './utils/createEntities';
@@ -35,7 +36,7 @@ const maker = Address.zero();
 const side = BigInt.fromI32(0).toI32();
 const ccy = toBytes32('ETH');
 const amount = BigInt.fromI32(100);
-const unitPrice = BigInt.fromI32(100);
+const unitPrice = BigInt.fromI32(9000);
 
 afterEach(() => {
     clearStore();
@@ -386,5 +387,44 @@ describe('With lending markets already existing', () => {
         handleLendingMarketsRotated(event);
 
         assert.fieldEquals('Order', id, 'status', 'Cancelled');
+    });
+
+    test('Rolling out a market should change the status of partially filled orders to expired', () => {
+        const orderId = BigInt.fromI32(1);
+        const id = getOrderEntityId(orderId, ccy, maturityList[0]);
+
+        handleOrderMade(
+            createOrderMadeEvent(
+                orderId,
+                maker,
+                side,
+                ccy,
+                maturityList[0],
+                amount,
+                unitPrice
+            )
+        );
+
+        handleOrderPartiallyTaken(
+            createOrderPartiallyTakenEvent(
+                orderId,
+                maker,
+                side,
+                ccy,
+                maturityList[0],
+                BigInt.fromI32(90),
+                BigInt.fromI32(100)
+            )
+        );
+        assert.fieldEquals('Order', id, 'status', 'PartiallyFilled');
+        const event = createLendingMarketsRotatedEvent(
+            ccy,
+            maturityList[0],
+            newMaturity
+        );
+
+        handleLendingMarketsRotated(event);
+
+        assert.fieldEquals('Order', id, 'status', 'Expired');
     });
 });

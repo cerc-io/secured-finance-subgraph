@@ -120,7 +120,7 @@ const setOrdersAsExpired = (rolledOutMarket: LendingMarket): void => {
     for (let i = 0; i < orders.length; i++) {
         const order = Order.load(orders[i]);
 
-        if (order && order.status == 'Open') {
+        if (order && (order.status == 'Open' || order.status == 'PartiallyFilled')) {
             order.status = 'Expired';
             order.save();
         }
