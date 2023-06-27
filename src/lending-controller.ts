@@ -1,11 +1,11 @@
-import { Bytes, log } from '@graphprotocol/graph-ts';
+import { log } from '@graphprotocol/graph-ts';
 import {
     LendingMarketCreated,
     LendingMarketsRotated,
 } from '../generated/LendingMarketController/LendingMarketController';
-import { LendingMarket, Transaction, Order } from '../generated/schema';
+import { LendingMarket, Order } from '../generated/schema';
 import { LendingMarket as LendingMarketTemplate } from '../generated/templates';
-import { getOrInitLendingMarket, getProtocol } from './helper/initializer';
+import { getOrInitLendingMarket } from './helper/initializer';
 
 export function handleLendingMarketCreated(event: LendingMarketCreated): void {
     LendingMarketTemplate.create(event.params.marketAddr);
@@ -25,81 +25,12 @@ export function handleLendingMarketsRotated(
     );
 
     rollOutMarket(rollingOutMarket);
-    updateTransactions(rollingOutMarket);
-
     setOrdersAsExpired(rollingOutMarket);
 }
-
-const getMarketList = (ccy: Bytes): LendingMarket[] => {
-    const markets = getProtocol().lendingMarkets;
-    if (markets.length > 0) {
-        const marketList: LendingMarket[] = [];
-        for (let i = 0; i < markets.length; i++) {
-            const market = LendingMarket.load(markets[i]);
-            if (market && market.currency == ccy && market.isActive) {
-                marketList.push(market);
-            }
-        }
-        return marketList;
-    }
-    return [];
-};
-
-const getShortestMaturityActiveMarket = (ccy: Bytes): LendingMarket | null => {
-    const marketList = getMarketList(ccy);
-    let market: LendingMarket | null = null;
-    if (marketList && marketList.length > 0) {
-        for (let i = 0; i < marketList.length; i++) {
-            if (!market) {
-                market = marketList[i];
-            }
-
-            if (marketList[i].maturity.lt(market.maturity)) {
-                market = marketList[i];
-            }
-        }
-    }
-    return market;
-};
 
 const rollOutMarket = (market: LendingMarket): void => {
     market.isActive = false;
     market.save();
-};
-
-const updateTransactions = (rolledOutMarket: LendingMarket): void => {
-    if (!rolledOutMarket.isSet('transactions')) {
-        log.debug('No transactions found for market {}', [
-            rolledOutMarket.prettyName,
-        ]);
-        return;
-    }
-    const transactions = rolledOutMarket.transactions;
-
-    if (!transactions) {
-        return;
-    }
-
-    log.debug('Rolling {} Transactions', [transactions.length.toString()]);
-
-    const closestMarket = getShortestMaturityActiveMarket(
-        rolledOutMarket.currency
-    );
-
-    if (!closestMarket) {
-        throw new Error('No closest market found');
-    }
-
-    for (let i = 0; i < transactions.length; i++) {
-        const transaction = Transaction.load(transactions[i]);
-        if (!transaction) {
-            continue;
-        }
-
-        transaction.maturity = closestMarket.maturity;
-        transaction.lendingMarket = closestMarket.id;
-        transaction.save();
-    }
 };
 
 const setOrdersAsExpired = (rolledOutMarket: LendingMarket): void => {
@@ -120,7 +51,10 @@ const setOrdersAsExpired = (rolledOutMarket: LendingMarket): void => {
     for (let i = 0; i < orders.length; i++) {
         const order = Order.load(orders[i]);
 
-        if (order && order.status == 'Open') {
+        if (
+            order &&
+            (order.status == 'Open' || order.status == 'PartiallyFilled')
+        ) {
             order.status = 'Expired';
             order.save();
         }

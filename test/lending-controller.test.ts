@@ -12,7 +12,11 @@ import {
     handleLendingMarketCreated,
     handleLendingMarketsRotated,
 } from '../src/lending-controller';
-import { handleOrderCanceled, handleOrderMade } from '../src/lending-market';
+import {
+    handleOrderCanceled,
+    handleOrderMade,
+    handleOrderPartiallyTaken,
+} from '../src/lending-market';
 
 import { buildLendingMarketId, toBytes32 } from '../src/utils/string';
 import {
@@ -20,6 +24,7 @@ import {
     createLendingMarketsRotatedEvent,
     createOrderCanceledEvent,
     createOrderMadeEvent,
+    createOrderPartiallyTakenEvent,
     toArrayString,
 } from './mocks';
 import { ALICE, BOB, createTransaction } from './utils/createEntities';
@@ -35,7 +40,7 @@ const maker = Address.zero();
 const side = BigInt.fromI32(0).toI32();
 const ccy = toBytes32('ETH');
 const amount = BigInt.fromI32(100);
-const unitPrice = BigInt.fromI32(100);
+const unitPrice = BigInt.fromI32(9000);
 
 afterEach(() => {
     clearStore();
@@ -199,98 +204,6 @@ describe('With lending markets already existing', () => {
         assert.i32Equals(lendingMarkets.length, 9);
     });
 
-    test('Rolling out a lending market with existing transactions should update those transactions', () => {
-        const event = createLendingMarketsRotatedEvent(
-            filBytes,
-            maturityList[0],
-            newMaturity
-        );
-
-        const hashList = [
-            Address.fromString('0x0000000000000000000000000000000000000000'),
-            Address.fromString('0x0000000000000000000000000000000000000001'),
-            Address.fromString('0x0000000000000000000000000000000000000002'),
-            Address.fromString('0x0000000000000000000000000000000000000003'),
-        ];
-
-        createTransaction(
-            ALICE,
-            0,
-            filBytes,
-            maturityList[0],
-            BigInt.fromI32(100000),
-            BigInt.fromI32(9000),
-            BigInt.fromI32(100002),
-            hashList[0]
-        );
-        createTransaction(
-            BOB,
-            0,
-            filBytes,
-            maturityList[0],
-            BigInt.fromI32(100000),
-            BigInt.fromI32(9000),
-            BigInt.fromI32(100002),
-            hashList[1]
-        );
-        createTransaction(
-            ALICE,
-            0,
-            toBytes32('ETH'),
-            maturityList[0],
-            BigInt.fromI32(100000),
-            BigInt.fromI32(9000),
-            BigInt.fromI32(100002),
-            hashList[2]
-        );
-        createTransaction(
-            BOB,
-            0,
-            filBytes,
-            maturityList[1],
-            BigInt.fromI32(100000),
-            BigInt.fromI32(9000),
-            BigInt.fromI32(100002),
-            hashList[3]
-        );
-        assert.entityCount('Transaction', 4);
-
-        handleLendingMarketsRotated(event);
-
-        // Maturity of only the FIL transactions with maturity Dec 22 should be updated
-        // Transaction 0 is updated (FIL, Dec 22)
-        assert.fieldEquals(
-            'Transaction',
-            hashList[0].toHexString() + ':1',
-            'maturity',
-            maturityList[1].toString()
-        );
-
-        // Transaction 1 is updated (FIL, Dec 22)
-        assert.fieldEquals(
-            'Transaction',
-            hashList[1].toHexString() + ':1',
-            'maturity',
-            maturityList[1].toString()
-        );
-
-        // Transaction 2 is not updated (ETH, Dec 22)
-        assert.fieldEquals(
-            'Transaction',
-            hashList[2].toHexString() + ':1',
-            'maturity',
-            maturityList[0].toString()
-        );
-
-        // Transaction 3 is not updated (FIL, Mar 23)
-        assert.fieldEquals(
-            'Transaction',
-            hashList[3].toHexString() + ':1',
-            'maturity',
-            maturityList[1].toString()
-        );
-    });
-
     test('Rolling out a market should change the status of open orders with oldMaturity to expired', () => {
         const orderId = BigInt.fromI32(1);
         const id = getOrderEntityId(orderId, ccy, maturityList[0]);
@@ -386,5 +299,44 @@ describe('With lending markets already existing', () => {
         handleLendingMarketsRotated(event);
 
         assert.fieldEquals('Order', id, 'status', 'Cancelled');
+    });
+
+    test('Rolling out a market should change the status of partially filled orders to expired', () => {
+        const orderId = BigInt.fromI32(1);
+        const id = getOrderEntityId(orderId, ccy, maturityList[0]);
+
+        handleOrderMade(
+            createOrderMadeEvent(
+                orderId,
+                maker,
+                side,
+                ccy,
+                maturityList[0],
+                amount,
+                unitPrice
+            )
+        );
+
+        handleOrderPartiallyTaken(
+            createOrderPartiallyTakenEvent(
+                orderId,
+                maker,
+                side,
+                ccy,
+                maturityList[0],
+                BigInt.fromI32(90),
+                BigInt.fromI32(100)
+            )
+        );
+        assert.fieldEquals('Order', id, 'status', 'PartiallyFilled');
+        const event = createLendingMarketsRotatedEvent(
+            ccy,
+            maturityList[0],
+            newMaturity
+        );
+
+        handleLendingMarketsRotated(event);
+
+        assert.fieldEquals('Order', id, 'status', 'Expired');
     });
 });
