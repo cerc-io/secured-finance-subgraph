@@ -12,7 +12,11 @@ import {
     handleLendingMarketCreated,
     handleLendingMarketsRotated,
 } from '../src/lending-controller';
-import { handleOrderCanceled, handleOrderMade, handleOrderPartiallyTaken } from '../src/lending-market';
+import {
+    handleOrderCanceled,
+    handleOrderMade,
+    handleOrderPartiallyTaken,
+} from '../src/lending-market';
 
 import { buildLendingMarketId, toBytes32 } from '../src/utils/string';
 import {
