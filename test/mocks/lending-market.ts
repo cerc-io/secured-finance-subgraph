@@ -16,7 +16,8 @@ export function createOrderMadeEvent(
     ccy: Bytes,
     maturity: BigInt,
     amount: BigInt,
-    unitPrice: BigInt
+    unitPrice: BigInt,
+    isPreOrder: boolean
 ): OrderMade {
     const mockEvent = changetype<OrderMade>(newMockEvent());
     const event = new OrderMade(
@@ -62,6 +63,12 @@ export function createOrderMadeEvent(
         new ethereum.EventParam(
             'unitPrice',
             ethereum.Value.fromUnsignedBigInt(unitPrice)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'isPreOrder',
+            ethereum.Value.fromBoolean(isPreOrder)
         )
     );
 

@@ -29,6 +29,7 @@ type Order @entity {
   amount: BigInt!
   status: OrderStatus!
   lendingMarket: LendingMarket!
+  isPreOrder: Boolean!
 
   createdAt: BigInt!
   blockNumber: BigInt!
@@ -46,6 +47,7 @@ type LendingMarket @entity {
   protocol: Protocol!
   volume: BigInt!
   dailyVolume: [DailyVolume!]! @derivedFrom(field: "lendingMarket")
+  openingPrice: BigInt!
 }
 
 enum OrderStatus {

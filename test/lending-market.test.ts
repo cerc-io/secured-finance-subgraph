@@ -48,7 +48,8 @@ test('Should create a Order when the OrderMade Event is raised', () => {
         ccy,
         maturity,
         amount,
-        unitPrice
+        unitPrice,
+        false
     );
     handleOrderMade(event);
 
@@ -73,7 +74,8 @@ test('Should create different orders when orderId is same and currency is differ
         ccy,
         maturity,
         amount,
-        unitPrice
+        unitPrice,
+        false
     );
     handleOrderMade(event1);
 
@@ -87,7 +89,8 @@ test('Should create different orders when orderId is same and currency is differ
         ccy,
         maturity2,
         amount2,
-        unitPrice2
+        unitPrice2,
+        false
     );
     handleOrderMade(event2);
 
@@ -121,7 +124,8 @@ test('Should create different orders when orderId is same and maturity is differ
         ccy,
         maturity,
         amount,
-        unitPrice
+        unitPrice,
+        false
     );
     handleOrderMade(event1);
 
@@ -135,7 +139,8 @@ test('Should create different orders when orderId is same and maturity is differ
         ccy2,
         maturity,
         amount2,
-        unitPrice2
+        unitPrice2,
+        false
     );
     handleOrderMade(event2);
 
@@ -169,7 +174,8 @@ test('Should update the Order when the OrderCanceled Event is raised', () => {
         ccy,
         maturity,
         amount,
-        unitPrice
+        unitPrice,
+        false
     );
     handleOrderMade(makeOrderEvent);
 
@@ -204,7 +210,8 @@ test('Should remove the orders and add transactions when the OrdersCleaned Event
         ccy,
         maturity,
         amount,
-        unitPrice
+        unitPrice,
+        false
     );
     handleOrderMade(makeOrderEvent1);
     const makeOrderEvent2 = createOrderMadeEvent(
@@ -214,7 +221,8 @@ test('Should remove the orders and add transactions when the OrdersCleaned Event
         ccy,
         maturity,
         amount2,
-        unitPrice2
+        unitPrice2,
+        false
     );
     handleOrderMade(makeOrderEvent2);
 
@@ -431,7 +439,8 @@ test('should update the order amount and create a transaction, when order is par
         ccy,
         maturity,
         amount,
-        unitPrice
+        unitPrice,
+        false
     );
     handleOrderMade(makeOrderEvent);
 

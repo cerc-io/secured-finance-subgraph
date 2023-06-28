@@ -216,7 +216,8 @@ describe('With lending markets already existing', () => {
                 ccy,
                 maturityList[0],
                 amount,
-                unitPrice
+                unitPrice,
+                false
             )
         );
 
@@ -231,7 +232,8 @@ describe('With lending markets already existing', () => {
                 ccy,
                 maturityList[2],
                 amount,
-                unitPrice
+                unitPrice,
+                false
             )
         );
 
@@ -246,7 +248,8 @@ describe('With lending markets already existing', () => {
                 ccy,
                 maturityList[0],
                 amount,
-                unitPrice
+                unitPrice,
+                false
             )
         );
         const event = createLendingMarketsRotatedEvent(
@@ -274,7 +277,8 @@ describe('With lending markets already existing', () => {
                 ccy,
                 maturityList[0],
                 amount,
-                unitPrice
+                unitPrice,
+                false
             )
         );
 
@@ -313,7 +317,8 @@ describe('With lending markets already existing', () => {
                 ccy,
                 maturityList[0],
                 amount,
-                unitPrice
+                unitPrice,
+                false
             )
         );
 

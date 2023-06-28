@@ -12,6 +12,7 @@ import {
     OrderPartiallyTaken,
     OrdersCleaned,
     OrdersTaken,
+    ItayoseExecuted,
 } from '../generated/templates/LendingMarket/LendingMarket';
 import {
     getOrInitDailyVolume,
@@ -41,6 +42,7 @@ export function handleOrderMade(event: OrderMade): void {
         event.params.ccy,
         event.params.maturity
     ).id;
+    order.isPreOrder = event.params.isPreOrder;
 
     order.createdAt = event.block.timestamp;
     order.blockNumber = event.block.number;
@@ -150,6 +152,15 @@ export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
 
         order.save();
     }
+}
+
+export function handleItayoseExecuted(event: ItayoseExecuted): void {
+    const lendingMarket = getOrInitLendingMarket(
+        event.params.ccy,
+        event.params.maturity
+    );
+    lendingMarket.openingPrice = event.params.openingPrice;
+    lendingMarket.save();
 }
 
 function createTransaction(
