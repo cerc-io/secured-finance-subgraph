@@ -2,7 +2,7 @@
   "development": {
     "isMajorUpdate": false,
     "isMinorUpdate": false,
-    "version": "0.0.15"
+    "version": "0.0.16"
   },
   "staging": {
     "isMajorUpdate": false,
