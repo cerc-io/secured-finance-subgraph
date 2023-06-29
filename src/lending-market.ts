@@ -63,7 +63,8 @@ export function handleOrdersTaken(event: OrdersTaken): void {
         event.params.filledFutureValue,
         event.block.timestamp,
         event.block.number,
-        event.transaction.hash
+        event.transaction.hash,
+        'Sync'
     );
     addToTransactionVolume(event);
 }
@@ -111,7 +112,8 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
                 ),
                 event.block.timestamp,
                 event.block.number,
-                event.transaction.hash
+                event.transaction.hash,
+                'Lazy'
             );
             order.filledAmount = order.amount;
             order.status = 'Filled';
@@ -145,7 +147,8 @@ export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
             event.params.filledFutureValue,
             event.block.timestamp,
             event.block.number,
-            event.transaction.hash
+            event.transaction.hash,
+            'Sync'
         );
 
         order.save();
@@ -163,7 +166,8 @@ function createTransaction(
     filledFutureValue: BigInt,
     timestamp: BigInt,
     blockNumber: BigInt,
-    txHash: Bytes
+    txHash: Bytes,
+    executionType: string
 ): void {
     if (filledAmount.isZero()) return;
     const transaction = new Transaction(txId);
@@ -173,6 +177,7 @@ function createTransaction(
     transaction.currency = ccy;
     transaction.maturity = maturity;
     transaction.side = side;
+    transaction.executionType = executionType;
 
     transaction.forwardValue = filledFutureValue;
     transaction.amount = filledAmount;
