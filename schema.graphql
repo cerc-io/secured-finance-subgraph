@@ -5,6 +5,7 @@ type Transaction @entity {
   side: Int!
   orderPrice: BigInt!
   taker: User!
+  executionType: TransactionExecutionType!
 
   forwardValue: BigInt!
   amount: BigInt!
@@ -46,6 +47,11 @@ type LendingMarket @entity {
   protocol: Protocol!
   volume: BigInt!
   dailyVolume: [DailyVolume!]! @derivedFrom(field: "lendingMarket")
+}
+
+enum TransactionExecutionType {
+  Sync
+  Lazy
 }
 
 enum OrderStatus {
