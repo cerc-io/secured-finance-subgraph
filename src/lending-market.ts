@@ -49,7 +49,7 @@ export function handleOrderMade(event: OrderMade): void {
 
     order.save();
 
-    user.noOfOrders = user.noOfOrders.plus(BigInt.fromI32(1));
+    user.orderCount = user.orderCount.plus(BigInt.fromI32(1));
     user.save();
 }
 
@@ -199,7 +199,7 @@ function createTransaction(
 
     transaction.save();
 
-    user.noOfTransactions = user.noOfTransactions.plus(BigInt.fromI32(1));
+    user.transactionCount = user.transactionCount.plus(BigInt.fromI32(1));
     user.save();
 }
 
