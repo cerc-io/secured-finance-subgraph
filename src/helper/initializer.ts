@@ -45,6 +45,8 @@ export const getOrInitUser = (address: Bytes): User => {
     let user = User.load(address.toHexString());
     if (!user) {
         user = new User(address.toHexString());
+        user.noOfTransactions = BigInt.fromI32(0);
+        user.noOfOrders = BigInt.fromI32(0);
         user.save();
 
         log.debug('New user: {}', [user.id]);

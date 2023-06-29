@@ -466,6 +466,19 @@ describe('User entity', () => {
             Address.fromString('0x0000000000000000000000000000000000000001'),
             1675845895 // Wednesday, February 8, 2023 8:44:55 AM GMT
         );
+
+        const orderId = BigInt.fromI32(1);
+
+        const event = createOrderMadeEvent(
+            orderId,
+            maker,
+            side,
+            ccy,
+            maturity,
+            amount,
+            unitPrice
+        );
+        handleOrderMade(event);
     });
     test('Should create an user entity and attach the transaction to it', () => {
         assert.fieldEquals(
@@ -474,6 +487,17 @@ describe('User entity', () => {
             'transactions',
             toArrayString(['0x0000000000000000000000000000000000000001:1'])
         );
+        assert.fieldEquals('User', maker.toHexString(), 'noOfTransactions', '1');
+    });
+
+    test('Should create an order entity and attach the order to it', () => {
+        assert.fieldEquals(
+            'User',
+            maker.toHexString(),
+            'orders',
+            toArrayString(['0x1:ETH:1677628800'])
+        );
+        assert.fieldEquals('User', maker.toHexString(), 'noOfOrders', '1');
     });
 
     test('Should attach the transactions to the existing user entity', () => {
@@ -500,6 +524,34 @@ describe('User entity', () => {
                 '0x0000000000000000000000000000000000000002:1',
             ])
         );
+        assert.fieldEquals('User', maker.toHexString(), 'noOfTransactions', '2');
+    });
+
+    test('Should attach the orders to the existing user entity', () => {
+        const maturity = BigInt.fromI32(1667628800);
+        const orderId = BigInt.fromI32(2);
+
+        const event = createOrderMadeEvent(
+            orderId,
+            maker,
+            side,
+            ccy,
+            maturity,
+            amount,
+            unitPrice
+        );
+        handleOrderMade(event);
+
+        assert.fieldEquals(
+            'User',
+            maker.toHexString(),
+            'orders',
+            toArrayString([
+                '0x1:ETH:1677628800',
+                '0x2:ETH:1667628800',
+            ])
+        );
+        assert.fieldEquals('User', maker.toHexString(), 'noOfOrders', '2');
     });
 });
 

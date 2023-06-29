@@ -64,7 +64,9 @@ enum OrderStatus {
 
 type User @entity {
   id: ID! # wallet address
+  noOfTransactions: BigInt!
   transactions: [Transaction!]! @derivedFrom(field: "taker")
+  noOfOrders: BigInt!
   orders: [Order!]! @derivedFrom(field: "maker")
 }
 
