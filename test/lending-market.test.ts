@@ -487,7 +487,12 @@ describe('User entity', () => {
             'transactions',
             toArrayString(['0x0000000000000000000000000000000000000001:1'])
         );
-        assert.fieldEquals('User', maker.toHexString(), 'noOfTransactions', '1');
+        assert.fieldEquals(
+            'User',
+            maker.toHexString(),
+            'noOfTransactions',
+            '1'
+        );
     });
 
     test('Should create an order entity and attach the order to it', () => {
@@ -524,7 +529,12 @@ describe('User entity', () => {
                 '0x0000000000000000000000000000000000000002:1',
             ])
         );
-        assert.fieldEquals('User', maker.toHexString(), 'noOfTransactions', '2');
+        assert.fieldEquals(
+            'User',
+            maker.toHexString(),
+            'noOfTransactions',
+            '2'
+        );
     });
 
     test('Should attach the orders to the existing user entity', () => {
@@ -546,10 +556,7 @@ describe('User entity', () => {
             'User',
             maker.toHexString(),
             'orders',
-            toArrayString([
-                '0x1:ETH:1677628800',
-                '0x2:ETH:1667628800',
-            ])
+            toArrayString(['0x1:ETH:1677628800', '0x2:ETH:1667628800'])
         );
         assert.fieldEquals('User', maker.toHexString(), 'noOfOrders', '2');
     });
