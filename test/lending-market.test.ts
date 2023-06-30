@@ -12,6 +12,7 @@ import {
     handleOrderPartiallyTaken,
     handleOrdersCleaned,
     handleOrdersTaken,
+    handleItayoseExecuted,
 } from '../src/lending-market';
 import {
     getDailyVolumeEntityId,
@@ -24,6 +25,7 @@ import {
     createOrderPartiallyTakenEvent,
     createOrdersCleaned,
     createOrdersTakenEvent,
+    createItayoseExecutedEvent,
     toArrayString,
 } from './mocks';
 import { createLendingMarket, createTransaction } from './utils/createEntities';
@@ -48,7 +50,8 @@ test('Should create a Order when the OrderMade Event is raised', () => {
         ccy,
         maturity,
         amount,
-        unitPrice
+        unitPrice,
+        false
     );
     handleOrderMade(event);
 
@@ -73,7 +76,8 @@ test('Should create different orders when orderId is same and currency is differ
         ccy,
         maturity,
         amount,
-        unitPrice
+        unitPrice,
+        false
     );
     handleOrderMade(event1);
 
@@ -87,7 +91,8 @@ test('Should create different orders when orderId is same and currency is differ
         ccy,
         maturity2,
         amount2,
-        unitPrice2
+        unitPrice2,
+        false
     );
     handleOrderMade(event2);
 
@@ -121,7 +126,8 @@ test('Should create different orders when orderId is same and maturity is differ
         ccy,
         maturity,
         amount,
-        unitPrice
+        unitPrice,
+        false
     );
     handleOrderMade(event1);
 
@@ -135,7 +141,8 @@ test('Should create different orders when orderId is same and maturity is differ
         ccy2,
         maturity,
         amount2,
-        unitPrice2
+        unitPrice2,
+        false
     );
     handleOrderMade(event2);
 
@@ -169,7 +176,8 @@ test('Should update the Order when the OrderCanceled Event is raised', () => {
         ccy,
         maturity,
         amount,
-        unitPrice
+        unitPrice,
+        false
     );
     handleOrderMade(makeOrderEvent);
 
@@ -204,7 +212,8 @@ test('Should remove the orders and add transactions when the OrdersCleaned Event
         ccy,
         maturity,
         amount,
-        unitPrice
+        unitPrice,
+        false
     );
     handleOrderMade(makeOrderEvent1);
     const makeOrderEvent2 = createOrderMadeEvent(
@@ -214,7 +223,8 @@ test('Should remove the orders and add transactions when the OrdersCleaned Event
         ccy,
         maturity,
         amount2,
-        unitPrice2
+        unitPrice2,
+        false
     );
     handleOrderMade(makeOrderEvent2);
 
@@ -397,7 +407,8 @@ test('should update the order amount and create a transaction, when order is par
         ccy,
         maturity,
         amount,
-        unitPrice
+        unitPrice,
+        false
     );
     handleOrderMade(makeOrderEvent);
 
@@ -476,7 +487,8 @@ describe('User entity', () => {
             ccy,
             maturity,
             amount,
-            unitPrice
+            unitPrice,
+            false
         );
         handleOrderMade(event);
     });
@@ -548,7 +560,8 @@ describe('User entity', () => {
             ccy,
             maturity,
             amount,
-            unitPrice
+            unitPrice,
+            false
         );
         handleOrderMade(event);
 
@@ -656,6 +669,252 @@ describe('Transaction Volume', () => {
             id,
             'volume',
             '1200000000000000000000'
+        );
+    });
+});
+
+describe('Itayose Transactions', () => {
+    beforeEach(() => {
+        clearStore();
+        createLendingMarket(ccy, maturity);
+    });
+
+    test('should update the market details when itayose is executed', () => {
+        const openingUnitPrice = BigInt.fromI32(8050);
+        const lastLendUnitPrice = BigInt.fromI32(8100);
+        const lastBorrowUnitPrice = BigInt.fromI32(8000);
+        const offsetAmount = BigInt.fromI32(80890);
+        const itayoseExecutedEvent = createItayoseExecutedEvent(
+            ccy,
+            maturity,
+            openingUnitPrice,
+            lastLendUnitPrice,
+            lastBorrowUnitPrice,
+            offsetAmount
+        );
+        handleItayoseExecuted(itayoseExecutedEvent);
+        const id = ccy.toHexString() + '-' + maturity.toString();
+
+        assert.fieldEquals('LendingMarket', id, 'currency', ccy.toHexString());
+        assert.fieldEquals(
+            'LendingMarket',
+            id,
+            'maturity',
+            maturity.toString()
+        );
+        assert.fieldEquals(
+            'LendingMarket',
+            id,
+            'openingUnitPrice',
+            openingUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'LendingMarket',
+            id,
+            'lastLendUnitPrice',
+            lastLendUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'LendingMarket',
+            id,
+            'lastBorrowUnitPrice',
+            lastBorrowUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'LendingMarket',
+            id,
+            'offsetAmount',
+            offsetAmount.toString()
+        );
+    });
+
+    test('should create the transactions with opening unit price only which were filled during itayose', () => {
+        const borrow = 1;
+        const lend = 0;
+
+        const orderId1 = BigInt.fromI32(1);
+        const unitPrice1 = BigInt.fromI32(8200);
+        const event1 = createOrderMadeEvent(
+            orderId1,
+            maker,
+            lend,
+            ccy,
+            maturity,
+            amount2,
+            unitPrice1,
+            true
+        );
+        handleOrderMade(event1);
+
+        const orderId2 = BigInt.fromI32(2);
+        const unitPrice2 = BigInt.fromI32(8100);
+        const event2 = createOrderMadeEvent(
+            orderId2,
+            maker,
+            lend,
+            ccy,
+            maturity,
+            amount,
+            unitPrice2,
+            true
+        );
+        handleOrderMade(event2);
+
+        const orderId3 = BigInt.fromI32(3);
+        const unitPrice3 = BigInt.fromI32(8000);
+        const event3 = createOrderMadeEvent(
+            orderId3,
+            maker,
+            lend,
+            ccy,
+            maturity,
+            amount2,
+            unitPrice3,
+            true
+        );
+        handleOrderMade(event3);
+
+        const orderId4 = BigInt.fromI32(4);
+        const unitPrice4 = BigInt.fromI32(7900);
+        const event4 = createOrderMadeEvent(
+            orderId4,
+            maker,
+            borrow,
+            ccy,
+            maturity,
+            amount,
+            unitPrice4,
+            true
+        );
+        handleOrderMade(event4);
+
+        const orderId5 = BigInt.fromI32(5);
+        const unitPrice5 = BigInt.fromI32(8000);
+        const event5 = createOrderMadeEvent(
+            orderId5,
+            maker,
+            borrow,
+            ccy,
+            maturity,
+            amount2,
+            unitPrice5,
+            true
+        );
+        handleOrderMade(event5);
+
+        const orderId6 = BigInt.fromI32(6);
+        const unitPrice6 = BigInt.fromI32(8020);
+        const event6 = createOrderMadeEvent(
+            orderId6,
+            maker,
+            borrow,
+            ccy,
+            maturity,
+            amount,
+            unitPrice6,
+            true
+        );
+        handleOrderMade(event6);
+
+        const orderId7 = BigInt.fromI32(7);
+        const unitPrice7 = BigInt.fromI32(7800);
+        const event7 = createOrderMadeEvent(
+            orderId7,
+            maker,
+            borrow,
+            ccy,
+            maturity,
+            amount,
+            unitPrice7,
+            false
+        );
+        handleOrderMade(event7);
+
+        const openingUnitPrice = BigInt.fromI32(8050);
+        const lastLendUnitPrice = BigInt.fromI32(8100);
+        const lastBorrowUnitPrice = BigInt.fromI32(8000);
+        const offsetAmount = BigInt.fromI32(300);
+        const itayoseExecutedEvent = createItayoseExecutedEvent(
+            ccy,
+            maturity,
+            openingUnitPrice,
+            lastLendUnitPrice,
+            lastBorrowUnitPrice,
+            offsetAmount
+        );
+        handleItayoseExecuted(itayoseExecutedEvent);
+
+        const cleanEvent1 = createOrdersCleaned(
+            [orderId1, orderId2, orderId3],
+            maker,
+            lend,
+            ccy,
+            maturity
+        );
+        handleOrdersCleaned(cleanEvent1);
+
+        const txId1 = cleanEvent1.transaction.hash.toHexString();
+        const txId10 = txId1 + '-0:1';
+        const txId11 = txId1 + '-1:1';
+        const txId12 = txId1 + '-2:1';
+
+        assert.fieldEquals(
+            'Transaction',
+            txId10,
+            'orderPrice',
+            openingUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'Transaction',
+            txId11,
+            'orderPrice',
+            openingUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'Transaction',
+            txId12,
+            'orderPrice',
+            unitPrice3.toString()
+        );
+
+        const cleanEvent2 = createOrdersCleaned(
+            [orderId4, orderId5, orderId6, orderId7],
+            maker,
+            borrow,
+            ccy,
+            maturity
+        );
+        handleOrdersCleaned(cleanEvent2);
+
+        const txId2 = cleanEvent2.transaction.hash.toHexString();
+        const txId20 = txId2 + '-0:1';
+        const txId21 = txId2 + '-1:1';
+        const txId22 = txId2 + '-2:1';
+        const txId23 = txId2 + '-3:1';
+
+        assert.fieldEquals(
+            'Transaction',
+            txId20,
+            'orderPrice',
+            openingUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'Transaction',
+            txId21,
+            'orderPrice',
+            openingUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'Transaction',
+            txId22,
+            'orderPrice',
+            unitPrice6.toString()
+        );
+        assert.fieldEquals(
+            'Transaction',
+            txId23,
+            'orderPrice',
+            unitPrice7.toString()
         );
     });
 });

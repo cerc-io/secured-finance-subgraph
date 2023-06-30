@@ -7,6 +7,7 @@ import {
     OrderPartiallyTaken,
     OrdersCleaned,
     OrdersTaken,
+    ItayoseExecuted,
 } from '../../generated/templates/LendingMarket/LendingMarket';
 
 export function createOrderMadeEvent(
@@ -16,7 +17,8 @@ export function createOrderMadeEvent(
     ccy: Bytes,
     maturity: BigInt,
     amount: BigInt,
-    unitPrice: BigInt
+    unitPrice: BigInt,
+    isPreOrder: boolean
 ): OrderMade {
     const mockEvent = changetype<OrderMade>(newMockEvent());
     const event = new OrderMade(
@@ -62,6 +64,12 @@ export function createOrderMadeEvent(
         new ethereum.EventParam(
             'unitPrice',
             ethereum.Value.fromUnsignedBigInt(unitPrice)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'isPreOrder',
+            ethereum.Value.fromBoolean(isPreOrder)
         )
     );
 
@@ -291,6 +299,63 @@ export function createOrderPartiallyTakenEvent(
         new ethereum.EventParam(
             'filledFutureValue',
             ethereum.Value.fromUnsignedBigInt(filledFutureValue)
+        )
+    );
+    return event;
+}
+
+export function createItayoseExecutedEvent(
+    ccy: Bytes,
+    maturity: BigInt,
+    openingUnitPrice: BigInt,
+    lastLendUnitPrice: BigInt,
+    lastBorrowUnitPrice: BigInt,
+    offsetAmount: BigInt
+): ItayoseExecuted {
+    const mockEvent = newMockEvent();
+    const event = new ItayoseExecuted(
+        mockEvent.address,
+        mockEvent.logIndex,
+        mockEvent.transactionLogIndex,
+        mockEvent.logType,
+        mockEvent.block,
+        mockEvent.transaction,
+        mockEvent.parameters,
+        mockEvent.receipt
+    );
+
+    event.parameters = new Array();
+    event.parameters.push(
+        new ethereum.EventParam('ccy', ethereum.Value.fromBytes(ccy))
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'maturity',
+            ethereum.Value.fromUnsignedBigInt(maturity)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'openingUnitPrice',
+            ethereum.Value.fromUnsignedBigInt(openingUnitPrice)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'lastLendUnitPrice',
+            ethereum.Value.fromUnsignedBigInt(lastLendUnitPrice)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'lastBorrowUnitPrice',
+            ethereum.Value.fromUnsignedBigInt(lastBorrowUnitPrice)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'offsetAmount',
+            ethereum.Value.fromUnsignedBigInt(offsetAmount)
         )
     );
     return event;

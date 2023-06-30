@@ -30,6 +30,7 @@ type Order @entity {
   amount: BigInt!
   status: OrderStatus!
   lendingMarket: LendingMarket!
+  isPreOrder: Boolean!
 
   createdAt: BigInt!
   blockNumber: BigInt!
@@ -47,6 +48,10 @@ type LendingMarket @entity {
   protocol: Protocol!
   volume: BigInt!
   dailyVolume: [DailyVolume!]! @derivedFrom(field: "lendingMarket")
+  openingUnitPrice: BigInt!
+  lastLendUnitPrice: BigInt!
+  lastBorrowUnitPrice: BigInt!
+  offsetAmount: BigInt!
 }
 
 enum TransactionExecutionType {

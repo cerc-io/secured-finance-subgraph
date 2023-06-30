@@ -12,6 +12,7 @@ import {
     OrderPartiallyTaken,
     OrdersCleaned,
     OrdersTaken,
+    ItayoseExecuted,
 } from '../generated/templates/LendingMarket/LendingMarket';
 import {
     getOrInitDailyVolume,
@@ -42,6 +43,7 @@ export function handleOrderMade(event: OrderMade): void {
         event.params.ccy,
         event.params.maturity
     ).id;
+    order.isPreOrder = event.params.isPreOrder;
 
     order.createdAt = event.block.timestamp;
     order.blockNumber = event.block.number;
@@ -102,9 +104,24 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
                 i.toString() +
                 ':' +
                 event.logIndex.toString();
+            let unitPrice = order.unitPrice;
+            const lendingMarket = getOrInitLendingMarket(
+                event.params.ccy,
+                event.params.maturity
+            );
+            if (
+                order.isPreOrder &&
+                !lendingMarket.openingUnitPrice.isZero() &&
+                ((order.side == 0 &&
+                    unitPrice >= lendingMarket.lastLendUnitPrice) ||
+                    (order.side == 1 &&
+                        unitPrice <= lendingMarket.lastBorrowUnitPrice))
+            ) {
+                unitPrice = lendingMarket.openingUnitPrice;
+            }
             createTransaction(
                 txId,
-                order.unitPrice,
+                unitPrice,
                 Address.fromString(order.maker),
                 order.currency,
                 order.maturity,
@@ -157,6 +174,18 @@ export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
 
         order.save();
     }
+}
+
+export function handleItayoseExecuted(event: ItayoseExecuted): void {
+    const lendingMarket = getOrInitLendingMarket(
+        event.params.ccy,
+        event.params.maturity
+    );
+    lendingMarket.openingUnitPrice = event.params.openingUnitPrice;
+    lendingMarket.lastLendUnitPrice = event.params.lastLendUnitPrice;
+    lendingMarket.lastBorrowUnitPrice = event.params.lastBorrowUnitPrice;
+    lendingMarket.offsetAmount = event.params.offsetAmount;
+    lendingMarket.save();
 }
 
 function createTransaction(
