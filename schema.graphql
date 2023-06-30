@@ -48,10 +48,10 @@ type LendingMarket @entity {
   protocol: Protocol!
   volume: BigInt!
   dailyVolume: [DailyVolume!]! @derivedFrom(field: "lendingMarket")
-  openingPrice: BigInt!
+  openingUnitPrice: BigInt!
   lastLendUnitPrice: BigInt!
   lastBorrowUnitPrice: BigInt!
-  totalOffsetAmount: BigInt!
+  offsetAmount: BigInt!
 }
 
 enum TransactionExecutionType {

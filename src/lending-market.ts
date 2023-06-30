@@ -104,9 +104,24 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
                 i.toString() +
                 ':' +
                 event.logIndex.toString();
+            let unitPrice = order.unitPrice;
+            const lendingMarket = getOrInitLendingMarket(
+                event.params.ccy,
+                event.params.maturity
+            );
+            if (
+                order.isPreOrder &&
+                !lendingMarket.openingUnitPrice.isZero() &&
+                ((order.side == 0 &&
+                    unitPrice >= lendingMarket.lastLendUnitPrice) ||
+                    (order.side == 1 &&
+                        unitPrice <= lendingMarket.lastBorrowUnitPrice))
+            ) {
+                unitPrice = lendingMarket.openingUnitPrice;
+            }
             createTransaction(
                 txId,
-                order.unitPrice,
+                unitPrice,
                 Address.fromString(order.maker),
                 order.currency,
                 order.maturity,
@@ -166,10 +181,10 @@ export function handleItayoseExecuted(event: ItayoseExecuted): void {
         event.params.ccy,
         event.params.maturity
     );
-    lendingMarket.openingPrice = event.params.openingPrice;
+    lendingMarket.openingUnitPrice = event.params.openingUnitPrice;
     lendingMarket.lastLendUnitPrice = event.params.lastLendUnitPrice;
     lendingMarket.lastBorrowUnitPrice = event.params.lastBorrowUnitPrice;
-    lendingMarket.totalOffsetAmount = event.params.totalOffsetAmount;
+    lendingMarket.offsetAmount = event.params.offsetAmount;
     lendingMarket.save();
 }
 
