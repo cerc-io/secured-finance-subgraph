@@ -263,67 +263,36 @@ test('Should remove the orders and add transactions when the OrdersCleaned Event
     assert.fieldEquals('Order', id2, 'filledAmount', '200');
 
     const txId = event.transaction.hash.toHexString();
+    const txId01 = txId + '-0:1';
 
-    assert.fieldEquals('Transaction', txId + '-0:1', 'amount', '90');
+    assert.fieldEquals('Transaction', txId01, 'amount', '90');
     assert.fieldEquals(
         'Transaction',
-        txId + '-0:1',
+        txId01,
         'orderPrice',
         unitPrice.toString()
     );
-    assert.fieldEquals(
-        'Transaction',
-        txId + '-0:1',
-        'currency',
-        ccy.toHexString()
-    );
-    assert.fieldEquals(
-        'Transaction',
-        txId + '-0:1',
-        'maturity',
-        maturity.toString()
-    );
-    assert.fieldEquals('Transaction', txId + ':1', 'side', side.toString());
-    assert.fieldEquals(
-        'Transaction',
-        txId + '-0:1',
-        'taker',
-        maker.toHexString()
-    );
-    assert.fieldEquals('Transaction', txId + '-0:1', 'forwardValue', '100');
+    assert.fieldEquals('Transaction', txId01, 'currency', ccy.toHexString());
+    assert.fieldEquals('Transaction', txId01, 'maturity', maturity.toString());
+    assert.fieldEquals('Transaction', txId01, 'side', side.toString());
+    assert.fieldEquals('Transaction', txId01, 'taker', maker.toHexString());
+    assert.fieldEquals('Transaction', txId01, 'forwardValue', '100');
+    assert.fieldEquals('Transaction', txId01, 'executionType', 'Lazy');
 
+    const txId11 = txId + '-1:1';
+    assert.fieldEquals('Transaction', txId11, 'amount', amount2.toString());
     assert.fieldEquals(
         'Transaction',
-        txId + '-1:1',
-        'amount',
-        amount2.toString()
-    );
-    assert.fieldEquals(
-        'Transaction',
-        txId + '-1:1',
+        txId11,
         'orderPrice',
         unitPrice2.toString()
     );
-    assert.fieldEquals(
-        'Transaction',
-        txId + '-1:1',
-        'currency',
-        ccy.toHexString()
-    );
-    assert.fieldEquals(
-        'Transaction',
-        txId + '-1:1',
-        'maturity',
-        maturity.toString()
-    );
-    assert.fieldEquals('Transaction', txId + '-1:1', 'side', side.toString());
-    assert.fieldEquals(
-        'Transaction',
-        txId + '-1:1',
-        'taker',
-        maker.toHexString()
-    );
-    assert.fieldEquals('Transaction', txId + '-1:1', 'forwardValue', '250');
+    assert.fieldEquals('Transaction', txId11, 'currency', ccy.toHexString());
+    assert.fieldEquals('Transaction', txId11, 'maturity', maturity.toString());
+    assert.fieldEquals('Transaction', txId11, 'side', side.toString());
+    assert.fieldEquals('Transaction', txId11, 'taker', maker.toHexString());
+    assert.fieldEquals('Transaction', txId11, 'forwardValue', '250');
+    assert.fieldEquals('Transaction', txId11, 'executionType', 'Lazy');
 });
 
 test('Should create a Transaction when the OrdersTaken Event is raised', () => {
@@ -366,6 +335,7 @@ test('Should create a Transaction when the OrdersTaken Event is raised', () => {
         'averagePrice',
         averagePrice.toString()
     );
+    assert.fieldEquals('Transaction', id, 'executionType', 'Sync');
 });
 
 test('Should create multiple Transaction when the multiple OrdersTaken Events are emitted under same transaction', () => {
@@ -374,10 +344,6 @@ test('Should create multiple Transaction when the multiple OrdersTaken Events ar
 
     const filledFutureValue = BigInt.fromString('1230000000000000000000');
     const filledAmount = BigInt.fromString('1200000000000000000000');
-
-    const averagePrice = filledAmount.divDecimal(
-        new BigDecimal(filledFutureValue)
-    );
 
     const takeOrdersEvent1 = createOrdersTakenEvent(
         maker,
@@ -509,6 +475,19 @@ describe('User entity', () => {
             Address.fromString('0x0000000000000000000000000000000000000001'),
             1675845895 // Wednesday, February 8, 2023 8:44:55 AM GMT
         );
+
+        const orderId = BigInt.fromI32(1);
+
+        const event = createOrderMadeEvent(
+            orderId,
+            maker,
+            side,
+            ccy,
+            maturity,
+            amount,
+            unitPrice
+        );
+        handleOrderMade(event);
     });
     test('Should create an user entity and attach the transaction to it', () => {
         assert.fieldEquals(
@@ -517,6 +496,22 @@ describe('User entity', () => {
             'transactions',
             toArrayString(['0x0000000000000000000000000000000000000001:1'])
         );
+        assert.fieldEquals(
+            'User',
+            maker.toHexString(),
+            'transactionCount',
+            '1'
+        );
+    });
+
+    test('Should create an order entity and attach the order to it', () => {
+        assert.fieldEquals(
+            'User',
+            maker.toHexString(),
+            'orders',
+            toArrayString(['0x1:ETH:1677628800'])
+        );
+        assert.fieldEquals('User', maker.toHexString(), 'orderCount', '1');
     });
 
     test('Should attach the transactions to the existing user entity', () => {
@@ -543,6 +538,36 @@ describe('User entity', () => {
                 '0x0000000000000000000000000000000000000002:1',
             ])
         );
+        assert.fieldEquals(
+            'User',
+            maker.toHexString(),
+            'transactionCount',
+            '2'
+        );
+    });
+
+    test('Should attach the orders to the existing user entity', () => {
+        const maturity = BigInt.fromI32(1667628800);
+        const orderId = BigInt.fromI32(2);
+
+        const event = createOrderMadeEvent(
+            orderId,
+            maker,
+            side,
+            ccy,
+            maturity,
+            amount,
+            unitPrice
+        );
+        handleOrderMade(event);
+
+        assert.fieldEquals(
+            'User',
+            maker.toHexString(),
+            'orders',
+            toArrayString(['0x1:ETH:1677628800', '0x2:ETH:1667628800'])
+        );
+        assert.fieldEquals('User', maker.toHexString(), 'orderCount', '2');
     });
 });
 

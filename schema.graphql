@@ -5,6 +5,7 @@ type Transaction @entity {
   side: Int!
   orderPrice: BigInt!
   taker: User!
+  executionType: TransactionExecutionType!
 
   forwardValue: BigInt!
   amount: BigInt!
@@ -53,6 +54,11 @@ type LendingMarket @entity {
   totalOffsetAmount: BigInt!
 }
 
+enum TransactionExecutionType {
+  Sync
+  Lazy
+}
+
 enum OrderStatus {
   Open
   Cancelled
@@ -63,7 +69,9 @@ enum OrderStatus {
 
 type User @entity {
   id: ID! # wallet address
+  transactionCount: BigInt!
   transactions: [Transaction!]! @derivedFrom(field: "taker")
+  orderCount: BigInt!
   orders: [Order!]! @derivedFrom(field: "maker")
 }
 

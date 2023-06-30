@@ -27,13 +27,14 @@ export function handleOrderMade(event: OrderMade): void {
         event.params.ccy,
         event.params.maturity
     );
+    const user = getOrInitUser(event.params.maker);
 
     const order = new Order(id);
     order.status = 'Open';
     order.orderId = event.params.orderId;
     order.filledAmount = BigInt.fromI32(0);
     order.amount = event.params.amount;
-    order.maker = getOrInitUser(event.params.maker).id;
+    order.maker = user.id;
     order.currency = event.params.ccy;
     order.side = event.params.side;
     order.maturity = event.params.maturity;
@@ -49,6 +50,9 @@ export function handleOrderMade(event: OrderMade): void {
     order.txHash = event.transaction.hash;
 
     order.save();
+
+    user.orderCount = user.orderCount.plus(BigInt.fromI32(1));
+    user.save();
 }
 
 export function handleOrdersTaken(event: OrdersTaken): void {
@@ -65,7 +69,8 @@ export function handleOrdersTaken(event: OrdersTaken): void {
         event.params.filledFutureValue,
         event.block.timestamp,
         event.block.number,
-        event.transaction.hash
+        event.transaction.hash,
+        'Sync'
     );
     addToTransactionVolume(event);
 }
@@ -113,7 +118,8 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
                 ),
                 event.block.timestamp,
                 event.block.number,
-                event.transaction.hash
+                event.transaction.hash,
+                'Lazy'
             );
             order.filledAmount = order.amount;
             order.status = 'Filled';
@@ -147,7 +153,8 @@ export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
             event.params.filledFutureValue,
             event.block.timestamp,
             event.block.number,
-            event.transaction.hash
+            event.transaction.hash,
+            'Sync'
         );
 
         order.save();
@@ -177,16 +184,19 @@ function createTransaction(
     filledFutureValue: BigInt,
     timestamp: BigInt,
     blockNumber: BigInt,
-    txHash: Bytes
+    txHash: Bytes,
+    executionType: string
 ): void {
     if (filledAmount.isZero()) return;
     const transaction = new Transaction(txId);
+    const user = getOrInitUser(taker);
 
     transaction.orderPrice = unitPrice;
-    transaction.taker = getOrInitUser(taker).id;
+    transaction.taker = user.id;
     transaction.currency = ccy;
     transaction.maturity = maturity;
     transaction.side = side;
+    transaction.executionType = executionType;
 
     transaction.forwardValue = filledFutureValue;
     transaction.amount = filledAmount;
@@ -202,6 +212,9 @@ function createTransaction(
     transaction.lendingMarket = getOrInitLendingMarket(ccy, maturity).id;
 
     transaction.save();
+
+    user.transactionCount = user.transactionCount.plus(BigInt.fromI32(1));
+    user.save();
 }
 
 function addToTransactionVolume(event: OrdersTaken): void {
