@@ -803,7 +803,7 @@ describe('Itayose Transactions', () => {
         handleOrderMade(event5);
 
         const orderId6 = BigInt.fromI32(6);
-        const unitPrice6 = BigInt.fromI32(8100);
+        const unitPrice6 = BigInt.fromI32(8020);
         const event6 = createOrderMadeEvent(
             orderId6,
             maker,
