@@ -160,6 +160,9 @@ export function handleItayoseExecuted(event: ItayoseExecuted): void {
         event.params.maturity
     );
     lendingMarket.openingPrice = event.params.openingPrice;
+    lendingMarket.lastLendUnitPrice = event.params.lastLendUnitPrice;
+    lendingMarket.lastBorrowUnitPrice = event.params.lastBorrowUnitPrice;
+    lendingMarket.totalOffsetAmount = event.params.totalOffsetAmount;
     lendingMarket.save();
 }
 

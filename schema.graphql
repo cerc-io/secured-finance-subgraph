@@ -48,6 +48,9 @@ type LendingMarket @entity {
   volume: BigInt!
   dailyVolume: [DailyVolume!]! @derivedFrom(field: "lendingMarket")
   openingPrice: BigInt!
+  lastLendUnitPrice: BigInt!
+  lastBorrowUnitPrice: BigInt!
+  totalOffsetAmount: BigInt!
 }
 
 enum OrderStatus {

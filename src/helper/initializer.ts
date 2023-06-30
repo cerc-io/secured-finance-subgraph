@@ -35,6 +35,9 @@ export const getOrInitLendingMarket = (
         lendingMarket.protocol = getProtocol().id;
         lendingMarket.volume = BigInt.fromI32(0);
         lendingMarket.openingPrice = BigInt.fromI32(0);
+        lendingMarket.lastLendUnitPrice = BigInt.fromI32(0);
+        lendingMarket.lastBorrowUnitPrice = BigInt.fromI32(0);
+        lendingMarket.totalOffsetAmount = BigInt.fromI32(0);
 
         lendingMarket.save();
         log.debug('Created lending market: {}', [lendingMarket.prettyName]);
