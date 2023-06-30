@@ -728,7 +728,7 @@ describe('Itayose Transactions', () => {
         );
     });
 
-    test('should create the transactions with opening unit price which were filled during itayose', () => {
+    test('should create the transactions with opening unit price only which were filled during itayose', () => {
         const borrow = 1;
         const lend = 0;
 
@@ -816,6 +816,20 @@ describe('Itayose Transactions', () => {
         );
         handleOrderMade(event6);
 
+        const orderId7 = BigInt.fromI32(7);
+        const unitPrice7 = BigInt.fromI32(7800);
+        const event7 = createOrderMadeEvent(
+            orderId7,
+            maker,
+            borrow,
+            ccy,
+            maturity,
+            amount,
+            unitPrice7,
+            false
+        );
+        handleOrderMade(event7);
+
         const openingUnitPrice = BigInt.fromI32(8050);
         const lastLendUnitPrice = BigInt.fromI32(8100);
         const lastBorrowUnitPrice = BigInt.fromI32(8000);
@@ -864,7 +878,7 @@ describe('Itayose Transactions', () => {
         );
 
         const cleanEvent2 = createOrdersCleaned(
-            [orderId4, orderId5, orderId6],
+            [orderId4, orderId5, orderId6, orderId7],
             maker,
             borrow,
             ccy,
@@ -876,6 +890,7 @@ describe('Itayose Transactions', () => {
         const txId20 = txId2 + '-0:1';
         const txId21 = txId2 + '-1:1';
         const txId22 = txId2 + '-2:1';
+        const txId23 = txId2 + '-3:1';
 
         assert.fieldEquals(
             'Transaction',
@@ -894,6 +909,12 @@ describe('Itayose Transactions', () => {
             txId22,
             'orderPrice',
             unitPrice6.toString()
+        );
+        assert.fieldEquals(
+            'Transaction',
+            txId23,
+            'orderPrice',
+            unitPrice7.toString()
         );
     });
 });
