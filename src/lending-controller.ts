@@ -24,39 +24,6 @@ export function handleLendingMarketsRotated(
         event.params.oldMaturity
     );
 
-    rollOutMarket(rollingOutMarket);
-    setOrdersAsExpired(rollingOutMarket);
+    rollingOutMarket.isActive = false;
+    rollingOutMarket.save();
 }
-
-const rollOutMarket = (market: LendingMarket): void => {
-    market.isActive = false;
-    market.save();
-};
-
-const setOrdersAsExpired = (rolledOutMarket: LendingMarket): void => {
-    if (!rolledOutMarket.isSet('orders')) {
-        log.debug('No orders found for market {}', [
-            rolledOutMarket.prettyName,
-        ]);
-        return;
-    }
-
-    const orders = rolledOutMarket.orders;
-
-    if (!orders) {
-        return;
-    }
-    log.debug('Rolling {} Orders', [orders.length.toString()]);
-
-    for (let i = 0; i < orders.length; i++) {
-        const order = Order.load(orders[i]);
-
-        if (
-            order &&
-            (order.status == 'Open' || order.status == 'PartiallyFilled')
-        ) {
-            order.status = 'Expired';
-            order.save();
-        }
-    }
-};
