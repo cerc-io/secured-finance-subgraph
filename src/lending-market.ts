@@ -5,7 +5,7 @@ import {
     Bytes,
     log,
 } from '@graphprotocol/graph-ts';
-import { Order, Transaction } from '../generated/schema';
+import { Order, Transaction, DailyVolume } from '../generated/schema';
 import {
     OrderExecuted,
     PreOrderExecuted,
@@ -14,6 +14,7 @@ import {
     OrdersCleaned,
     ItayoseExecuted,
 } from '../generated/templates/LendingMarket/LendingMarket';
+import { OrderPartiallyFilled } from '../generated/FundManagementLogic/FundManagementLogic';
 import {
     getOrInitDailyVolume,
     getOrInitLendingMarket,
@@ -82,7 +83,12 @@ export function handleOrderExecuted(event: OrderExecuted): void {
             event.block.number,
             event.transaction.hash
         );
-        addToTransactionVolume(event);
+        const dailyVolume = getOrInitDailyVolume(
+            event.params.ccy,
+            event.params.maturity,
+            event.block.timestamp
+        );
+        addToTransactionVolume(txId, dailyVolume);
     }
 }
 
@@ -148,6 +154,45 @@ export function handlePositionUnwound(event: PositionUnwound): void {
         event.block.number,
         event.transaction.hash
     );
+    const dailyVolume = getOrInitDailyVolume(
+        event.params.ccy,
+        event.params.maturity,
+        event.block.timestamp
+    );
+    addToTransactionVolume(txId, dailyVolume);
+}
+
+export function handleOrderPartiallyFilled(event: OrderPartiallyFilled): void {
+    const id = getOrderEntityId(
+        event.params.orderId,
+        event.params.ccy,
+        event.params.maturity
+    );
+    const order = Order.load(id);
+    if (order) {
+        order.filledAmount = order.filledAmount.plus(event.params.amount);
+        order.status = 'PartiallyFilled';
+        order.save();
+
+        const txId =
+            event.transaction.hash.toHexString() +
+            ':' +
+            event.logIndex.toString();
+        createTransaction(
+            txId,
+            order.unitPrice,
+            event.params.maker,
+            event.params.ccy,
+            event.params.maturity,
+            event.params.side,
+            event.params.amount,
+            event.params.futureValue,
+            'Lazy',
+            event.block.timestamp,
+            event.block.number,
+            event.transaction.hash
+        );
+    }
 }
 
 export function handleOrderCanceled(event: OrderCanceled): void {
@@ -311,16 +356,9 @@ function createTransaction(
     user.save();
 }
 
-function addToTransactionVolume(event: OrderExecuted): void {
-    const txId =
-        event.transaction.hash.toHexString() + ':' + event.logIndex.toString();
+function addToTransactionVolume(txId: string, dailyVolume: DailyVolume): void {
     const transaction = Transaction.load(txId);
     if (transaction) {
-        const dailyVolume = getOrInitDailyVolume(
-            transaction.currency,
-            transaction.maturity,
-            event.block.timestamp
-        );
         dailyVolume.volume = dailyVolume.volume.plus(transaction.amount);
         dailyVolume.save();
     } else {

@@ -43,6 +43,26 @@ dataSources:
         - event: Deposit(indexed address,bytes32,uint256)
           handler: handleDeposit
       file: ./src/token-vault.ts
+  - kind: ethereum
+    name: FundManagementLogic
+    network: ~
+    source:
+      abi: FundManagementLogic
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Order
+        - Transaction
+      abis:
+        - name: FundManagementLogic
+          file: >-
+            ./abis/protocol/libraries/logics/FundManagementLogic.sol/FundManagementLogic.json
+      eventHandlers:
+        - event: OrderPartiallyFilled(uint48,indexed address,indexed bytes32,uint8,uint256,uint256,uint256)
+          handler: handleOrderPartiallyFilled
+      file: ./src/lending-market.ts
 templates:
   - kind: ethereum
     name: LendingMarket

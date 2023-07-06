@@ -9,6 +9,7 @@ import {
     OrdersCleaned,
     ItayoseExecuted,
 } from '../../generated/templates/LendingMarket/LendingMarket';
+import { OrderPartiallyFilled } from '../../generated/FundManagementLogic/FundManagementLogic';
 
 export function createOrderExecutedEvent(
     user: Address,
@@ -23,7 +24,8 @@ export function createOrderExecutedEvent(
     placedOrderId: BigInt,
     placedAmount: BigInt,
     placedUnitPrice: BigInt,
-    cbThresholdUnitPrice: BigInt
+    cbThresholdUnitPrice: BigInt,
+    blockTimestamp: BigInt = BigInt.fromI32(0)
 ): OrderExecuted {
     const mockEvent = changetype<OrderExecuted>(newMockEvent());
     const event = new OrderExecuted(
@@ -36,6 +38,9 @@ export function createOrderExecutedEvent(
         mockEvent.parameters,
         mockEvent.receipt
     );
+    if (!blockTimestamp.isZero()) {
+        event.block.timestamp = blockTimestamp;
+    }
     event.parameters = [];
 
     event.parameters.push(
@@ -179,7 +184,8 @@ export function createPositionUnwoundEvent(
     filledAmount: BigInt,
     filledUnitPrice: BigInt,
     filledFutureValue: BigInt,
-    cbThresholdUnitPrice: BigInt
+    cbThresholdUnitPrice: BigInt,
+    blockTimestamp: BigInt = BigInt.fromI32(0)
 ): PositionUnwound {
     const mockEvent = changetype<PositionUnwound>(newMockEvent());
 
@@ -193,6 +199,9 @@ export function createPositionUnwoundEvent(
         mockEvent.parameters,
         mockEvent.receipt
     );
+    if (!blockTimestamp.isZero()) {
+        event.block.timestamp = blockTimestamp;
+    }
     event.parameters = [];
 
     event.parameters.push(
@@ -362,17 +371,18 @@ export function createOrdersCleanedEvent(
     return event;
 }
 
-export function createOrderPartiallyTakenEvent(
+export function createOrderPartiallyFilledEvent(
     orderId: BigInt,
     maker: Address,
-    side: i32,
     ccy: Bytes,
+    side: i32,
     maturity: BigInt,
-    filledAmount: BigInt,
-    filledFutureValue: BigInt
-): OrderPartiallyTaken {
+    amount: BigInt,
+    futureValue: BigInt,
+    blockTimestamp: BigInt = BigInt.fromI32(0)
+): OrderPartiallyFilled {
     const mockEvent = newMockEvent();
-    const event = new OrderPartiallyTaken(
+    const event = new OrderPartiallyFilled(
         mockEvent.address,
         mockEvent.logIndex,
         mockEvent.transactionLogIndex,
@@ -383,6 +393,9 @@ export function createOrderPartiallyTakenEvent(
         mockEvent.receipt
     );
 
+    if (!blockTimestamp.isZero()) {
+        event.block.timestamp = blockTimestamp;
+    }
     event.parameters = new Array();
     event.parameters.push(
         new ethereum.EventParam(
@@ -394,10 +407,10 @@ export function createOrderPartiallyTakenEvent(
         new ethereum.EventParam('maker', ethereum.Value.fromAddress(maker))
     );
     event.parameters.push(
-        new ethereum.EventParam('side', ethereum.Value.fromI32(side))
+        new ethereum.EventParam('ccy', ethereum.Value.fromBytes(ccy))
     );
     event.parameters.push(
-        new ethereum.EventParam('ccy', ethereum.Value.fromBytes(ccy))
+        new ethereum.EventParam('side', ethereum.Value.fromI32(side))
     );
     event.parameters.push(
         new ethereum.EventParam(
@@ -407,14 +420,14 @@ export function createOrderPartiallyTakenEvent(
     );
     event.parameters.push(
         new ethereum.EventParam(
-            'filledAmount',
-            ethereum.Value.fromUnsignedBigInt(filledAmount)
+            'amount',
+            ethereum.Value.fromUnsignedBigInt(amount)
         )
     );
     event.parameters.push(
         new ethereum.EventParam(
-            'filledFutureValue',
-            ethereum.Value.fromUnsignedBigInt(filledFutureValue)
+            'futureValue',
+            ethereum.Value.fromUnsignedBigInt(futureValue)
         )
     );
     return event;

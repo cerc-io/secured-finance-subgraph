@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts';
+import { Address, BigInt } from '@graphprotocol/graph-ts';
 import {
     assert,
     beforeEach,
@@ -10,6 +10,7 @@ import {
     handleOrderExecuted,
     handlePreOrderExecuted,
     handlePositionUnwound,
+    handleOrderPartiallyFilled,
     handleOrderCanceled,
     handleOrdersCleaned,
     handleItayoseExecuted,
@@ -26,6 +27,7 @@ import {
     createOrderCanceledEvent,
     createOrdersCleanedEvent,
     createItayoseExecutedEvent,
+    createOrderPartiallyFilledEvent,
 } from './mocks';
 import { createLendingMarket, ALICE, BOB } from './utils/createEntities';
 
@@ -77,6 +79,14 @@ describe('Order Executed', () => {
             ':' +
             event.logIndex.toString();
         assert.notInStore('Transaction', txId);
+
+        assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
+        assert.fieldEquals(
+            'User',
+            ALICE.toHexString(),
+            'transactionCount',
+            '0'
+        );
     });
 
     test('should create a Partially Filled Order and a Transaction', () => {
@@ -137,6 +147,14 @@ describe('Order Executed', () => {
             txId,
             'amount',
             filledAmount.toString()
+        );
+
+        assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
+        assert.fieldEquals(
+            'User',
+            ALICE.toHexString(),
+            'transactionCount',
+            '1'
         );
     });
 
@@ -200,6 +218,14 @@ describe('Order Executed', () => {
             txId,
             'amount',
             filledAmount.toString()
+        );
+
+        assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
+        assert.fieldEquals(
+            'User',
+            ALICE.toHexString(),
+            'transactionCount',
+            '1'
         );
     });
 
@@ -265,6 +291,14 @@ describe('Order Executed', () => {
             'amount',
             filledAmount.toString()
         );
+
+        assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
+        assert.fieldEquals(
+            'User',
+            ALICE.toHexString(),
+            'transactionCount',
+            '1'
+        );
     });
 
     test('should create an Blocked Order', () => {
@@ -303,6 +337,14 @@ describe('Order Executed', () => {
             ':' +
             event.logIndex.toString();
         assert.notInStore('Transaction', txId);
+
+        assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
+        assert.fieldEquals(
+            'User',
+            ALICE.toHexString(),
+            'transactionCount',
+            '0'
+        );
     });
 });
 
@@ -328,6 +370,14 @@ describe('PreOrder Executed', () => {
         assert.fieldEquals('Order', id, 'amount', amount.toString());
         assert.fieldEquals('Order', id, 'status', 'Open');
         assert.fieldEquals('Order', id, 'isPreOrder', 'true');
+
+        assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
+        assert.fieldEquals(
+            'User',
+            ALICE.toHexString(),
+            'transactionCount',
+            '0'
+        );
     });
 });
 
@@ -400,6 +450,9 @@ describe('Position Unwound', () => {
             'amount',
             filledAmount.toString()
         );
+
+        assert.fieldEquals('User', BOB.toHexString(), 'orderCount', '1');
+        assert.fieldEquals('User', BOB.toHexString(), 'transactionCount', '1');
     });
 
     test('should create an Filled Order and a transaction when futureValue is not filled completely', () => {
@@ -465,6 +518,138 @@ describe('Position Unwound', () => {
             'amount',
             filledAmount.toString()
         );
+
+        assert.fieldEquals('User', BOB.toHexString(), 'orderCount', '1');
+        assert.fieldEquals('User', BOB.toHexString(), 'transactionCount', '1');
+    });
+});
+
+describe('Order Partially Filled', () => {
+    beforeEach(() => {
+        clearStore();
+        createLendingMarket(ccy, maturity);
+    });
+
+    test('should update an Open Order and add a transaction', () => {
+        const placedOrderId = BigInt.fromI32(1);
+
+        const event = createOrderExecutedEvent(
+            ALICE,
+            borrow,
+            ccy,
+            maturity,
+            amount,
+            unitPrice,
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            placedOrderId,
+            amount,
+            unitPrice,
+            borrowThreshold
+        );
+        handleOrderExecuted(event);
+
+        const id = getOrderEntityId(placedOrderId, ccy, maturity);
+        assert.fieldEquals('Order', id, 'filledAmount', '0');
+        assert.fieldEquals('Order', id, 'amount', amount.toString());
+        assert.fieldEquals('Order', id, 'status', 'Open');
+
+        const orderPartiallyFilled = createOrderPartiallyFilledEvent(
+            placedOrderId,
+            ALICE,
+            ccy,
+            borrow,
+            maturity,
+            BigInt.fromI32(27),
+            BigInt.fromI32(30)
+        );
+        handleOrderPartiallyFilled(orderPartiallyFilled);
+        assert.fieldEquals('Order', id, 'filledAmount', '27');
+        assert.fieldEquals('Order', id, 'amount', amount.toString());
+        assert.fieldEquals('Order', id, 'status', 'PartiallyFilled');
+
+        const txId =
+            orderPartiallyFilled.transaction.hash.toHexString() +
+            ':' +
+            orderPartiallyFilled.logIndex.toString();
+        assert.fieldEquals(
+            'Transaction',
+            txId,
+            'orderPrice',
+            unitPrice.toString()
+        );
+        assert.fieldEquals('Transaction', txId, 'forwardValue', '30');
+        assert.fieldEquals('Transaction', txId, 'amount', '27');
+
+        assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
+        assert.fieldEquals(
+            'User',
+            ALICE.toHexString(),
+            'transactionCount',
+            '1'
+        );
+    });
+
+    test('should update an PartiallyFilled and add a transaction', () => {
+        const placedOrderId = BigInt.fromI32(1);
+
+        const event = createOrderExecutedEvent(
+            ALICE,
+            borrow,
+            ccy,
+            maturity,
+            amount,
+            unitPrice,
+            BigInt.fromI32(27),
+            unitPrice,
+            BigInt.fromI32(30),
+            placedOrderId,
+            BigInt.fromI32(63),
+            unitPrice,
+            borrowThreshold
+        );
+        handleOrderExecuted(event);
+
+        const id = getOrderEntityId(placedOrderId, ccy, maturity);
+        assert.fieldEquals('Order', id, 'filledAmount', '27');
+        assert.fieldEquals('Order', id, 'amount', amount.toString());
+        assert.fieldEquals('Order', id, 'status', 'PartiallyFilled');
+
+        const orderPartiallyFilled = createOrderPartiallyFilledEvent(
+            placedOrderId,
+            ALICE,
+            ccy,
+            borrow,
+            maturity,
+            BigInt.fromI32(54),
+            BigInt.fromI32(60)
+        );
+        handleOrderPartiallyFilled(orderPartiallyFilled);
+        assert.fieldEquals('Order', id, 'filledAmount', '81');
+        assert.fieldEquals('Order', id, 'amount', amount.toString());
+        assert.fieldEquals('Order', id, 'status', 'PartiallyFilled');
+
+        const txId =
+            orderPartiallyFilled.transaction.hash.toHexString() +
+            ':' +
+            orderPartiallyFilled.logIndex.toString();
+        assert.fieldEquals(
+            'Transaction',
+            txId,
+            'orderPrice',
+            unitPrice.toString()
+        );
+        assert.fieldEquals('Transaction', txId, 'forwardValue', '60');
+        assert.fieldEquals('Transaction', txId, 'amount', '54');
+
+        assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
+        assert.fieldEquals(
+            'User',
+            ALICE.toHexString(),
+            'transactionCount',
+            '2'
+        );
     });
 });
 
@@ -509,6 +694,14 @@ describe('Order Canceled', () => {
         handleOrderCanceled(canceledEvent);
 
         assert.fieldEquals('Order', id, 'status', 'Cancelled');
+
+        assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
+        assert.fieldEquals(
+            'User',
+            ALICE.toHexString(),
+            'transactionCount',
+            '0'
+        );
     });
 
     test('should mark partially filled order as cancelled order', () => {
@@ -550,6 +743,14 @@ describe('Order Canceled', () => {
         handleOrderCanceled(canceledEvent);
 
         assert.fieldEquals('Order', id, 'status', 'Cancelled');
+
+        assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
+        assert.fieldEquals(
+            'User',
+            ALICE.toHexString(),
+            'transactionCount',
+            '1'
+        );
     });
 
     test('should not give error if order does not exist', () => {
@@ -743,6 +944,14 @@ describe('Orders Cleaned', () => {
         );
         assert.fieldEquals('Transaction', txId2, 'forwardValue', '50');
         assert.fieldEquals('Transaction', txId2, 'amount', '40');
+
+        assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '2');
+        assert.fieldEquals(
+            'User',
+            ALICE.toHexString(),
+            'transactionCount',
+            '4'
+        );
     });
 });
 
@@ -996,5 +1205,167 @@ describe('Itayose Executed', () => {
             unitPrice7.toString()
         );
         assert.fieldEquals('Transaction', txId23, 'forwardValue', '115');
+
+        assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '4');
+        assert.fieldEquals(
+            'User',
+            ALICE.toHexString(),
+            'transactionCount',
+            '4'
+        );
+
+        assert.fieldEquals('User', BOB.toHexString(), 'orderCount', '3');
+        assert.fieldEquals('User', BOB.toHexString(), 'transactionCount', '3');
+    });
+});
+
+describe('Daily Volume', () => {
+    beforeEach(() => {
+        clearStore();
+        createLendingMarket(ccy, maturity);
+    });
+
+    test('taker transaction should update the daily volume', () => {
+        const placedOrderId = BigInt.fromI32(1);
+        const filledAmount = BigInt.fromI32(81);
+        const filledUnitPrice = unitPrice;
+        const filledFutureValue = BigInt.fromI32(90);
+        const totalAmount = filledAmount.plus(amount);
+
+        const event = createOrderExecutedEvent(
+            ALICE,
+            borrow,
+            ccy,
+            maturity,
+            totalAmount,
+            unitPrice,
+            filledAmount,
+            filledUnitPrice,
+            filledFutureValue,
+            placedOrderId,
+            amount,
+            unitPrice,
+            borrowThreshold,
+            BigInt.fromI32(1675878200)
+        );
+        handleOrderExecuted(event);
+
+        const id = getDailyVolumeEntityId(ccy, maturity, '2023-02-08');
+        assert.fieldEquals(
+            'DailyVolume',
+            id,
+            'volume',
+            filledAmount.toString()
+        );
+
+        const placedOrderId2 = BigInt.fromI32(2);
+        const filledAmount2 = BigInt.fromI32(45);
+        const filledFutureValue2 = BigInt.fromI32(50);
+        const totalAmount2 = filledAmount2.plus(amount);
+        const event2 = createOrderExecutedEvent(
+            BOB,
+            borrow,
+            ccy,
+            maturity,
+            totalAmount2,
+            unitPrice,
+            filledAmount2,
+            filledUnitPrice,
+            filledFutureValue2,
+            placedOrderId2,
+            amount,
+            unitPrice,
+            borrowThreshold,
+            BigInt.fromI32(1675878200)
+        );
+        handleOrderExecuted(event2);
+        assert.fieldEquals(
+            'DailyVolume',
+            id,
+            'volume',
+            filledAmount.plus(filledAmount2).toString()
+        );
+    });
+
+    test('position unwound should update the daily volume', () => {
+        const orderId = BigInt.fromI32(0);
+        const futureValue = BigInt.fromI32(250);
+        const filledAmount = BigInt.fromI32(225);
+        const filledUnitPrice = unitPrice;
+        const filledFutureValue = BigInt.fromI32(250);
+
+        const event = createPositionUnwoundEvent(
+            BOB,
+            lend,
+            ccy,
+            maturity,
+            futureValue,
+            filledAmount,
+            filledUnitPrice,
+            filledFutureValue,
+            lendThreshold,
+            BigInt.fromI32(1675878200)
+        );
+        handlePositionUnwound(event);
+
+        const id = getDailyVolumeEntityId(ccy, maturity, '2023-02-08');
+        assert.fieldEquals(
+            'DailyVolume',
+            id,
+            'volume',
+            filledAmount.toString()
+        );
+    });
+
+    test('partially filled order transaction should not update the daily volume', () => {
+        const placedOrderId = BigInt.fromI32(1);
+        const filledAmount = BigInt.fromI32(81);
+        const filledUnitPrice = unitPrice;
+        const filledFutureValue = BigInt.fromI32(90);
+        const totalAmount = filledAmount.plus(amount);
+
+        const event = createOrderExecutedEvent(
+            ALICE,
+            borrow,
+            ccy,
+            maturity,
+            totalAmount,
+            unitPrice,
+            filledAmount,
+            filledUnitPrice,
+            filledFutureValue,
+            placedOrderId,
+            amount,
+            unitPrice,
+            borrowThreshold,
+            BigInt.fromI32(1675878200)
+        );
+        handleOrderExecuted(event);
+
+        const id = getDailyVolumeEntityId(ccy, maturity, '2023-02-08');
+        assert.fieldEquals(
+            'DailyVolume',
+            id,
+            'volume',
+            filledAmount.toString()
+        );
+
+        const orderPartiallyFilled = createOrderPartiallyFilledEvent(
+            placedOrderId,
+            ALICE,
+            ccy,
+            borrow,
+            maturity,
+            BigInt.fromI32(27),
+            BigInt.fromI32(30),
+            BigInt.fromI32(1675878200)
+        );
+        handleOrderPartiallyFilled(orderPartiallyFilled);
+        assert.fieldEquals(
+            'DailyVolume',
+            id,
+            'volume',
+            filledAmount.toString()
+        );
     });
 });
