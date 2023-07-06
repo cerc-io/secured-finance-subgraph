@@ -2,26 +2,31 @@
 import { Address, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import { newMockEvent } from 'matchstick-as/assembly/index';
 import {
+    OrderExecuted,
+    PreOrderExecuted,
+    PositionUnwound,
     OrderCanceled,
-    OrderMade,
-    OrderPartiallyTaken,
     OrdersCleaned,
-    OrdersTaken,
     ItayoseExecuted,
 } from '../../generated/templates/LendingMarket/LendingMarket';
 
-export function createOrderMadeEvent(
-    orderId: BigInt,
-    maker: Address,
+export function createOrderExecutedEvent(
+    user: Address,
     side: i32,
     ccy: Bytes,
     maturity: BigInt,
-    amount: BigInt,
-    unitPrice: BigInt,
-    isPreOrder: boolean
-): OrderMade {
-    const mockEvent = changetype<OrderMade>(newMockEvent());
-    const event = new OrderMade(
+    inputAmount: BigInt,
+    inputUnitPrice: BigInt,
+    filledAmount: BigInt,
+    filledUnitPrice: BigInt,
+    filledFutureValue: BigInt,
+    placedOrderId: BigInt,
+    placedAmount: BigInt,
+    placedUnitPrice: BigInt,
+    cbThresholdUnitPrice: BigInt
+): OrderExecuted {
+    const mockEvent = changetype<OrderExecuted>(newMockEvent());
+    const event = new OrderExecuted(
         mockEvent.address,
         mockEvent.logIndex,
         mockEvent.transactionLogIndex,
@@ -34,13 +39,102 @@ export function createOrderMadeEvent(
     event.parameters = [];
 
     event.parameters.push(
+        new ethereum.EventParam('user', ethereum.Value.fromAddress(user))
+    );
+    event.parameters.push(
+        new ethereum.EventParam('side', ethereum.Value.fromI32(side))
+    );
+    event.parameters.push(
+        new ethereum.EventParam('ccy', ethereum.Value.fromBytes(ccy))
+    );
+    event.parameters.push(
         new ethereum.EventParam(
-            'orderId',
-            ethereum.Value.fromUnsignedBigInt(orderId)
+            'maturity',
+            ethereum.Value.fromUnsignedBigInt(maturity)
         )
     );
     event.parameters.push(
-        new ethereum.EventParam('maker', ethereum.Value.fromAddress(maker))
+        new ethereum.EventParam(
+            'inputAmount',
+            ethereum.Value.fromUnsignedBigInt(inputAmount)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'inputUnitPrice',
+            ethereum.Value.fromUnsignedBigInt(inputUnitPrice)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'filledAmount',
+            ethereum.Value.fromUnsignedBigInt(filledAmount)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'filledUnitPrice',
+            ethereum.Value.fromUnsignedBigInt(filledUnitPrice)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'filledFutureValue',
+            ethereum.Value.fromUnsignedBigInt(filledFutureValue)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'placedOrderId',
+            ethereum.Value.fromUnsignedBigInt(placedOrderId)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'placedAmount',
+            ethereum.Value.fromUnsignedBigInt(placedAmount)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'placedUnitPrice',
+            ethereum.Value.fromUnsignedBigInt(placedUnitPrice)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'cbThresholdUnitPrice',
+            ethereum.Value.fromUnsignedBigInt(cbThresholdUnitPrice)
+        )
+    );
+
+    return event;
+}
+
+export function createPreOrderExecutedEvent(
+    user: Address,
+    side: i32,
+    ccy: Bytes,
+    maturity: BigInt,
+    amount: BigInt,
+    unitPrice: BigInt,
+    orderId: BigInt
+): PreOrderExecuted {
+    const mockEvent = changetype<PreOrderExecuted>(newMockEvent());
+    const event = new PreOrderExecuted(
+        mockEvent.address,
+        mockEvent.logIndex,
+        mockEvent.transactionLogIndex,
+        mockEvent.logType,
+        mockEvent.block,
+        mockEvent.transaction,
+        mockEvent.parameters,
+        mockEvent.receipt
+    );
+    event.parameters = [];
+
+    event.parameters.push(
+        new ethereum.EventParam('user', ethereum.Value.fromAddress(user))
     );
     event.parameters.push(
         new ethereum.EventParam('side', ethereum.Value.fromI32(side))
@@ -68,32 +162,28 @@ export function createOrderMadeEvent(
     );
     event.parameters.push(
         new ethereum.EventParam(
-            'isPreOrder',
-            ethereum.Value.fromBoolean(isPreOrder)
+            'orderId',
+            ethereum.Value.fromUnsignedBigInt(orderId)
         )
     );
 
     return event;
 }
 
-export function createOrdersTakenEvent(
-    taker: Address,
+export function createPositionUnwoundEvent(
+    user: Address,
     side: i32,
     ccy: Bytes,
     maturity: BigInt,
+    futureValue: BigInt,
     filledAmount: BigInt,
-    unitPrice: BigInt,
+    filledUnitPrice: BigInt,
     filledFutureValue: BigInt,
-    hash: Address | null = null,
-    logIndex: BigInt = BigInt.fromI32(1)
-): OrdersTaken {
-    const mockEvent = changetype<OrdersTaken>(newMockEvent());
-    if (hash) {
-        mockEvent.transaction.hash = hash;
-    }
-    mockEvent.logIndex = logIndex;
+    cbThresholdUnitPrice: BigInt
+): PositionUnwound {
+    const mockEvent = changetype<PositionUnwound>(newMockEvent());
 
-    const event = new OrdersTaken(
+    const event = new PositionUnwound(
         mockEvent.address,
         mockEvent.logIndex,
         mockEvent.transactionLogIndex,
@@ -106,7 +196,7 @@ export function createOrdersTakenEvent(
     event.parameters = [];
 
     event.parameters.push(
-        new ethereum.EventParam('taker', ethereum.Value.fromAddress(taker))
+        new ethereum.EventParam('user', ethereum.Value.fromAddress(user))
     );
     event.parameters.push(
         new ethereum.EventParam('side', ethereum.Value.fromI32(side))
@@ -122,20 +212,32 @@ export function createOrdersTakenEvent(
     );
     event.parameters.push(
         new ethereum.EventParam(
+            'futureValue',
+            ethereum.Value.fromUnsignedBigInt(futureValue)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
             'filledAmount',
             ethereum.Value.fromUnsignedBigInt(filledAmount)
         )
     );
     event.parameters.push(
         new ethereum.EventParam(
-            'unitPrice',
-            ethereum.Value.fromUnsignedBigInt(unitPrice)
+            'filledUnitPrice',
+            ethereum.Value.fromUnsignedBigInt(filledUnitPrice)
         )
     );
     event.parameters.push(
         new ethereum.EventParam(
             'filledFutureValue',
             ethereum.Value.fromUnsignedBigInt(filledFutureValue)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'cbThresholdUnitPrice',
+            ethereum.Value.fromUnsignedBigInt(cbThresholdUnitPrice)
         )
     );
 
@@ -201,12 +303,14 @@ export function createOrderCanceledEvent(
     return event;
 }
 
-export function createOrdersCleaned(
+export function createOrdersCleanedEvent(
     orderIds: Array<BigInt>,
     maker: Address,
     side: i32,
     ccy: Bytes,
-    maturity: BigInt
+    maturity: BigInt,
+    amount: BigInt,
+    futureValue: BigInt
 ): OrdersCleaned {
     const mockEvent = changetype<OrdersCleaned>(newMockEvent());
     const event = new OrdersCleaned(
@@ -240,6 +344,18 @@ export function createOrdersCleaned(
         new ethereum.EventParam(
             'maturity',
             ethereum.Value.fromUnsignedBigInt(maturity)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'amount',
+            ethereum.Value.fromUnsignedBigInt(amount)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'futureValue',
+            ethereum.Value.fromUnsignedBigInt(futureValue)
         )
     );
 

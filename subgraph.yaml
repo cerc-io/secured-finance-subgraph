@@ -63,16 +63,16 @@ templates:
           file: >-
             ./abis/protocol/LendingMarket.sol/LendingMarket.json
       eventHandlers:
-        - event: OrderMade(uint48,indexed address,uint8,bytes32,uint256,uint256,uint256,bool)
-          handler: handleOrderMade
-        - event: OrdersTaken(indexed address,uint8,bytes32,uint256,uint256,uint256,uint256)
-          handler: handleOrdersTaken
-        - event: OrdersCleaned(uint48[],indexed address,uint8,indexed bytes32,uint256)
-          handler: handleOrdersCleaned
+        - event: OrderExecuted(indexed address,uint8,indexed bytes32,indexed uint256,uint256,uint256,uint256,uint256,uint256,uint48,uint256,uint256,uint256)
+          handler: handleOrderExecuted
+        - event: PreOrderExecuted(indexed address,uint8,indexed bytes32,indexed uint256,uint256,uint256,uint48)
+          handler: handlePreOrderExecuted
+        - event: PositionUnwound(indexed address,uint8,indexed bytes32,indexed uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handlePositionUnwound
         - event: OrderCanceled(uint48,indexed address,uint8,bytes32,uint256,uint256,uint256)
           handler: handleOrderCanceled
-        - event: OrderPartiallyTaken(uint48,indexed address,uint8,indexed bytes32,uint256,uint256,uint256)
-          handler: handleOrderPartiallyTaken
+        - event: OrdersCleaned(uint48[],indexed address,uint8,indexed bytes32,uint256,uint256,uint256)
+          handler: handleOrdersCleaned
         - event: ItayoseExecuted(bytes32,uint256,uint256,uint256,uint256,uint256)
           handler: handleItayoseExecuted
       file: ./src/lending-market.ts

@@ -7,11 +7,11 @@ import {
 } from '@graphprotocol/graph-ts';
 import { Order, Transaction } from '../generated/schema';
 import {
+    OrderExecuted,
+    PreOrderExecuted,
+    PositionUnwound,
     OrderCanceled,
-    OrderMade,
-    OrderPartiallyTaken,
     OrdersCleaned,
-    OrdersTaken,
     ItayoseExecuted,
 } from '../generated/templates/LendingMarket/LendingMarket';
 import {
@@ -21,58 +21,133 @@ import {
 } from './helper/initializer';
 import { getOrderEntityId } from './utils/id-generation';
 
-export function handleOrderMade(event: OrderMade): void {
+export function handleOrderExecuted(event: OrderExecuted): void {
+    let id = getOrderEntityId(
+        event.params.placedOrderId,
+        event.params.ccy,
+        event.params.maturity
+    );
+    let status: string;
+    let amount: BigInt;
+    if (!event.params.placedAmount.isZero()) {
+        if (!event.params.filledAmount.isZero()) {
+            amount = event.params.placedAmount.plus(event.params.filledAmount);
+            status = 'PartiallyFilled';
+        } else {
+            amount = event.params.placedAmount;
+            status = 'Open';
+        }
+    } else if (!event.params.filledAmount.isZero()) {
+        id = id + ':' + event.transaction.hash.toString();
+        amount = event.params.filledAmount;
+        status = 'Filled';
+    } else {
+        id = id + ':' + event.transaction.hash.toString();
+        amount = event.params.inputAmount;
+        status = 'Blocked';
+    }
+    createOrder(
+        id,
+        event.params.placedOrderId,
+        event.params.user,
+        event.params.ccy,
+        event.params.side,
+        event.params.maturity,
+        event.params.inputUnitPrice,
+        event.params.filledAmount,
+        amount,
+        status,
+        false,
+        event.block.timestamp,
+        event.block.number,
+        event.transaction.hash
+    );
+
+    if (status === 'PartiallyFilled' || status === 'Filled') {
+        const txId =
+            event.transaction.hash.toHexString() +
+            ':' +
+            event.logIndex.toString();
+        createTransaction(
+            txId,
+            event.params.filledUnitPrice,
+            event.params.user,
+            event.params.ccy,
+            event.params.maturity,
+            event.params.side,
+            event.params.filledAmount,
+            event.params.filledFutureValue,
+            'Sync',
+            event.block.timestamp,
+            event.block.number,
+            event.transaction.hash
+        );
+        addToTransactionVolume(event);
+    }
+}
+
+export function handlePreOrderExecuted(event: PreOrderExecuted): void {
     const id = getOrderEntityId(
         event.params.orderId,
         event.params.ccy,
         event.params.maturity
     );
-    const user = getOrInitUser(event.params.maker);
-
-    const order = new Order(id);
-    order.status = 'Open';
-    order.orderId = event.params.orderId;
-    order.filledAmount = BigInt.fromI32(0);
-    order.amount = event.params.amount;
-    order.maker = user.id;
-    order.currency = event.params.ccy;
-    order.side = event.params.side;
-    order.maturity = event.params.maturity;
-    order.unitPrice = event.params.unitPrice;
-    order.lendingMarket = getOrInitLendingMarket(
+    createOrder(
+        id,
+        event.params.orderId,
+        event.params.user,
         event.params.ccy,
-        event.params.maturity
-    ).id;
-    order.isPreOrder = event.params.isPreOrder;
-
-    order.createdAt = event.block.timestamp;
-    order.blockNumber = event.block.number;
-    order.txHash = event.transaction.hash;
-
-    order.save();
-
-    user.orderCount = user.orderCount.plus(BigInt.fromI32(1));
-    user.save();
+        event.params.side,
+        event.params.maturity,
+        event.params.unitPrice,
+        BigInt.fromI32(0),
+        event.params.amount,
+        'Open',
+        true,
+        event.block.timestamp,
+        event.block.number,
+        event.transaction.hash
+    );
 }
 
-export function handleOrdersTaken(event: OrdersTaken): void {
+export function handlePositionUnwound(event: PositionUnwound): void {
+    const orderId = BigInt.fromI32(0);
+    const id =
+        getOrderEntityId(orderId, event.params.ccy, event.params.maturity) +
+        ':' +
+        event.transaction.hash.toString();
+    createOrder(
+        id,
+        orderId,
+        event.params.user,
+        event.params.ccy,
+        event.params.side,
+        event.params.maturity,
+        event.params.filledUnitPrice,
+        event.params.filledAmount,
+        event.params.filledAmount,
+        'Filled',
+        false,
+        event.block.timestamp,
+        event.block.number,
+        event.transaction.hash
+    );
     const txId =
         event.transaction.hash.toHexString() + ':' + event.logIndex.toString();
     createTransaction(
         txId,
-        event.params.unitPrice,
-        event.params.taker,
+        event.params.filledUnitPrice,
+        event.params.user,
         event.params.ccy,
         event.params.maturity,
         event.params.side,
         event.params.filledAmount,
         event.params.filledFutureValue,
+        'Sync',
         event.block.timestamp,
         event.block.number,
-        event.transaction.hash,
-        'Sync'
+        event.transaction.hash
     );
-    addToTransactionVolume(event);
 }
 
 export function handleOrderCanceled(event: OrderCanceled): void {
@@ -129,50 +204,17 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
                 order.amount.minus(order.filledAmount),
                 calculateForwardValue(
                     order.amount.minus(order.filledAmount),
-                    order.unitPrice
+                    unitPrice
                 ),
+                'Lazy',
                 event.block.timestamp,
                 event.block.number,
-                event.transaction.hash,
-                'Lazy'
+                event.transaction.hash
             );
             order.filledAmount = order.amount;
             order.status = 'Filled';
             order.save();
         }
-    }
-}
-
-export function handleOrderPartiallyTaken(event: OrderPartiallyTaken): void {
-    const id = getOrderEntityId(
-        event.params.orderId,
-        event.params.ccy,
-        event.params.maturity
-    );
-    const order = Order.load(id);
-    if (order) {
-        order.filledAmount = order.filledAmount.plus(event.params.filledAmount);
-        order.status = 'PartiallyFilled';
-        const txId =
-            event.transaction.hash.toHexString() +
-            ':' +
-            event.logIndex.toString();
-        createTransaction(
-            txId,
-            order.unitPrice,
-            event.params.maker,
-            event.params.ccy,
-            event.params.maturity,
-            event.params.side,
-            event.params.filledAmount,
-            event.params.filledFutureValue,
-            event.block.timestamp,
-            event.block.number,
-            event.transaction.hash,
-            'Sync'
-        );
-
-        order.save();
     }
 }
 
@@ -188,52 +230,88 @@ export function handleItayoseExecuted(event: ItayoseExecuted): void {
     lendingMarket.save();
 }
 
+function createOrder(
+    id: string,
+    orderId: BigInt,
+    maker: Address,
+    currency: Bytes,
+    side: i32,
+    maturity: BigInt,
+    unitPrice: BigInt,
+    filledAmount: BigInt,
+    amount: BigInt,
+    status: string,
+    isPreOrder: boolean,
+    createdAt: BigInt,
+    blockNumber: BigInt,
+    txHash: Bytes
+): void {
+    if (amount.isZero()) return;
+
+    const order = new Order(id);
+    const user = getOrInitUser(maker);
+
+    order.orderId = orderId;
+    order.maker = user.id;
+    order.currency = currency;
+    order.side = side;
+    order.maturity = maturity;
+    order.unitPrice = unitPrice;
+    order.filledAmount = filledAmount;
+    order.amount = amount;
+    order.status = status;
+    order.lendingMarket = getOrInitLendingMarket(currency, maturity).id;
+    order.isPreOrder = isPreOrder;
+    order.createdAt = createdAt;
+    order.blockNumber = blockNumber;
+    order.txHash = txHash;
+    order.save();
+
+    user.orderCount = user.orderCount.plus(BigInt.fromI32(1));
+    user.save();
+}
+
 function createTransaction(
     txId: string,
     unitPrice: BigInt,
     taker: Address,
-    ccy: Bytes,
+    currency: Bytes,
     maturity: BigInt,
     side: i32,
     filledAmount: BigInt,
     filledFutureValue: BigInt,
+    executionType: string,
     timestamp: BigInt,
     blockNumber: BigInt,
-    txHash: Bytes,
-    executionType: string
+    txHash: Bytes
 ): void {
     if (filledAmount.isZero()) return;
+
     const transaction = new Transaction(txId);
     const user = getOrInitUser(taker);
 
     transaction.orderPrice = unitPrice;
     transaction.taker = user.id;
-    transaction.currency = ccy;
+    transaction.currency = currency;
     transaction.maturity = maturity;
     transaction.side = side;
     transaction.executionType = executionType;
-
     transaction.forwardValue = filledFutureValue;
     transaction.amount = filledAmount;
-
     transaction.averagePrice = !filledFutureValue.isZero()
         ? filledAmount.divDecimal(new BigDecimal(filledFutureValue))
         : BigDecimal.zero();
-
+    transaction.lendingMarket = getOrInitLendingMarket(currency, maturity).id;
     transaction.createdAt = timestamp;
     transaction.blockNumber = blockNumber;
     transaction.txHash = txHash;
-
-    transaction.lendingMarket = getOrInitLendingMarket(ccy, maturity).id;
-
     transaction.save();
 
     user.transactionCount = user.transactionCount.plus(BigInt.fromI32(1));
     user.save();
 }
 
-function addToTransactionVolume(event: OrdersTaken): void {
-    // We expect to have a transaction entity created in the handleOrdersTaken
+function addToTransactionVolume(event: OrderExecuted): void {
     const txId =
         event.transaction.hash.toHexString() + ':' + event.logIndex.toString();
     const transaction = Transaction.load(txId);
@@ -246,9 +324,7 @@ function addToTransactionVolume(event: OrdersTaken): void {
         dailyVolume.volume = dailyVolume.volume.plus(transaction.amount);
         dailyVolume.save();
     } else {
-        log.error('Transaction entity not found: {}', [
-            event.transaction.hash.toHexString(),
-        ]);
+        log.error('Transaction entity not found: {}', [txId]);
     }
 }
 
