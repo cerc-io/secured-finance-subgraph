@@ -935,36 +935,21 @@ describe('Itayose Executed', () => {
             'orderPrice',
             openingUnitPrice.toString()
         );
-        assert.fieldEquals(
-            'Transaction',
-            txId10,
-            'forwardValue',
-            '111'
-        );
+        assert.fieldEquals('Transaction', txId10, 'forwardValue', '111');
         assert.fieldEquals(
             'Transaction',
             txId11,
             'orderPrice',
             openingUnitPrice.toString()
         );
-        assert.fieldEquals(
-            'Transaction',
-            txId11,
-            'forwardValue',
-            '111'
-        );
+        assert.fieldEquals('Transaction', txId11, 'forwardValue', '111');
         assert.fieldEquals(
             'Transaction',
             txId12,
             'orderPrice',
             unitPrice3.toString()
         );
-        assert.fieldEquals(
-            'Transaction',
-            txId12,
-            'forwardValue',
-            '112'
-        );
+        assert.fieldEquals('Transaction', txId12, 'forwardValue', '112');
 
         const cleanEvent2 = createOrdersCleanedEvent(
             [orderId4, orderId5, orderId6, orderId7],
@@ -989,47 +974,27 @@ describe('Itayose Executed', () => {
             'orderPrice',
             openingUnitPrice.toString()
         );
-        assert.fieldEquals(
-            'Transaction',
-            txId20,
-            'forwardValue',
-            '111'
-        );
+        assert.fieldEquals('Transaction', txId20, 'forwardValue', '111');
         assert.fieldEquals(
             'Transaction',
             txId21,
             'orderPrice',
             openingUnitPrice.toString()
         );
-        assert.fieldEquals(
-            'Transaction',
-            txId21,
-            'forwardValue',
-            '111'
-        );
+        assert.fieldEquals('Transaction', txId21, 'forwardValue', '111');
         assert.fieldEquals(
             'Transaction',
             txId22,
             'orderPrice',
             unitPrice6.toString()
         );
-        assert.fieldEquals(
-            'Transaction',
-            txId22,
-            'forwardValue',
-            '112'
-        );
+        assert.fieldEquals('Transaction', txId22, 'forwardValue', '112');
         assert.fieldEquals(
             'Transaction',
             txId23,
             'orderPrice',
             unitPrice7.toString()
         );
-        assert.fieldEquals(
-            'Transaction',
-            txId23,
-            'forwardValue',
-            '115'
-        );
+        assert.fieldEquals('Transaction', txId23, 'forwardValue', '115');
     });
 });
