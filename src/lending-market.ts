@@ -13,7 +13,7 @@ import {
     OrderCanceled,
     OrdersCleaned,
     ItayoseExecuted,
-} from '../generated/templates/LendingMarket/LendingMarket';
+} from '../generated/LendingMarket/LendingMarket';
 import { OrderPartiallyFilled } from '../generated/FundManagementLogic/FundManagementLogic';
 import {
     getOrInitDailyVolume,
