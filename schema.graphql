@@ -64,8 +64,9 @@ enum OrderStatus {
   Cancelled
   Filled
   PartiallyFilled
-  Expired
   Blocked
+  PartiallyBlocked
+  Expired
 }
 
 type User @entity {

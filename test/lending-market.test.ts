@@ -229,7 +229,7 @@ describe('Order Executed', () => {
         );
     });
 
-    test('should create a Filled Order and a Transaction when Market Order is executed', () => {
+    test('should create a Filled Order and a Transaction with filled unit price when Market Order is executed', () => {
         const placedOrderId = BigInt.fromI32(0);
         const filledAmount = BigInt.fromI32(160);
         const filledUnitPrice = BigInt.fromI32(80);
@@ -258,7 +258,12 @@ describe('Order Executed', () => {
             ':' +
             event.transaction.hash.toString();
         assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
-        assert.fieldEquals('Order', id, 'unitPrice', '0');
+        assert.fieldEquals(
+            'Order',
+            id,
+            'unitPrice',
+            filledUnitPrice.toString()
+        );
         assert.fieldEquals(
             'Order',
             id,
@@ -278,6 +283,78 @@ describe('Order Executed', () => {
             txId,
             'orderPrice',
             filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'Transaction',
+            txId,
+            'forwardValue',
+            filledFutureValue.toString()
+        );
+        assert.fieldEquals(
+            'Transaction',
+            txId,
+            'amount',
+            filledAmount.toString()
+        );
+
+        assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
+        assert.fieldEquals(
+            'User',
+            ALICE.toHexString(),
+            'transactionCount',
+            '1'
+        );
+    });
+
+    test('should create a Partially Blocked Order and a Transaction', () => {
+        const placedOrderId = BigInt.fromI32(0);
+        const filledAmount = BigInt.fromI32(81);
+        const filledUnitPrice = unitPrice;
+        const filledFutureValue = BigInt.fromI32(90);
+        const totalAmount = filledAmount.plus(amount);
+
+        const event = createOrderExecutedEvent(
+            ALICE,
+            borrow,
+            ccy,
+            maturity,
+            totalAmount,
+            unitPrice,
+            filledAmount,
+            filledUnitPrice,
+            filledFutureValue,
+            placedOrderId,
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            borrowThreshold
+        );
+        handleOrderExecuted(event);
+
+        const id =
+            getOrderEntityId(placedOrderId, ccy, maturity) +
+            ':' +
+            event.transaction.hash.toString();
+        assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
+        assert.fieldEquals('Order', id, 'unitPrice', unitPrice.toString());
+        assert.fieldEquals(
+            'Order',
+            id,
+            'filledAmount',
+            filledAmount.toString()
+        );
+        assert.fieldEquals('Order', id, 'amount', totalAmount.toString());
+        assert.fieldEquals('Order', id, 'status', 'PartiallyBlocked');
+        assert.fieldEquals('Order', id, 'isPreOrder', 'false');
+
+        const txId =
+            event.transaction.hash.toHexString() +
+            ':' +
+            event.logIndex.toString();
+        assert.fieldEquals(
+            'Transaction',
+            txId,
+            'orderPrice',
+            unitPrice.toString()
         );
         assert.fieldEquals(
             'Transaction',

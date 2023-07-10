@@ -30,21 +30,36 @@ export function handleOrderExecuted(event: OrderExecuted): void {
     );
     let status: string;
     let amount: BigInt;
+    let unitPrice: BigInt;
     if (!event.params.placedAmount.isZero()) {
+        amount = event.params.inputAmount;
+        unitPrice = event.params.inputUnitPrice;
         if (!event.params.filledAmount.isZero()) {
-            amount = event.params.placedAmount.plus(event.params.filledAmount);
             status = 'PartiallyFilled';
         } else {
-            amount = event.params.placedAmount;
             status = 'Open';
         }
     } else if (!event.params.filledAmount.isZero()) {
         id = id + ':' + event.transaction.hash.toString();
-        amount = event.params.filledAmount;
-        status = 'Filled';
+        if (event.params.inputUnitPrice.isZero()) {
+            amount = event.params.filledAmount;
+            unitPrice = event.params.filledUnitPrice;
+            status = 'Filled';
+        } else if (
+            event.params.inputAmount.minus(event.params.filledAmount).isZero()
+        ) {
+            amount = event.params.inputAmount;
+            unitPrice = event.params.inputUnitPrice;
+            status = 'Filled';
+        } else {
+            amount = event.params.inputAmount;
+            unitPrice = event.params.inputUnitPrice;
+            status = 'PartiallyBlocked';
+        }
     } else {
         id = id + ':' + event.transaction.hash.toString();
         amount = event.params.inputAmount;
+        unitPrice = event.params.inputUnitPrice;
         status = 'Blocked';
     }
     createOrder(
@@ -54,7 +69,7 @@ export function handleOrderExecuted(event: OrderExecuted): void {
         event.params.ccy,
         event.params.side,
         event.params.maturity,
-        event.params.inputUnitPrice,
+        unitPrice,
         event.params.filledAmount,
         amount,
         status,
@@ -64,7 +79,11 @@ export function handleOrderExecuted(event: OrderExecuted): void {
         event.transaction.hash
     );
 
-    if (status === 'PartiallyFilled' || status === 'Filled') {
+    if (
+        status === 'PartiallyFilled' ||
+        status === 'Filled' ||
+        status === 'PartiallyBlocked'
+    ) {
         const txId =
             event.transaction.hash.toHexString() +
             ':' +
