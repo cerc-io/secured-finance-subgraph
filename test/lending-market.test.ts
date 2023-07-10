@@ -319,7 +319,7 @@ describe('Order Executed', () => {
             ccy,
             maturity,
             totalAmount,
-            unitPrice,
+            BigInt.fromI32(8400),
             filledAmount,
             filledUnitPrice,
             filledFutureValue,
@@ -335,7 +335,7 @@ describe('Order Executed', () => {
             ':' +
             event.transaction.hash.toString();
         assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
-        assert.fieldEquals('Order', id, 'unitPrice', unitPrice.toString());
+        assert.fieldEquals('Order', id, 'unitPrice', '8400');
         assert.fieldEquals(
             'Order',
             id,
