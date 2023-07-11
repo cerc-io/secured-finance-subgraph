@@ -306,6 +306,33 @@ describe('Order Executed', () => {
         );
     });
 
+    test('should not create any order when market order is not filled', () => {
+        const placedOrderId = BigInt.fromI32(0);
+
+        const event = createOrderExecutedEvent(
+            ALICE,
+            borrow,
+            ccy,
+            maturity,
+            amount,
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            borrowThreshold
+        );
+        handleOrderExecuted(event);
+
+        const id =
+            getOrderEntityId(placedOrderId, ccy, maturity) +
+            ':' +
+            event.transaction.hash.toString();
+        assert.notInStore('Order', id);
+    });
+
     test('should create a Partially Blocked Order and a Transaction', () => {
         const placedOrderId = BigInt.fromI32(0);
         const filledAmount = BigInt.fromI32(81);

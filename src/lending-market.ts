@@ -31,7 +31,16 @@ export function handleOrderExecuted(event: OrderExecuted): void {
     let status: string;
     let amount: BigInt;
     let unitPrice: BigInt;
-    if (!event.params.placedAmount.isZero()) {
+    if (event.params.inputUnitPrice.isZero()) {
+        id = id + ':' + event.transaction.hash.toString();
+        if (!event.params.filledAmount.isZero()) {
+            amount = event.params.filledAmount;
+            unitPrice = event.params.filledUnitPrice;
+            status = 'Filled';
+        } else {
+            return;
+        }
+    } else if (!event.params.placedAmount.isZero()) {
         amount = event.params.inputAmount;
         unitPrice = event.params.inputUnitPrice;
         if (!event.params.filledAmount.isZero()) {
@@ -41,11 +50,7 @@ export function handleOrderExecuted(event: OrderExecuted): void {
         }
     } else if (!event.params.filledAmount.isZero()) {
         id = id + ':' + event.transaction.hash.toString();
-        if (event.params.inputUnitPrice.isZero()) {
-            amount = event.params.filledAmount;
-            unitPrice = event.params.filledUnitPrice;
-            status = 'Filled';
-        } else if (
+        if (
             event.params.inputAmount.minus(event.params.filledAmount).isZero()
         ) {
             amount = event.params.inputAmount;
