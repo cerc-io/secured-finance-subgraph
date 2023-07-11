@@ -43,6 +43,26 @@ dataSources:
         - event: Deposit(indexed address,bytes32,uint256)
           handler: handleDeposit
       file: ./src/token-vault.ts
+  - kind: ethereum
+    name: FundManagementLogic
+    network: ~
+    source:
+      abi: FundManagementLogic
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Order
+        - Transaction
+      abis:
+        - name: FundManagementLogic
+          file: >-
+            ./abis/protocol/libraries/logics/FundManagementLogic.sol/FundManagementLogic.json
+      eventHandlers:
+        - event: OrderPartiallyFilled(uint48,indexed address,indexed bytes32,uint8,uint256,uint256,uint256)
+          handler: handleOrderPartiallyFilled
+      file: ./src/lending-market.ts
 templates:
   - kind: ethereum
     name: LendingMarket
@@ -63,16 +83,16 @@ templates:
           file: >-
             ./abis/protocol/LendingMarket.sol/LendingMarket.json
       eventHandlers:
-        - event: OrderMade(uint48,indexed address,uint8,bytes32,uint256,uint256,uint256,bool)
-          handler: handleOrderMade
-        - event: OrdersTaken(indexed address,uint8,bytes32,uint256,uint256,uint256,uint256)
-          handler: handleOrdersTaken
-        - event: OrdersCleaned(uint48[],indexed address,uint8,indexed bytes32,uint256)
-          handler: handleOrdersCleaned
+        - event: OrderExecuted(indexed address,uint8,indexed bytes32,indexed uint256,uint256,uint256,uint256,uint256,uint256,uint48,uint256,uint256,uint256)
+          handler: handleOrderExecuted
+        - event: PreOrderExecuted(indexed address,uint8,indexed bytes32,indexed uint256,uint256,uint256,uint48)
+          handler: handlePreOrderExecuted
+        - event: PositionUnwound(indexed address,uint8,indexed bytes32,indexed uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handlePositionUnwound
         - event: OrderCanceled(uint48,indexed address,uint8,bytes32,uint256,uint256,uint256)
           handler: handleOrderCanceled
-        - event: OrderPartiallyTaken(uint48,indexed address,uint8,indexed bytes32,uint256,uint256,uint256)
-          handler: handleOrderPartiallyTaken
+        - event: OrdersCleaned(uint48[],indexed address,uint8,indexed bytes32,uint256,uint256,uint256)
+          handler: handleOrdersCleaned
         - event: ItayoseExecuted(bytes32,uint256,uint256,uint256,uint256,uint256)
           handler: handleItayoseExecuted
       file: ./src/lending-market.ts

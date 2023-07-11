@@ -12,23 +12,13 @@ import {
     handleLendingMarketCreated,
     handleLendingMarketsRotated,
 } from '../src/lending-controller';
-import {
-    handleOrderCanceled,
-    handleOrderMade,
-    handleOrderPartiallyTaken,
-} from '../src/lending-market';
-
 import { buildLendingMarketId, toBytes32 } from '../src/utils/string';
 import {
     createLendingMarketCreatedEvent,
     createLendingMarketsRotatedEvent,
-    createOrderCanceledEvent,
-    createOrderMadeEvent,
-    createOrderPartiallyTakenEvent,
     toArrayString,
 } from './mocks';
-import { ALICE, BOB, createTransaction } from './utils/createEntities';
-import { getOrderEntityId } from '../src/utils/id-generation';
+import { ALICE, BOB } from './utils/createEntities';
 
 const lendingMarketAddress = Address.zero();
 const futureValueVault = Address.zero();

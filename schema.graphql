@@ -64,6 +64,8 @@ enum OrderStatus {
   Cancelled
   Filled
   PartiallyFilled
+  Blocked
+  PartiallyBlocked
   Expired
 }
 
