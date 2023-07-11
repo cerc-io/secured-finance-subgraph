@@ -44,10 +44,10 @@ dataSources:
           handler: handleDeposit
       file: ./src/token-vault.ts
   - kind: ethereum
-    name: FundManagementLogic
+    name: FundManagement
     network: ~
     source:
-      abi: FundManagementLogic
+      abi: FundManagement
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -56,13 +56,13 @@ dataSources:
         - Order
         - Transaction
       abis:
-        - name: FundManagementLogic
+        - name: FundManagement
           file: >-
             ./abis/protocol/libraries/logics/FundManagementLogic.sol/FundManagementLogic.json
       eventHandlers:
         - event: OrderPartiallyFilled(uint48,indexed address,indexed bytes32,uint8,uint256,uint256,uint256)
           handler: handleOrderPartiallyFilled
-      file: ./src/lending-market.ts
+      file: ./src/fund-management.ts
 templates:
   - kind: ethereum
     name: LendingMarket
@@ -74,7 +74,6 @@ templates:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - LendingMarket
         - Order
         - Transaction
         - DailyVolume
