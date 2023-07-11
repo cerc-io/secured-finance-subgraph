@@ -46,7 +46,7 @@ describe('Order Executed', () => {
         createLendingMarket(ccy, maturity);
     });
 
-    test('should create an Open Order', () => {
+    test('should create an Open Order when limit order is not filled and order is placed', () => {
         const placedOrderId = BigInt.fromI32(1);
 
         const event = createOrderExecutedEvent(
@@ -89,7 +89,7 @@ describe('Order Executed', () => {
         );
     });
 
-    test('should create a Partially Filled Order and a Transaction', () => {
+    test('should create a Partially Filled Order and a Transaction when a limit order is partially filled and order is placed', () => {
         const placedOrderId = BigInt.fromI32(1);
         const filledAmount = BigInt.fromI32(81);
         const filledUnitPrice = unitPrice;
@@ -158,7 +158,7 @@ describe('Order Executed', () => {
         );
     });
 
-    test('should create a Filled Order and a Transaction', () => {
+    test('should create a Filled Order and a Transaction when a limit order is filled completely', () => {
         const placedOrderId = BigInt.fromI32(0);
         const filledAmount = BigInt.fromI32(135);
         const filledUnitPrice = unitPrice;
@@ -333,7 +333,7 @@ describe('Order Executed', () => {
         assert.notInStore('Order', id);
     });
 
-    test('should create a Partially Blocked Order and a Transaction', () => {
+    test('should create a Partially Blocked Order and a Transaction when order is filled partially and remaining amount is not placed', () => {
         const placedOrderId = BigInt.fromI32(0);
         const filledAmount = BigInt.fromI32(81);
         const filledUnitPrice = unitPrice;
@@ -405,7 +405,7 @@ describe('Order Executed', () => {
         );
     });
 
-    test('should create an Blocked Order', () => {
+    test('should create an Blocked Order when limit order is completely blocked', () => {
         const placedOrderId = BigInt.fromI32(0);
 
         const event = createOrderExecutedEvent(
@@ -491,7 +491,7 @@ describe('Position Unwound', () => {
         createLendingMarket(ccy, maturity);
     });
 
-    test('should create an Filled Order and a transaction', () => {
+    test('should create an Filled Order and a transaction when future value is filled completely', () => {
         const orderId = BigInt.fromI32(0);
         const futureValue = BigInt.fromI32(250);
         const filledAmount = BigInt.fromI32(225);
