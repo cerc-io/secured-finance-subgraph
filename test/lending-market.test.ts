@@ -10,11 +10,11 @@ import {
     handleOrderExecuted,
     handlePreOrderExecuted,
     handlePositionUnwound,
-    handleOrderPartiallyFilled,
     handleOrderCanceled,
     handleOrdersCleaned,
     handleItayoseExecuted,
 } from '../src/lending-market';
+import { handleOrderPartiallyFilled } from '../src/fund-management';
 import {
     getDailyVolumeEntityId,
     getOrderEntityId,
@@ -184,7 +184,7 @@ describe('Order Executed', () => {
         const id =
             getOrderEntityId(placedOrderId, ccy, maturity) +
             ':' +
-            event.transaction.hash.toString();
+            event.transaction.hash.toHexString();
         assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
         assert.fieldEquals('Order', id, 'unitPrice', unitPrice.toString());
         assert.fieldEquals(
@@ -256,7 +256,7 @@ describe('Order Executed', () => {
         const id =
             getOrderEntityId(placedOrderId, ccy, maturity) +
             ':' +
-            event.transaction.hash.toString();
+            event.transaction.hash.toHexString();
         assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
         assert.fieldEquals(
             'Order',
@@ -329,7 +329,7 @@ describe('Order Executed', () => {
         const id =
             getOrderEntityId(placedOrderId, ccy, maturity) +
             ':' +
-            event.transaction.hash.toString();
+            event.transaction.hash.toHexString();
         assert.notInStore('Order', id);
     });
 
@@ -360,7 +360,7 @@ describe('Order Executed', () => {
         const id =
             getOrderEntityId(placedOrderId, ccy, maturity) +
             ':' +
-            event.transaction.hash.toString();
+            event.transaction.hash.toHexString();
         assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
         assert.fieldEquals('Order', id, 'unitPrice', '8400');
         assert.fieldEquals(
@@ -428,7 +428,7 @@ describe('Order Executed', () => {
         const id =
             getOrderEntityId(placedOrderId, ccy, maturity) +
             ':' +
-            event.transaction.hash.toString();
+            event.transaction.hash.toHexString();
         assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
         assert.fieldEquals('Order', id, 'unitPrice', unitPrice.toString());
         assert.fieldEquals('Order', id, 'filledAmount', '0');
@@ -514,7 +514,7 @@ describe('Position Unwound', () => {
         const id =
             getOrderEntityId(orderId, ccy, maturity) +
             ':' +
-            event.transaction.hash.toString();
+            event.transaction.hash.toHexString();
         assert.fieldEquals('Order', id, 'orderId', orderId.toString());
         assert.fieldEquals(
             'Order',
@@ -582,7 +582,7 @@ describe('Position Unwound', () => {
         const id =
             getOrderEntityId(orderId, ccy, maturity) +
             ':' +
-            event.transaction.hash.toString();
+            event.transaction.hash.toHexString();
         assert.fieldEquals('Order', id, 'orderId', orderId.toString());
         assert.fieldEquals(
             'Order',

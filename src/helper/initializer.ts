@@ -1,9 +1,17 @@
-import { BigInt, Bytes, log } from '@graphprotocol/graph-ts';
+import {
+    Address,
+    BigDecimal,
+    BigInt,
+    Bytes,
+    log,
+} from '@graphprotocol/graph-ts';
 import {
     DailyVolume,
     LendingMarket,
     Protocol,
     User,
+    Order,
+    Transaction,
 } from '../../generated/schema';
 import { getDailyVolumeEntityId } from '../utils/id-generation';
 import { buildLendingMarketId } from '../utils/string';
@@ -86,4 +94,85 @@ export const getOrInitDailyVolume = (
         dailyVolume.save();
     }
     return dailyVolume as DailyVolume;
+};
+
+export const initOrder = (
+    id: string,
+    orderId: BigInt,
+    maker: Address,
+    currency: Bytes,
+    side: i32,
+    maturity: BigInt,
+    unitPrice: BigInt,
+    filledAmount: BigInt,
+    amount: BigInt,
+    status: string,
+    isPreOrder: boolean,
+    createdAt: BigInt,
+    blockNumber: BigInt,
+    txHash: Bytes
+): void => {
+    if (amount.isZero()) return;
+
+    const order = new Order(id);
+    const user = getOrInitUser(maker);
+
+    order.orderId = orderId;
+    order.maker = user.id;
+    order.currency = currency;
+    order.side = side;
+    order.maturity = maturity;
+    order.unitPrice = unitPrice;
+    order.filledAmount = filledAmount;
+    order.amount = amount;
+    order.status = status;
+    order.lendingMarket = getOrInitLendingMarket(currency, maturity).id;
+    order.isPreOrder = isPreOrder;
+    order.createdAt = createdAt;
+    order.blockNumber = blockNumber;
+    order.txHash = txHash;
+    order.save();
+
+    user.orderCount = user.orderCount.plus(BigInt.fromI32(1));
+    user.save();
+};
+
+export const initTransaction = (
+    txId: string,
+    unitPrice: BigInt,
+    taker: Address,
+    currency: Bytes,
+    maturity: BigInt,
+    side: i32,
+    filledAmount: BigInt,
+    filledFutureValue: BigInt,
+    executionType: string,
+    timestamp: BigInt,
+    blockNumber: BigInt,
+    txHash: Bytes
+): void => {
+    if (filledAmount.isZero()) return;
+
+    const transaction = new Transaction(txId);
+    const user = getOrInitUser(taker);
+
+    transaction.orderPrice = unitPrice;
+    transaction.taker = user.id;
+    transaction.currency = currency;
+    transaction.maturity = maturity;
+    transaction.side = side;
+    transaction.executionType = executionType;
+    transaction.forwardValue = filledFutureValue;
+    transaction.amount = filledAmount;
+    transaction.averagePrice = !filledFutureValue.isZero()
+        ? filledAmount.divDecimal(new BigDecimal(filledFutureValue))
+        : BigDecimal.zero();
+    transaction.lendingMarket = getOrInitLendingMarket(currency, maturity).id;
+    transaction.createdAt = timestamp;
+    transaction.blockNumber = blockNumber;
+    transaction.txHash = txHash;
+    transaction.save();
+
+    user.transactionCount = user.transactionCount.plus(BigInt.fromI32(1));
+    user.save();
 };
