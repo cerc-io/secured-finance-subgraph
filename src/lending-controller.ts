@@ -2,7 +2,7 @@ import { log } from '@graphprotocol/graph-ts';
 import {
     LendingMarketCreated,
     LendingMarketsRotated,
-} from '../generated/LendingMarketController/LendingMarketController';
+} from '../generated/LendingMarketOperationLogic/LendingMarketController';
 import { LendingMarket, Order } from '../generated/schema';
 import { LendingMarket as LendingMarketTemplate } from '../generated/templates';
 import { getOrInitLendingMarket } from './helper/initializer';

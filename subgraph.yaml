@@ -4,7 +4,7 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum
-    name: LendingMarketController
+    name: LendingMarketOperationLogic
     network: ~
     source:
       abi: LendingMarketController
@@ -13,7 +13,7 @@ dataSources:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - LendingMarketController
+        - LendingMarket
       abis:
         - name: LendingMarketController
           file: >-
@@ -44,10 +44,10 @@ dataSources:
           handler: handleDeposit
       file: ./src/token-vault.ts
   - kind: ethereum
-    name: FundManagement
+    name: FundManagementLogic
     network: ~
     source:
-      abi: FundManagement
+      abi: LendingMarketController
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -56,7 +56,7 @@ dataSources:
         - Order
         - Transaction
       abis:
-        - name: FundManagement
+        - name: LendingMarketController
           file: >-
             ./abis/protocol/libraries/logics/FundManagementLogic.sol/FundManagementLogic.json
       eventHandlers:

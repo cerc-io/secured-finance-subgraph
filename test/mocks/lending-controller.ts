@@ -3,7 +3,7 @@ import { newMockEvent } from 'matchstick-as/assembly/index';
 import {
     LendingMarketCreated,
     LendingMarketsRotated,
-} from '../../generated/LendingMarketController/LendingMarketController';
+} from '../../generated/LendingMarketOperationLogic/LendingMarketController';
 
 export function createLendingMarketCreatedEvent(
     ccy: Bytes,
