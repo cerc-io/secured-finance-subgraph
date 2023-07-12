@@ -9,7 +9,7 @@ import {
     OrdersCleaned,
     ItayoseExecuted,
 } from '../../generated/templates/LendingMarket/LendingMarket';
-import { OrderPartiallyFilled } from '../../generated/FundManagement/FundManagement';
+import { OrderPartiallyFilled } from '../../generated/FundManagementLogic/LendingMarketController';
 
 export function createOrderExecutedEvent(
     user: Address,

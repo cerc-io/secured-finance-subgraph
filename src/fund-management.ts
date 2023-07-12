@@ -6,7 +6,7 @@ import {
     log,
 } from '@graphprotocol/graph-ts';
 import { Order, Transaction } from '../generated/schema';
-import { OrderPartiallyFilled } from '../generated/FundManagement/FundManagement';
+import { OrderPartiallyFilled } from '../generated/FundManagementLogic/LendingMarketController';
 import { initTransaction } from './helper/initializer';
 import { getOrderEntityId } from './utils/id-generation';
 

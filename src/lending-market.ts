@@ -14,7 +14,7 @@ import {
     OrdersCleaned,
     ItayoseExecuted,
 } from '../generated/templates/LendingMarket/LendingMarket';
-import { OrderPartiallyFilled } from '../generated/FundManagement/FundManagement';
+import { OrderPartiallyFilled } from '../generated/FundManagementLogic/LendingMarketController';
 import {
     getOrInitDailyVolume,
     getOrInitLendingMarket,
