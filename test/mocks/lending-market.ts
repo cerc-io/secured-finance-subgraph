@@ -24,7 +24,7 @@ export function createOrderExecutedEvent(
     placedOrderId: BigInt,
     placedAmount: BigInt,
     placedUnitPrice: BigInt,
-    cbThresholdUnitPrice: BigInt,
+    isCircuitBreakerTriggered: boolean,
     blockTimestamp: BigInt = BigInt.fromI32(0)
 ): OrderExecuted {
     const mockEvent = changetype<OrderExecuted>(newMockEvent());
@@ -108,8 +108,8 @@ export function createOrderExecutedEvent(
     );
     event.parameters.push(
         new ethereum.EventParam(
-            'cbThresholdUnitPrice',
-            ethereum.Value.fromUnsignedBigInt(cbThresholdUnitPrice)
+            'isCircuitBreakerTriggered',
+            ethereum.Value.fromBoolean(isCircuitBreakerTriggered)
         )
     );
 
@@ -184,7 +184,7 @@ export function createPositionUnwoundEvent(
     filledAmount: BigInt,
     filledUnitPrice: BigInt,
     filledFutureValue: BigInt,
-    cbThresholdUnitPrice: BigInt,
+    isCircuitBreakerTriggered: boolean,
     blockTimestamp: BigInt = BigInt.fromI32(0)
 ): PositionUnwound {
     const mockEvent = changetype<PositionUnwound>(newMockEvent());
@@ -245,8 +245,8 @@ export function createPositionUnwoundEvent(
     );
     event.parameters.push(
         new ethereum.EventParam(
-            'cbThresholdUnitPrice',
-            ethereum.Value.fromUnsignedBigInt(cbThresholdUnitPrice)
+            'isCircuitBreakerTriggered',
+            ethereum.Value.fromBoolean(isCircuitBreakerTriggered)
         )
     );
 

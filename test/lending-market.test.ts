@@ -62,7 +62,7 @@ describe('Order Executed', () => {
             placedOrderId,
             amount,
             unitPrice,
-            borrowThreshold
+            false
         );
         handleOrderExecuted(event);
 
@@ -109,7 +109,7 @@ describe('Order Executed', () => {
             placedOrderId,
             amount,
             unitPrice,
-            borrowThreshold
+            false
         );
         handleOrderExecuted(event);
 
@@ -177,7 +177,7 @@ describe('Order Executed', () => {
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
-            borrowThreshold
+            false
         );
         handleOrderExecuted(event);
 
@@ -249,7 +249,7 @@ describe('Order Executed', () => {
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
-            borrowThreshold
+            false
         );
         handleOrderExecuted(event);
 
@@ -306,7 +306,7 @@ describe('Order Executed', () => {
         );
     });
 
-    test('should not create any order when market order is not filled', () => {
+    test('should not create any order when market order is not filled or blocked', () => {
         const placedOrderId = BigInt.fromI32(0);
 
         const event = createOrderExecutedEvent(
@@ -322,7 +322,7 @@ describe('Order Executed', () => {
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
-            borrowThreshold
+            false
         );
         handleOrderExecuted(event);
 
@@ -331,6 +331,115 @@ describe('Order Executed', () => {
             ':' +
             event.transaction.hash.toHexString();
         assert.notInStore('Order', id);
+    });
+
+    test('should create a Partially Blocked Order and a Transaction when market order is blocked partially because of circuit breaker', () => {
+        const placedOrderId = BigInt.fromI32(0);
+        const filledAmount = BigInt.fromI32(81);
+        const filledUnitPrice = unitPrice;
+        const filledFutureValue = BigInt.fromI32(90);
+        const totalAmount = filledAmount.plus(amount);
+
+        const event = createOrderExecutedEvent(
+            ALICE,
+            borrow,
+            ccy,
+            maturity,
+            totalAmount,
+            BigInt.fromI32(0),
+            filledAmount,
+            filledUnitPrice,
+            filledFutureValue,
+            placedOrderId,
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            true
+        );
+        handleOrderExecuted(event);
+
+        const id =
+            getOrderEntityId(placedOrderId, ccy, maturity) +
+            ':' +
+            event.transaction.hash.toHexString();
+        assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
+        assert.fieldEquals(
+            'Order',
+            id,
+            'unitPrice',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'Order',
+            id,
+            'filledAmount',
+            filledAmount.toString()
+        );
+        assert.fieldEquals('Order', id, 'amount', totalAmount.toString());
+        assert.fieldEquals('Order', id, 'status', 'PartiallyBlocked');
+        assert.fieldEquals('Order', id, 'isPreOrder', 'false');
+
+        const txId =
+            event.transaction.hash.toHexString() +
+            ':' +
+            event.logIndex.toString();
+        assert.fieldEquals(
+            'Transaction',
+            txId,
+            'orderPrice',
+            unitPrice.toString()
+        );
+        assert.fieldEquals(
+            'Transaction',
+            txId,
+            'forwardValue',
+            filledFutureValue.toString()
+        );
+        assert.fieldEquals(
+            'Transaction',
+            txId,
+            'amount',
+            filledAmount.toString()
+        );
+
+        assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
+        assert.fieldEquals(
+            'User',
+            ALICE.toHexString(),
+            'transactionCount',
+            '1'
+        );
+    });
+
+    test('should create a Blocked Order when market order is fully blocked because of circuit breaker', () => {
+        const placedOrderId = BigInt.fromI32(0);
+
+        const event = createOrderExecutedEvent(
+            ALICE,
+            borrow,
+            ccy,
+            maturity,
+            amount,
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            true
+        );
+        handleOrderExecuted(event);
+
+        const id =
+            getOrderEntityId(placedOrderId, ccy, maturity) +
+            ':' +
+            event.transaction.hash.toHexString();
+        assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
+        assert.fieldEquals('Order', id, 'unitPrice', '0');
+        assert.fieldEquals('Order', id, 'filledAmount', '0');
+        assert.fieldEquals('Order', id, 'amount', amount.toString());
+        assert.fieldEquals('Order', id, 'status', 'Blocked');
+        assert.fieldEquals('Order', id, 'isPreOrder', 'false');
     });
 
     test('should create a Partially Blocked Order and a Transaction when order is filled partially and remaining amount is not placed', () => {
@@ -353,7 +462,7 @@ describe('Order Executed', () => {
             placedOrderId,
             BigInt.fromI32(0),
             BigInt.fromI32(0),
-            borrowThreshold
+            true
         );
         handleOrderExecuted(event);
 
@@ -421,7 +530,7 @@ describe('Order Executed', () => {
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
-            borrowThreshold
+            true
         );
         handleOrderExecuted(event);
 
@@ -491,7 +600,7 @@ describe('Position Unwound', () => {
         createLendingMarket(ccy, maturity);
     });
 
-    test('should create an Filled Order and a transaction when future value is filled completely', () => {
+    test('should create a Filled Order and a transaction when future value is filled completely', () => {
         const orderId = BigInt.fromI32(0);
         const futureValue = BigInt.fromI32(250);
         const filledAmount = BigInt.fromI32(225);
@@ -507,7 +616,7 @@ describe('Position Unwound', () => {
             filledAmount,
             filledUnitPrice,
             filledFutureValue,
-            lendThreshold
+            false
         );
         handlePositionUnwound(event);
 
@@ -575,7 +684,7 @@ describe('Position Unwound', () => {
             filledAmount,
             filledUnitPrice,
             filledFutureValue,
-            lendThreshold
+            true
         );
         handlePositionUnwound(event);
 
@@ -626,6 +735,58 @@ describe('Position Unwound', () => {
         assert.fieldEquals('User', BOB.toHexString(), 'orderCount', '1');
         assert.fieldEquals('User', BOB.toHexString(), 'transactionCount', '1');
     });
+
+    test('should create a Blocked Order when order is fully blocked', () => {
+        const orderId = BigInt.fromI32(0);
+        const futureValue = BigInt.fromI32(250);
+
+        const event = createPositionUnwoundEvent(
+            BOB,
+            lend,
+            ccy,
+            maturity,
+            futureValue,
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            true
+        );
+        handlePositionUnwound(event);
+
+        const id =
+            getOrderEntityId(orderId, ccy, maturity) +
+            ':' +
+            event.transaction.hash.toHexString();
+        assert.fieldEquals('Order', id, 'unitPrice', '0');
+        assert.fieldEquals('Order', id, 'filledAmount', '0');
+        assert.fieldEquals('Order', id, 'amount', '0');
+        assert.fieldEquals('Order', id, 'status', 'Blocked');
+        assert.fieldEquals('Order', id, 'isPreOrder', 'false');
+    });
+
+    test('should not create any order when position unwound order is not filled or blocked', () => {
+        const orderId = BigInt.fromI32(0);
+        const futureValue = BigInt.fromI32(250);
+
+        const event = createPositionUnwoundEvent(
+            BOB,
+            lend,
+            ccy,
+            maturity,
+            futureValue,
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            false
+        );
+        handlePositionUnwound(event);
+
+        const id =
+            getOrderEntityId(orderId, ccy, maturity) +
+            ':' +
+            event.transaction.hash.toHexString();
+        assert.notInStore('Order', id);
+    });
 });
 
 describe('Order Partially Filled', () => {
@@ -650,7 +811,7 @@ describe('Order Partially Filled', () => {
             placedOrderId,
             amount,
             unitPrice,
-            borrowThreshold
+            false
         );
         handleOrderExecuted(event);
 
@@ -711,7 +872,7 @@ describe('Order Partially Filled', () => {
             placedOrderId,
             BigInt.fromI32(63),
             unitPrice,
-            borrowThreshold
+            false
         );
         handleOrderExecuted(event);
 
@@ -779,7 +940,7 @@ describe('Order Canceled', () => {
             placedOrderId,
             amount,
             unitPrice,
-            borrowThreshold
+            false
         );
         handleOrderExecuted(event);
 
@@ -828,7 +989,7 @@ describe('Order Canceled', () => {
             placedOrderId,
             amount,
             unitPrice,
-            borrowThreshold
+            false
         );
         handleOrderExecuted(event);
 
@@ -895,7 +1056,7 @@ describe('Orders Cleaned', () => {
             placedOrderId1,
             amount,
             unitPrice,
-            borrowThreshold
+            false
         );
         handleOrderExecuted(event1);
         const id1 = getOrderEntityId(placedOrderId1, ccy, maturity);
@@ -918,7 +1079,7 @@ describe('Orders Cleaned', () => {
             placedOrderId2,
             amount2,
             unitPrice2,
-            borrowThreshold
+            false
         );
         handleOrderExecuted(event2);
         const id2 = getOrderEntityId(placedOrderId2, ccy, maturity);
@@ -981,7 +1142,7 @@ describe('Orders Cleaned', () => {
             placedOrderId1,
             BigInt.fromI32(54),
             unitPrice,
-            borrowThreshold
+            false
         );
         handleOrderExecuted(event1);
         const id1 = getOrderEntityId(placedOrderId1, ccy, maturity);
@@ -1004,7 +1165,7 @@ describe('Orders Cleaned', () => {
             placedOrderId2,
             BigInt.fromI32(40),
             unitPrice2,
-            borrowThreshold
+            false
         );
         handleOrderExecuted(event2);
         const id2 = getOrderEntityId(placedOrderId2, ccy, maturity);
@@ -1208,7 +1369,7 @@ describe('Itayose Executed', () => {
             orderId7,
             amount,
             unitPrice7,
-            borrowThreshold
+            false
         );
         handleOrderExecuted(event7);
 
@@ -1349,7 +1510,7 @@ describe('Daily Volume', () => {
             placedOrderId,
             amount,
             unitPrice,
-            borrowThreshold,
+            false,
             BigInt.fromI32(1675878200)
         );
         handleOrderExecuted(event);
@@ -1379,7 +1540,7 @@ describe('Daily Volume', () => {
             placedOrderId2,
             amount,
             unitPrice,
-            borrowThreshold,
+            false,
             BigInt.fromI32(1675878200)
         );
         handleOrderExecuted(event2);
@@ -1407,7 +1568,7 @@ describe('Daily Volume', () => {
             filledAmount,
             filledUnitPrice,
             filledFutureValue,
-            lendThreshold,
+            false,
             BigInt.fromI32(1675878200)
         );
         handlePositionUnwound(event);
@@ -1441,7 +1602,7 @@ describe('Daily Volume', () => {
             placedOrderId,
             amount,
             unitPrice,
-            borrowThreshold,
+            false,
             BigInt.fromI32(1675878200)
         );
         handleOrderExecuted(event);

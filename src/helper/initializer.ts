@@ -112,8 +112,6 @@ export const initOrder = (
     blockNumber: BigInt,
     txHash: Bytes
 ): void => {
-    if (amount.isZero()) return;
-
     const order = new Order(id);
     const user = getOrInitUser(maker);
 
