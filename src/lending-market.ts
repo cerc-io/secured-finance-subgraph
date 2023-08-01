@@ -52,28 +52,26 @@ export function handleOrderExecuted(event: OrderExecuted): void {
         } else {
             return;
         }
-    } else if (!event.params.placedAmount.isZero()) {
-        amount = event.params.inputAmount;
-        unitPrice = event.params.inputUnitPrice;
-        if (!event.params.filledAmount.isZero()) {
-            status = 'PartiallyFilled';
-        } else {
-            status = 'Open';
-        }
-    } else if (event.params.isCircuitBreakerTriggered) {
-        id = id + ':' + event.transaction.hash.toHexString();
-        amount = event.params.inputAmount;
-        unitPrice = event.params.inputUnitPrice;
-        if (event.params.filledAmount.isZero()) {
-            status = 'Blocked';
-        } else {
-            status = 'PartiallyBlocked';
-        }
     } else {
-        id = id + ':' + event.transaction.hash.toHexString();
         amount = event.params.inputAmount;
         unitPrice = event.params.inputUnitPrice;
-        status = 'Filled';
+        if (!event.params.placedAmount.isZero()) {
+            if (!event.params.filledAmount.isZero()) {
+                status = 'PartiallyFilled';
+            } else {
+                status = 'Open';
+            }
+        } else if (event.params.isCircuitBreakerTriggered) {
+            id = id + ':' + event.transaction.hash.toHexString();
+            if (event.params.filledAmount.isZero()) {
+                status = 'Blocked';
+            } else {
+                status = 'PartiallyBlocked';
+            }
+        } else {
+            id = id + ':' + event.transaction.hash.toHexString();
+            status = 'Filled';
+        }
     }
     initOrder(
         id,
