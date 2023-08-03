@@ -35,39 +35,43 @@ export function handleOrderExecuted(event: OrderExecuted): void {
     let unitPrice: BigInt;
     if (event.params.inputUnitPrice.isZero()) {
         id = id + ':' + event.transaction.hash.toHexString();
-        if (!event.params.filledAmount.isZero()) {
+        if (event.params.isCircuitBreakerTriggered) {
+            if (event.params.filledAmount.isZero()) {
+                amount = event.params.inputAmount;
+                unitPrice = event.params.inputUnitPrice;
+                status = 'Blocked';
+            } else {
+                amount = event.params.inputAmount;
+                unitPrice = event.params.filledUnitPrice;
+                status = 'PartiallyBlocked';
+            }
+        } else if (!event.params.filledAmount.isZero()) {
             amount = event.params.filledAmount;
             unitPrice = event.params.filledUnitPrice;
             status = 'Filled';
         } else {
             return;
         }
-    } else if (!event.params.placedAmount.isZero()) {
-        amount = event.params.inputAmount;
-        unitPrice = event.params.inputUnitPrice;
-        if (!event.params.filledAmount.isZero()) {
-            status = 'PartiallyFilled';
-        } else {
-            status = 'Open';
-        }
-    } else if (!event.params.filledAmount.isZero()) {
-        id = id + ':' + event.transaction.hash.toHexString();
-        if (
-            event.params.inputAmount.minus(event.params.filledAmount).isZero()
-        ) {
-            amount = event.params.inputAmount;
-            unitPrice = event.params.inputUnitPrice;
-            status = 'Filled';
-        } else {
-            amount = event.params.inputAmount;
-            unitPrice = event.params.inputUnitPrice;
-            status = 'PartiallyBlocked';
-        }
     } else {
-        id = id + ':' + event.transaction.hash.toHexString();
         amount = event.params.inputAmount;
         unitPrice = event.params.inputUnitPrice;
-        status = 'Blocked';
+        if (!event.params.placedAmount.isZero()) {
+            if (!event.params.filledAmount.isZero()) {
+                status = 'PartiallyFilled';
+            } else {
+                status = 'Open';
+            }
+        } else if (event.params.isCircuitBreakerTriggered) {
+            id = id + ':' + event.transaction.hash.toHexString();
+            if (event.params.filledAmount.isZero()) {
+                status = 'Blocked';
+            } else {
+                status = 'PartiallyBlocked';
+            }
+        } else {
+            id = id + ':' + event.transaction.hash.toHexString();
+            status = 'Filled';
+        }
     }
     initOrder(
         id,
@@ -148,44 +152,65 @@ export function handlePositionUnwound(event: PositionUnwound): void {
         getOrderEntityId(orderId, event.params.ccy, event.params.maturity) +
         ':' +
         event.transaction.hash.toHexString();
-    initOrder(
-        id,
-        orderId,
-        event.params.user,
-        event.params.ccy,
-        event.params.side,
-        event.params.maturity,
-        event.params.filledUnitPrice,
-        event.params.filledAmount,
-        event.params.filledAmount,
-        'Filled',
-        false,
-        event.block.timestamp,
-        event.block.number,
-        event.transaction.hash
-    );
-    const txId =
-        event.transaction.hash.toHexString() + ':' + event.logIndex.toString();
-    initTransaction(
-        txId,
-        event.params.filledUnitPrice,
-        event.params.user,
-        event.params.ccy,
-        event.params.maturity,
-        event.params.side,
-        event.params.filledAmount,
-        event.params.filledFutureValue,
-        'Sync',
-        event.block.timestamp,
-        event.block.number,
-        event.transaction.hash
-    );
-    const dailyVolume = getOrInitDailyVolume(
-        event.params.ccy,
-        event.params.maturity,
-        event.block.timestamp
-    );
-    addToTransactionVolume(txId, dailyVolume);
+    if (!event.params.filledAmount.isZero()) {
+        initOrder(
+            id,
+            orderId,
+            event.params.user,
+            event.params.ccy,
+            event.params.side,
+            event.params.maturity,
+            event.params.filledUnitPrice,
+            event.params.filledAmount,
+            event.params.filledAmount,
+            'Filled',
+            false,
+            event.block.timestamp,
+            event.block.number,
+            event.transaction.hash
+        );
+        const txId =
+            event.transaction.hash.toHexString() +
+            ':' +
+            event.logIndex.toString();
+        initTransaction(
+            txId,
+            event.params.filledUnitPrice,
+            event.params.user,
+            event.params.ccy,
+            event.params.maturity,
+            event.params.side,
+            event.params.filledAmount,
+            event.params.filledFutureValue,
+            'Sync',
+            event.block.timestamp,
+            event.block.number,
+            event.transaction.hash
+        );
+        const dailyVolume = getOrInitDailyVolume(
+            event.params.ccy,
+            event.params.maturity,
+            event.block.timestamp
+        );
+        addToTransactionVolume(txId, dailyVolume);
+    } else if (event.params.isCircuitBreakerTriggered) {
+        initOrder(
+            id,
+            orderId,
+            event.params.user,
+            event.params.ccy,
+            event.params.side,
+            event.params.maturity,
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            'Blocked',
+            false,
+            event.block.timestamp,
+            event.block.number,
+            event.transaction.hash
+        );
+    }
 }
 
 export function handleOrderCanceled(event: OrderCanceled): void {
