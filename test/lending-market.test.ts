@@ -1,4 +1,4 @@
-import { Address, BigInt } from '@graphprotocol/graph-ts';
+import { BigInt } from '@graphprotocol/graph-ts';
 import {
     assert,
     beforeEach,
@@ -6,30 +6,30 @@ import {
     describe,
     test,
 } from 'matchstick-as/assembly/index';
-import {
-    handleOrderExecuted,
-    handlePreOrderExecuted,
-    handlePositionUnwound,
-    handleOrderCanceled,
-    handleOrdersCleaned,
-    handleItayoseExecuted,
-} from '../src/lending-market';
 import { handleOrderPartiallyFilled } from '../src/fund-management';
+import {
+    handleItayoseExecuted,
+    handleOrderCanceled,
+    handleOrderExecuted,
+    handleOrdersCleaned,
+    handlePositionUnwound,
+    handlePreOrderExecuted,
+} from '../src/lending-market';
 import {
     getDailyVolumeEntityId,
     getOrderEntityId,
 } from '../src/utils/id-generation';
 import { toBytes32 } from '../src/utils/string';
 import {
-    createOrderExecutedEvent,
-    createPreOrderExecutedEvent,
-    createPositionUnwoundEvent,
-    createOrderCanceledEvent,
-    createOrdersCleanedEvent,
     createItayoseExecutedEvent,
+    createOrderCanceledEvent,
+    createOrderExecutedEvent,
     createOrderPartiallyFilledEvent,
+    createOrdersCleanedEvent,
+    createPositionUnwoundEvent,
+    createPreOrderExecutedEvent,
 } from './mocks';
-import { createLendingMarket, ALICE, BOB } from './utils/createEntities';
+import { ALICE, BOB, createLendingMarket } from './utils/createEntities';
 
 const lend = 0;
 const borrow = 1;
@@ -37,8 +37,6 @@ const ccy = toBytes32('ETH');
 const maturity = BigInt.fromI32(1677628800); // 1st Mar 23
 const amount = BigInt.fromI32(90);
 const unitPrice = BigInt.fromI32(9000);
-const borrowThreshold = BigInt.fromI32(8500);
-const lendThreshold = BigInt.fromI32(9500);
 
 describe('Order Executed', () => {
     beforeEach(() => {

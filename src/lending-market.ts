@@ -1,24 +1,16 @@
+import { Address, BigInt, log } from '@graphprotocol/graph-ts';
+import { DailyVolume, Order, Transaction } from '../generated/schema';
 import {
-    Address,
-    BigDecimal,
-    BigInt,
-    Bytes,
-    log,
-} from '@graphprotocol/graph-ts';
-import { Order, Transaction, DailyVolume } from '../generated/schema';
-import {
-    OrderExecuted,
-    PreOrderExecuted,
-    PositionUnwound,
-    OrderCanceled,
-    OrdersCleaned,
     ItayoseExecuted,
+    OrderCanceled,
+    OrderExecuted,
+    OrdersCleaned,
+    PositionUnwound,
+    PreOrderExecuted,
 } from '../generated/templates/LendingMarket/LendingMarket';
-import { OrderPartiallyFilled } from '../generated/FundManagementLogic/LendingMarketController';
 import {
     getOrInitDailyVolume,
     getOrInitLendingMarket,
-    getOrInitUser,
     initOrder,
     initTransaction,
 } from './helper/initializer';
@@ -304,5 +296,5 @@ function addToTransactionVolume(txId: string, dailyVolume: DailyVolume): void {
 }
 
 function calculateForwardValue(amount: BigInt, unitPrice: BigInt): BigInt {
-    return (amount * BigInt.fromI32(10000)).div(unitPrice);
+    return amount.times(BigInt.fromI32(10000)).div(unitPrice);
 }

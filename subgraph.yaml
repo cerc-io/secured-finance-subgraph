@@ -16,13 +16,14 @@ dataSources:
         - LendingMarket
       abis:
         - name: LendingMarketController
-          file: >-
-            ./abis/protocol/libraries/logics/LendingMarketOperationLogic.sol/LendingMarketOperationLogic.json
+          file: ./abis/protocol/libraries/logics/LendingMarketOperationLogic.sol/LendingMarketOperationLogic.json
       eventHandlers:
-        - event: LendingMarketCreated(indexed bytes32,indexed address,address,uint256,uint256,uint256)
-          handler: handleLendingMarketCreated
-        - event: LendingMarketsRotated(bytes32,uint256,uint256)
-          handler: handleLendingMarketsRotated
+        - event: LendingMarketInitialized(indexed bytes32,uint256,uint256,uint256,uint256,address,address)
+          handler: handleLendingMarketInitialized
+        - event: OrderBookCreated(indexed bytes32,indexed uint8,uint256,uint256)
+          handler: handleOrderBookCreated
+        - event: OrderBooksRotated(bytes32,uint256,uint256)
+          handler: handleOrderBooksRotated
       file: ./src/lending-controller.ts
   - kind: ethereum
     name: TokenVault
@@ -57,18 +58,17 @@ dataSources:
         - Transaction
       abis:
         - name: LendingMarketController
-          file: >-
-            ./abis/protocol/libraries/logics/FundManagementLogic.sol/FundManagementLogic.json
+          file: ./abis/protocol/libraries/logics/FundManagementLogic.sol/FundManagementLogic.json
       eventHandlers:
         - event: OrderPartiallyFilled(uint48,indexed address,indexed bytes32,uint8,uint256,uint256,uint256)
           handler: handleOrderPartiallyFilled
       file: ./src/fund-management.ts
 templates:
   - kind: ethereum
-    name: LendingMarket
+    name: OrderActionLogic
     network: ~
     source:
-      abi: LendingMarket
+      abi: OrderActionLogic
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -78,9 +78,8 @@ templates:
         - Transaction
         - DailyVolume
       abis:
-        - name: LendingMarket
-          file: >-
-            ./abis/protocol/LendingMarket.sol/LendingMarket.json
+        - name: OrderActionLogic
+          file: ./abis/protocol/libraries/logics/OrderActionLogic.sol/OrderActionLogic.json
       eventHandlers:
         - event: OrderExecuted(indexed address,uint8,indexed bytes32,indexed uint256,uint256,uint256,uint256,uint256,uint256,uint48,uint256,uint256,bool)
           handler: handleOrderExecuted
@@ -92,6 +91,22 @@ templates:
           handler: handleOrderCanceled
         - event: OrdersCleaned(uint48[],indexed address,uint8,indexed bytes32,uint256,uint256,uint256)
           handler: handleOrdersCleaned
+      file: ./src/lending-market.ts
+  - kind: ethereum
+    name: OrderBookLogic
+    network: ~
+    source:
+      abi: OrderBookLogic
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - LendingMarket
+      abis:
+        - name: OrderBookLogic
+          file: ./abis/protocol/libraries/logics/OrderBookLogic.sol/OrderBookLogic.json
+      eventHandlers:
         - event: ItayoseExecuted(bytes32,uint256,uint256,uint256,uint256,uint256)
           handler: handleItayoseExecuted
       file: ./src/lending-market.ts
