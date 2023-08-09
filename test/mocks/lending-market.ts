@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Address, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import { newMockEvent } from 'matchstick-as/assembly/index';
-import {
-    OrderExecuted,
-    PreOrderExecuted,
-    PositionUnwound,
-    OrderCanceled,
-    OrdersCleaned,
-    ItayoseExecuted,
-} from '../../generated/templates/LendingMarket/LendingMarket';
 import { OrderPartiallyFilled } from '../../generated/FundManagementLogic/LendingMarketController';
+import {
+    OrderCanceled,
+    OrderExecuted,
+    OrdersCleaned,
+    PositionUnwound,
+    PreOrderExecuted,
+} from '../../generated/templates/OrderActionLogic/OrderActionLogic';
+import { ItayoseExecuted } from '../../generated/templates/OrderBookLogic/OrderBookLogic';
 
 export function createOrderExecutedEvent(
     user: Address,

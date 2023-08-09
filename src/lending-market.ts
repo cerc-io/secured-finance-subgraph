@@ -1,13 +1,13 @@
 import { Address, BigInt, log } from '@graphprotocol/graph-ts';
 import { DailyVolume, Order, Transaction } from '../generated/schema';
 import {
-    ItayoseExecuted,
     OrderCanceled,
     OrderExecuted,
     OrdersCleaned,
     PositionUnwound,
     PreOrderExecuted,
-} from '../generated/templates/LendingMarket/LendingMarket';
+} from '../generated/templates/OrderActionLogic/OrderActionLogic';
+import { ItayoseExecuted } from '../generated/templates/OrderBookLogic/OrderBookLogic';
 import {
     getOrInitDailyVolume,
     getOrInitLendingMarket,
