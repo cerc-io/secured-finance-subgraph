@@ -1,20 +1,18 @@
-import { Address, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
+import { BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import { newMockEvent } from 'matchstick-as/assembly/index';
 import {
-    LendingMarketCreated,
-    LendingMarketsRotated,
+    OrderBookCreated,
+    OrderBooksRotated,
 } from '../../generated/LendingMarketOperationLogic/LendingMarketController';
 
-export function createLendingMarketCreatedEvent(
+export function createOrderBookCreatedEvent(
     ccy: Bytes,
-    lendingMarketAddress: Address,
-    futureValueVault: Address,
-    index: BigInt,
+    orderBookId: BigInt,
     openingDate: BigInt,
     maturity: BigInt
-): LendingMarketCreated {
-    const mockEvent = changetype<LendingMarketCreated>(newMockEvent());
-    const event = new LendingMarketCreated(
+): OrderBookCreated {
+    const mockEvent = changetype<OrderBookCreated>(newMockEvent());
+    const event = new OrderBookCreated(
         mockEvent.address,
         mockEvent.logIndex,
         mockEvent.transactionLogIndex,
@@ -31,20 +29,8 @@ export function createLendingMarketCreatedEvent(
     );
     event.parameters.push(
         new ethereum.EventParam(
-            'marketAddr',
-            ethereum.Value.fromAddress(lendingMarketAddress)
-        )
-    );
-    event.parameters.push(
-        new ethereum.EventParam(
-            'futureValueVault',
-            ethereum.Value.fromAddress(futureValueVault)
-        )
-    );
-    event.parameters.push(
-        new ethereum.EventParam(
-            'index',
-            ethereum.Value.fromUnsignedBigInt(index)
+            'orderBookId',
+            ethereum.Value.fromUnsignedBigInt(orderBookId)
         )
     );
     event.parameters.push(
@@ -63,13 +49,13 @@ export function createLendingMarketCreatedEvent(
     return event;
 }
 
-export function createLendingMarketsRotatedEvent(
+export function createOrderBooksRotatedEvent(
     ccy: Bytes,
     oldMaturity: BigInt,
     newMaturity: BigInt
-): LendingMarketsRotated {
-    const mockEvent = changetype<LendingMarketsRotated>(newMockEvent());
-    const event = new LendingMarketsRotated(
+): OrderBooksRotated {
+    const mockEvent = changetype<OrderBooksRotated>(newMockEvent());
+    const event = new OrderBooksRotated(
         mockEvent.address,
         mockEvent.logIndex,
         mockEvent.transactionLogIndex,

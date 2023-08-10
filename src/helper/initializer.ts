@@ -8,10 +8,10 @@ import {
 import {
     DailyVolume,
     LendingMarket,
-    Protocol,
-    User,
     Order,
+    Protocol,
     Transaction,
+    User,
 } from '../../generated/schema';
 import { getDailyVolumeEntityId } from '../utils/id-generation';
 import { buildLendingMarketId } from '../utils/string';
