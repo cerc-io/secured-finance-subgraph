@@ -26,8 +26,8 @@ type Order @entity {
   side: Int!
   maturity: BigInt!
   inputUnitPrice: BigInt!
-  filledAmount: BigInt!
   inputAmount: BigInt!
+  filledAmount: BigInt!
   status: OrderStatus!
   lendingMarket: LendingMarket!
   isPreOrder: Boolean!

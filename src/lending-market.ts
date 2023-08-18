@@ -25,39 +25,31 @@ export function handleOrderExecuted(event: OrderExecuted): void {
     let status: string;
     let type: string;
     if (event.params.inputUnitPrice.isZero()) {
-        id = id + ':' + event.transaction.hash.toHexString();
         type = 'Market';
-        if (event.params.isCircuitBreakerTriggered) {
-            if (event.params.filledAmount.isZero()) {
-                status = 'Blocked';
-            } else {
-                status = 'PartiallyBlocked';
-            }
-        } else if (!event.params.filledAmount.isZero()) {
-            status = 'Filled';
-        } else {
-            return;
-        }
     } else {
         type = 'Limit';
-        if (!event.params.placedAmount.isZero()) {
-            if (!event.params.filledAmount.isZero()) {
-                status = 'PartiallyFilled';
-            } else {
-                status = 'Open';
-            }
-        } else if (event.params.isCircuitBreakerTriggered) {
-            id = id + ':' + event.transaction.hash.toHexString();
-            if (event.params.filledAmount.isZero()) {
-                status = 'Blocked';
-            } else {
-                status = 'PartiallyBlocked';
-            }
-        } else {
-            id = id + ':' + event.transaction.hash.toHexString();
-            status = 'Filled';
-        }
     }
+
+    if (!event.params.placedAmount.isZero() && type === 'Limit') {
+        if (!event.params.filledAmount.isZero()) {
+            status = 'PartiallyFilled';
+        } else {
+            status = 'Open';
+        }
+    } else if (event.params.isCircuitBreakerTriggered) {
+        id = id + ':' + event.transaction.hash.toHexString();
+        if (event.params.filledAmount.isZero()) {
+            status = 'Blocked';
+        } else {
+            status = 'PartiallyBlocked';
+        }
+    } else if (!event.params.filledAmount.isZero()) {
+        id = id + ':' + event.transaction.hash.toHexString();
+        status = 'Filled';
+    } else {
+        return;
+    }
+
     initOrder(
         id,
         event.params.placedOrderId,
@@ -66,8 +58,8 @@ export function handleOrderExecuted(event: OrderExecuted): void {
         event.params.side,
         event.params.maturity,
         event.params.inputUnitPrice,
-        event.params.filledAmount,
         event.params.inputAmount,
+        event.params.filledAmount,
         status,
         false,
         type,
@@ -122,8 +114,8 @@ export function handlePreOrderExecuted(event: PreOrderExecuted): void {
         event.params.side,
         event.params.maturity,
         event.params.unitPrice,
-        BigInt.fromI32(0),
         event.params.amount,
+        BigInt.fromI32(0),
         'Open',
         true,
         'Limit',
