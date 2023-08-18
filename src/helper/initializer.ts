@@ -103,11 +103,12 @@ export const initOrder = (
     currency: Bytes,
     side: i32,
     maturity: BigInt,
-    unitPrice: BigInt,
+    inputUnitPrice: BigInt,
     filledAmount: BigInt,
-    amount: BigInt,
+    inputAmount: BigInt,
     status: string,
     isPreOrder: boolean,
+    type: string,
     createdAt: BigInt,
     blockNumber: BigInt,
     txHash: Bytes
@@ -120,12 +121,13 @@ export const initOrder = (
     order.currency = currency;
     order.side = side;
     order.maturity = maturity;
-    order.unitPrice = unitPrice;
+    order.inputUnitPrice = inputUnitPrice;
     order.filledAmount = filledAmount;
-    order.amount = amount;
+    order.inputAmount = inputAmount;
     order.status = status;
     order.lendingMarket = getOrInitLendingMarket(currency, maturity).id;
     order.isPreOrder = isPreOrder;
+    order.type = type;
     order.createdAt = createdAt;
     order.blockNumber = blockNumber;
     order.txHash = txHash;

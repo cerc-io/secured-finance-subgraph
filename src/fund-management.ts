@@ -28,7 +28,7 @@ export function handleOrderPartiallyFilled(event: OrderPartiallyFilled): void {
             event.logIndex.toString();
         initTransaction(
             txId,
-            order.unitPrice,
+            order.inputUnitPrice,
             event.params.maker,
             event.params.ccy,
             event.params.maturity,

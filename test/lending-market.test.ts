@@ -66,11 +66,12 @@ describe('Order Executed', () => {
 
         const id = getOrderEntityId(placedOrderId, ccy, maturity);
         assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
-        assert.fieldEquals('Order', id, 'unitPrice', unitPrice.toString());
+        assert.fieldEquals('Order', id, 'inputUnitPrice', unitPrice.toString());
         assert.fieldEquals('Order', id, 'filledAmount', '0');
-        assert.fieldEquals('Order', id, 'amount', amount.toString());
+        assert.fieldEquals('Order', id, 'inputAmount', amount.toString());
         assert.fieldEquals('Order', id, 'status', 'Open');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
+        assert.fieldEquals('Order', id, 'type', 'Limit');
 
         const txId =
             event.transaction.hash.toHexString() +
@@ -113,16 +114,17 @@ describe('Order Executed', () => {
 
         const id = getOrderEntityId(placedOrderId, ccy, maturity);
         assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
-        assert.fieldEquals('Order', id, 'unitPrice', unitPrice.toString());
+        assert.fieldEquals('Order', id, 'inputUnitPrice', unitPrice.toString());
         assert.fieldEquals(
             'Order',
             id,
             'filledAmount',
             filledAmount.toString()
         );
-        assert.fieldEquals('Order', id, 'amount', totalAmount.toString());
+        assert.fieldEquals('Order', id, 'inputAmount', totalAmount.toString());
         assert.fieldEquals('Order', id, 'status', 'PartiallyFilled');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
+        assert.fieldEquals('Order', id, 'type', 'Limit');
 
         const txId =
             event.transaction.hash.toHexString() +
@@ -184,16 +186,17 @@ describe('Order Executed', () => {
             ':' +
             event.transaction.hash.toHexString();
         assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
-        assert.fieldEquals('Order', id, 'unitPrice', unitPrice.toString());
+        assert.fieldEquals('Order', id, 'inputUnitPrice', unitPrice.toString());
         assert.fieldEquals(
             'Order',
             id,
             'filledAmount',
             filledAmount.toString()
         );
-        assert.fieldEquals('Order', id, 'amount', filledAmount.toString());
+        assert.fieldEquals('Order', id, 'inputAmount', filledAmount.toString());
         assert.fieldEquals('Order', id, 'status', 'Filled');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
+        assert.fieldEquals('Order', id, 'type', 'Limit');
 
         const txId =
             event.transaction.hash.toHexString() +
@@ -256,21 +259,17 @@ describe('Order Executed', () => {
             ':' +
             event.transaction.hash.toHexString();
         assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
-        assert.fieldEquals(
-            'Order',
-            id,
-            'unitPrice',
-            filledUnitPrice.toString()
-        );
+        assert.fieldEquals('Order', id, 'inputUnitPrice', '0');
         assert.fieldEquals(
             'Order',
             id,
             'filledAmount',
             filledAmount.toString()
         );
-        assert.fieldEquals('Order', id, 'amount', filledAmount.toString());
+        assert.fieldEquals('Order', id, 'inputAmount', totalAmount.toString());
         assert.fieldEquals('Order', id, 'status', 'Filled');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
+        assert.fieldEquals('Order', id, 'type', 'Market');
 
         const txId =
             event.transaction.hash.toHexString() +
@@ -360,21 +359,17 @@ describe('Order Executed', () => {
             ':' +
             event.transaction.hash.toHexString();
         assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
-        assert.fieldEquals(
-            'Order',
-            id,
-            'unitPrice',
-            filledUnitPrice.toString()
-        );
+        assert.fieldEquals('Order', id, 'inputUnitPrice', '0');
         assert.fieldEquals(
             'Order',
             id,
             'filledAmount',
             filledAmount.toString()
         );
-        assert.fieldEquals('Order', id, 'amount', totalAmount.toString());
+        assert.fieldEquals('Order', id, 'inputAmount', totalAmount.toString());
         assert.fieldEquals('Order', id, 'status', 'PartiallyBlocked');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
+        assert.fieldEquals('Order', id, 'type', 'Market');
 
         const txId =
             event.transaction.hash.toHexString() +
@@ -433,11 +428,12 @@ describe('Order Executed', () => {
             ':' +
             event.transaction.hash.toHexString();
         assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
-        assert.fieldEquals('Order', id, 'unitPrice', '0');
+        assert.fieldEquals('Order', id, 'inputUnitPrice', '0');
         assert.fieldEquals('Order', id, 'filledAmount', '0');
-        assert.fieldEquals('Order', id, 'amount', amount.toString());
+        assert.fieldEquals('Order', id, 'inputAmount', amount.toString());
         assert.fieldEquals('Order', id, 'status', 'Blocked');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
+        assert.fieldEquals('Order', id, 'type', 'Market');
     });
 
     test('should create a Partially Blocked Order and a Transaction when order is filled partially and remaining amount is not placed', () => {
@@ -469,16 +465,17 @@ describe('Order Executed', () => {
             ':' +
             event.transaction.hash.toHexString();
         assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
-        assert.fieldEquals('Order', id, 'unitPrice', '8400');
+        assert.fieldEquals('Order', id, 'inputUnitPrice', '8400');
         assert.fieldEquals(
             'Order',
             id,
             'filledAmount',
             filledAmount.toString()
         );
-        assert.fieldEquals('Order', id, 'amount', totalAmount.toString());
+        assert.fieldEquals('Order', id, 'inputAmount', totalAmount.toString());
         assert.fieldEquals('Order', id, 'status', 'PartiallyBlocked');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
+        assert.fieldEquals('Order', id, 'type', 'Limit');
 
         const txId =
             event.transaction.hash.toHexString() +
@@ -537,11 +534,12 @@ describe('Order Executed', () => {
             ':' +
             event.transaction.hash.toHexString();
         assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
-        assert.fieldEquals('Order', id, 'unitPrice', unitPrice.toString());
+        assert.fieldEquals('Order', id, 'inputUnitPrice', unitPrice.toString());
         assert.fieldEquals('Order', id, 'filledAmount', '0');
-        assert.fieldEquals('Order', id, 'amount', amount.toString());
+        assert.fieldEquals('Order', id, 'inputAmount', amount.toString());
         assert.fieldEquals('Order', id, 'status', 'Blocked');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
+        assert.fieldEquals('Order', id, 'type', 'Limit');
 
         const txId =
             event.transaction.hash.toHexString() +
@@ -576,11 +574,12 @@ describe('PreOrder Executed', () => {
 
         const id = getOrderEntityId(orderId, ccy, maturity);
         assert.fieldEquals('Order', id, 'orderId', orderId.toString());
-        assert.fieldEquals('Order', id, 'unitPrice', unitPrice.toString());
+        assert.fieldEquals('Order', id, 'inputUnitPrice', unitPrice.toString());
         assert.fieldEquals('Order', id, 'filledAmount', '0');
-        assert.fieldEquals('Order', id, 'amount', amount.toString());
+        assert.fieldEquals('Order', id, 'inputAmount', amount.toString());
         assert.fieldEquals('Order', id, 'status', 'Open');
         assert.fieldEquals('Order', id, 'isPreOrder', 'true');
+        assert.fieldEquals('Order', id, 'type', 'Limit');
 
         assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
         assert.fieldEquals(
@@ -623,21 +622,17 @@ describe('Position Unwound', () => {
             ':' +
             event.transaction.hash.toHexString();
         assert.fieldEquals('Order', id, 'orderId', orderId.toString());
-        assert.fieldEquals(
-            'Order',
-            id,
-            'unitPrice',
-            filledUnitPrice.toString()
-        );
+        assert.fieldEquals('Order', id, 'inputUnitPrice', '0');
         assert.fieldEquals(
             'Order',
             id,
             'filledAmount',
             filledAmount.toString()
         );
-        assert.fieldEquals('Order', id, 'amount', filledAmount.toString());
+        assert.fieldEquals('Order', id, 'inputAmount', filledAmount.toString());
         assert.fieldEquals('Order', id, 'status', 'Filled');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
+        assert.fieldEquals('Order', id, 'type', 'Market');
 
         const txId =
             event.transaction.hash.toHexString() +
@@ -691,21 +686,17 @@ describe('Position Unwound', () => {
             ':' +
             event.transaction.hash.toHexString();
         assert.fieldEquals('Order', id, 'orderId', orderId.toString());
-        assert.fieldEquals(
-            'Order',
-            id,
-            'unitPrice',
-            filledUnitPrice.toString()
-        );
+        assert.fieldEquals('Order', id, 'inputUnitPrice', '0');
         assert.fieldEquals(
             'Order',
             id,
             'filledAmount',
             filledAmount.toString()
         );
-        assert.fieldEquals('Order', id, 'amount', filledAmount.toString());
+        assert.fieldEquals('Order', id, 'inputAmount', filledAmount.toString());
         assert.fieldEquals('Order', id, 'status', 'Filled');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
+        assert.fieldEquals('Order', id, 'type', 'Market');
 
         const txId =
             event.transaction.hash.toHexString() +
@@ -755,11 +746,12 @@ describe('Position Unwound', () => {
             getOrderEntityId(orderId, ccy, maturity) +
             ':' +
             event.transaction.hash.toHexString();
-        assert.fieldEquals('Order', id, 'unitPrice', '0');
+        assert.fieldEquals('Order', id, 'inputUnitPrice', '0');
         assert.fieldEquals('Order', id, 'filledAmount', '0');
-        assert.fieldEquals('Order', id, 'amount', '0');
+        assert.fieldEquals('Order', id, 'inputAmount', '0');
         assert.fieldEquals('Order', id, 'status', 'Blocked');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
+        assert.fieldEquals('Order', id, 'type', 'Market');
     });
 
     test('should not create any order when position unwound order is not filled or blocked', () => {
@@ -815,7 +807,7 @@ describe('Order Partially Filled', () => {
 
         const id = getOrderEntityId(placedOrderId, ccy, maturity);
         assert.fieldEquals('Order', id, 'filledAmount', '0');
-        assert.fieldEquals('Order', id, 'amount', amount.toString());
+        assert.fieldEquals('Order', id, 'inputAmount', amount.toString());
         assert.fieldEquals('Order', id, 'status', 'Open');
 
         const orderPartiallyFilled = createOrderPartiallyFilledEvent(
@@ -829,7 +821,7 @@ describe('Order Partially Filled', () => {
         );
         handleOrderPartiallyFilled(orderPartiallyFilled);
         assert.fieldEquals('Order', id, 'filledAmount', '27');
-        assert.fieldEquals('Order', id, 'amount', amount.toString());
+        assert.fieldEquals('Order', id, 'inputAmount', amount.toString());
         assert.fieldEquals('Order', id, 'status', 'PartiallyFilled');
 
         const txId =
@@ -876,7 +868,7 @@ describe('Order Partially Filled', () => {
 
         const id = getOrderEntityId(placedOrderId, ccy, maturity);
         assert.fieldEquals('Order', id, 'filledAmount', '27');
-        assert.fieldEquals('Order', id, 'amount', amount.toString());
+        assert.fieldEquals('Order', id, 'inputAmount', amount.toString());
         assert.fieldEquals('Order', id, 'status', 'PartiallyFilled');
 
         const orderPartiallyFilled = createOrderPartiallyFilledEvent(
@@ -890,7 +882,7 @@ describe('Order Partially Filled', () => {
         );
         handleOrderPartiallyFilled(orderPartiallyFilled);
         assert.fieldEquals('Order', id, 'filledAmount', '81');
-        assert.fieldEquals('Order', id, 'amount', amount.toString());
+        assert.fieldEquals('Order', id, 'inputAmount', amount.toString());
         assert.fieldEquals('Order', id, 'status', 'PartiallyFilled');
 
         const txId =
