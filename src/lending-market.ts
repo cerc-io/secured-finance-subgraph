@@ -30,7 +30,7 @@ export function handleOrderExecuted(event: OrderExecuted): void {
         type = 'Limit';
     }
 
-    if (!event.params.placedAmount.isZero() && type === 'Limit') {
+    if (!event.params.placedAmount.isZero()) {
         if (!event.params.filledAmount.isZero()) {
             status = 'PartiallyFilled';
         } else {
