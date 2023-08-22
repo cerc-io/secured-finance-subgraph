@@ -57,6 +57,7 @@ describe('Order Executed', () => {
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
+            BigInt.fromI32(0),
             placedOrderId,
             amount,
             unitPrice,
@@ -91,7 +92,7 @@ describe('Order Executed', () => {
         const placedOrderId = BigInt.fromI32(1);
         const filledAmount = BigInt.fromI32(81);
         const filledUnitPrice = unitPrice;
-        const filledFutureValue = BigInt.fromI32(90);
+        const filledAmountInFV = BigInt.fromI32(90);
         const totalAmount = filledAmount.plus(amount);
 
         const event = createOrderExecutedEvent(
@@ -103,7 +104,8 @@ describe('Order Executed', () => {
             unitPrice,
             filledAmount,
             filledUnitPrice,
-            filledFutureValue,
+            filledAmountInFV,
+            BigInt.fromI32(0),
             placedOrderId,
             amount,
             unitPrice,
@@ -138,7 +140,7 @@ describe('Order Executed', () => {
             'Transaction',
             txId,
             'forwardValue',
-            filledFutureValue.toString()
+            filledAmountInFV.toString()
         );
         assert.fieldEquals(
             'Transaction',
@@ -160,7 +162,7 @@ describe('Order Executed', () => {
         const placedOrderId = BigInt.fromI32(0);
         const filledAmount = BigInt.fromI32(135);
         const filledUnitPrice = unitPrice;
-        const filledFutureValue = BigInt.fromI32(150);
+        const filledAmountInFV = BigInt.fromI32(150);
 
         const event = createOrderExecutedEvent(
             ALICE,
@@ -171,7 +173,8 @@ describe('Order Executed', () => {
             unitPrice,
             filledAmount,
             filledUnitPrice,
-            filledFutureValue,
+            filledAmountInFV,
+            BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
@@ -209,7 +212,7 @@ describe('Order Executed', () => {
             'Transaction',
             txId,
             'forwardValue',
-            filledFutureValue.toString()
+            filledAmountInFV.toString()
         );
         assert.fieldEquals(
             'Transaction',
@@ -231,7 +234,7 @@ describe('Order Executed', () => {
         const placedOrderId = BigInt.fromI32(0);
         const filledAmount = BigInt.fromI32(160);
         const filledUnitPrice = BigInt.fromI32(80);
-        const filledFutureValue = BigInt.fromI32(200);
+        const filledAmountInFV = BigInt.fromI32(200);
         const totalAmount = filledAmount.plus(amount);
 
         const event = createOrderExecutedEvent(
@@ -243,7 +246,8 @@ describe('Order Executed', () => {
             BigInt.fromI32(0),
             filledAmount,
             filledUnitPrice,
-            filledFutureValue,
+            filledAmountInFV,
+            BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
@@ -286,7 +290,7 @@ describe('Order Executed', () => {
             'Transaction',
             txId,
             'forwardValue',
-            filledFutureValue.toString()
+            filledAmountInFV.toString()
         );
         assert.fieldEquals(
             'Transaction',
@@ -320,6 +324,7 @@ describe('Order Executed', () => {
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
+            BigInt.fromI32(0),
             false
         );
         handleOrderExecuted(event);
@@ -335,7 +340,7 @@ describe('Order Executed', () => {
         const placedOrderId = BigInt.fromI32(0);
         const filledAmount = BigInt.fromI32(81);
         const filledUnitPrice = unitPrice;
-        const filledFutureValue = BigInt.fromI32(90);
+        const filledAmountInFV = BigInt.fromI32(90);
         const totalAmount = filledAmount.plus(amount);
 
         const event = createOrderExecutedEvent(
@@ -347,7 +352,8 @@ describe('Order Executed', () => {
             BigInt.fromI32(0),
             filledAmount,
             filledUnitPrice,
-            filledFutureValue,
+            filledAmountInFV,
+            BigInt.fromI32(0),
             placedOrderId,
             BigInt.fromI32(0),
             BigInt.fromI32(0),
@@ -390,7 +396,7 @@ describe('Order Executed', () => {
             'Transaction',
             txId,
             'forwardValue',
-            filledFutureValue.toString()
+            filledAmountInFV.toString()
         );
         assert.fieldEquals(
             'Transaction',
@@ -424,6 +430,7 @@ describe('Order Executed', () => {
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
+            BigInt.fromI32(0),
             true
         );
         handleOrderExecuted(event);
@@ -444,7 +451,7 @@ describe('Order Executed', () => {
         const placedOrderId = BigInt.fromI32(0);
         const filledAmount = BigInt.fromI32(81);
         const filledUnitPrice = unitPrice;
-        const filledFutureValue = BigInt.fromI32(90);
+        const filledAmountInFV = BigInt.fromI32(90);
         const totalAmount = filledAmount.plus(amount);
 
         const event = createOrderExecutedEvent(
@@ -456,7 +463,8 @@ describe('Order Executed', () => {
             BigInt.fromI32(8400),
             filledAmount,
             filledUnitPrice,
-            filledFutureValue,
+            filledAmountInFV,
+            BigInt.fromI32(0),
             placedOrderId,
             BigInt.fromI32(0),
             BigInt.fromI32(0),
@@ -494,7 +502,7 @@ describe('Order Executed', () => {
             'Transaction',
             txId,
             'forwardValue',
-            filledFutureValue.toString()
+            filledAmountInFV.toString()
         );
         assert.fieldEquals(
             'Transaction',
@@ -522,6 +530,7 @@ describe('Order Executed', () => {
             maturity,
             amount,
             unitPrice,
+            BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
@@ -603,7 +612,7 @@ describe('Position Unwound', () => {
         const futureValue = BigInt.fromI32(250);
         const filledAmount = BigInt.fromI32(225);
         const filledUnitPrice = unitPrice;
-        const filledFutureValue = BigInt.fromI32(250);
+        const filledAmountInFV = BigInt.fromI32(250);
 
         const event = createPositionUnwoundEvent(
             BOB,
@@ -613,7 +622,8 @@ describe('Position Unwound', () => {
             futureValue,
             filledAmount,
             filledUnitPrice,
-            filledFutureValue,
+            filledAmountInFV,
+            BigInt.fromI32(0),
             false
         );
         handlePositionUnwound(event);
@@ -653,7 +663,7 @@ describe('Position Unwound', () => {
             'Transaction',
             txId,
             'forwardValue',
-            filledFutureValue.toString()
+            filledAmountInFV.toString()
         );
         assert.fieldEquals(
             'Transaction',
@@ -671,7 +681,7 @@ describe('Position Unwound', () => {
         const futureValue = BigInt.fromI32(400);
         const filledAmount = BigInt.fromI32(180);
         const filledUnitPrice = unitPrice;
-        const filledFutureValue = BigInt.fromI32(200);
+        const filledAmountInFV = BigInt.fromI32(200);
 
         const event = createPositionUnwoundEvent(
             BOB,
@@ -681,7 +691,8 @@ describe('Position Unwound', () => {
             futureValue,
             filledAmount,
             filledUnitPrice,
-            filledFutureValue,
+            filledAmountInFV,
+            BigInt.fromI32(0),
             true
         );
         handlePositionUnwound(event);
@@ -721,7 +732,7 @@ describe('Position Unwound', () => {
             'Transaction',
             txId,
             'forwardValue',
-            filledFutureValue.toString()
+            filledAmountInFV.toString()
         );
         assert.fieldEquals(
             'Transaction',
@@ -744,6 +755,7 @@ describe('Position Unwound', () => {
             ccy,
             maturity,
             futureValue,
+            BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
@@ -775,6 +787,7 @@ describe('Position Unwound', () => {
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
+            BigInt.fromI32(0),
             false
         );
         handlePositionUnwound(event);
@@ -803,6 +816,7 @@ describe('Order Partially Filled', () => {
             maturity,
             amount,
             unitPrice,
+            BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
@@ -867,6 +881,7 @@ describe('Order Partially Filled', () => {
             BigInt.fromI32(27),
             unitPrice,
             BigInt.fromI32(30),
+            BigInt.fromI32(0),
             placedOrderId,
             BigInt.fromI32(63),
             unitPrice,
@@ -935,6 +950,7 @@ describe('Order Canceled', () => {
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
+            BigInt.fromI32(0),
             placedOrderId,
             amount,
             unitPrice,
@@ -971,7 +987,7 @@ describe('Order Canceled', () => {
         const placedOrderId = BigInt.fromI32(1);
         const filledAmount = BigInt.fromI32(81);
         const filledUnitPrice = unitPrice;
-        const filledFutureValue = BigInt.fromI32(90);
+        const filledAmountInFV = BigInt.fromI32(90);
         const totalAmount = filledAmount.plus(amount);
 
         const event = createOrderExecutedEvent(
@@ -983,7 +999,8 @@ describe('Order Canceled', () => {
             unitPrice,
             filledAmount,
             filledUnitPrice,
-            filledFutureValue,
+            filledAmountInFV,
+            BigInt.fromI32(0),
             placedOrderId,
             amount,
             unitPrice,
@@ -1051,6 +1068,7 @@ describe('Orders Cleaned', () => {
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
+            BigInt.fromI32(0),
             placedOrderId1,
             amount,
             unitPrice,
@@ -1071,6 +1089,7 @@ describe('Orders Cleaned', () => {
             maturity,
             amount2,
             unitPrice2,
+            BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
@@ -1137,6 +1156,7 @@ describe('Orders Cleaned', () => {
             BigInt.fromI32(36),
             BigInt.fromI32(90),
             BigInt.fromI32(45),
+            BigInt.fromI32(0),
             placedOrderId1,
             BigInt.fromI32(54),
             unitPrice,
@@ -1160,6 +1180,7 @@ describe('Orders Cleaned', () => {
             BigInt.fromI32(80),
             BigInt.fromI32(80),
             BigInt.fromI32(100),
+            BigInt.fromI32(0),
             placedOrderId2,
             BigInt.fromI32(40),
             unitPrice2,
@@ -1364,6 +1385,7 @@ describe('Itayose Executed', () => {
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
+            BigInt.fromI32(0),
             orderId7,
             amount,
             unitPrice7,
@@ -1492,7 +1514,7 @@ describe('Daily Volume', () => {
         const placedOrderId = BigInt.fromI32(1);
         const filledAmount = BigInt.fromI32(81);
         const filledUnitPrice = unitPrice;
-        const filledFutureValue = BigInt.fromI32(90);
+        const filledAmountInFV = BigInt.fromI32(90);
         const totalAmount = filledAmount.plus(amount);
 
         const event = createOrderExecutedEvent(
@@ -1504,7 +1526,8 @@ describe('Daily Volume', () => {
             unitPrice,
             filledAmount,
             filledUnitPrice,
-            filledFutureValue,
+            filledAmountInFV,
+            BigInt.fromI32(0),
             placedOrderId,
             amount,
             unitPrice,
@@ -1523,7 +1546,7 @@ describe('Daily Volume', () => {
 
         const placedOrderId2 = BigInt.fromI32(2);
         const filledAmount2 = BigInt.fromI32(45);
-        const filledFutureValue2 = BigInt.fromI32(50);
+        const filledAmountInFV2 = BigInt.fromI32(50);
         const totalAmount2 = filledAmount2.plus(amount);
         const event2 = createOrderExecutedEvent(
             BOB,
@@ -1534,7 +1557,8 @@ describe('Daily Volume', () => {
             unitPrice,
             filledAmount2,
             filledUnitPrice,
-            filledFutureValue2,
+            filledAmountInFV2,
+            BigInt.fromI32(0),
             placedOrderId2,
             amount,
             unitPrice,
@@ -1555,7 +1579,7 @@ describe('Daily Volume', () => {
         const futureValue = BigInt.fromI32(250);
         const filledAmount = BigInt.fromI32(225);
         const filledUnitPrice = unitPrice;
-        const filledFutureValue = BigInt.fromI32(250);
+        const filledAmountInFV = BigInt.fromI32(250);
 
         const event = createPositionUnwoundEvent(
             BOB,
@@ -1565,7 +1589,8 @@ describe('Daily Volume', () => {
             futureValue,
             filledAmount,
             filledUnitPrice,
-            filledFutureValue,
+            filledAmountInFV,
+            BigInt.fromI32(0),
             false,
             BigInt.fromI32(1675878200)
         );
@@ -1584,7 +1609,7 @@ describe('Daily Volume', () => {
         const placedOrderId = BigInt.fromI32(1);
         const filledAmount = BigInt.fromI32(81);
         const filledUnitPrice = unitPrice;
-        const filledFutureValue = BigInt.fromI32(90);
+        const filledAmountInFV = BigInt.fromI32(90);
         const totalAmount = filledAmount.plus(amount);
 
         const event = createOrderExecutedEvent(
@@ -1596,7 +1621,8 @@ describe('Daily Volume', () => {
             unitPrice,
             filledAmount,
             filledUnitPrice,
-            filledFutureValue,
+            filledAmountInFV,
+            BigInt.fromI32(0),
             placedOrderId,
             amount,
             unitPrice,
