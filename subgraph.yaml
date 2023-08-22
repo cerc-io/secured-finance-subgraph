@@ -81,11 +81,11 @@ templates:
         - name: OrderActionLogic
           file: ./abis/protocol/libraries/logics/OrderActionLogic.sol/OrderActionLogic.json
       eventHandlers:
-        - event: OrderExecuted(indexed address,uint8,indexed bytes32,indexed uint256,uint256,uint256,uint256,uint256,uint256,uint48,uint256,uint256,bool)
+        - event: OrderExecuted(indexed address,uint8,indexed bytes32,indexed uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint48,uint256,uint256,bool)
           handler: handleOrderExecuted
         - event: PreOrderExecuted(indexed address,uint8,indexed bytes32,indexed uint256,uint256,uint256,uint48)
           handler: handlePreOrderExecuted
-        - event: PositionUnwound(indexed address,uint8,indexed bytes32,indexed uint256,uint256,uint256,uint256,uint256,bool)
+        - event: PositionUnwound(indexed address,uint8,indexed bytes32,indexed uint256,uint256,uint256,uint256,uint256,uint256,bool)
           handler: handlePositionUnwound
         - event: OrderCanceled(uint48,indexed address,uint8,bytes32,uint256,uint256,uint256)
           handler: handleOrderCanceled
