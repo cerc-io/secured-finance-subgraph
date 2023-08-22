@@ -23,48 +23,33 @@ export function handleOrderExecuted(event: OrderExecuted): void {
         event.params.maturity
     );
     let status: string;
-    let amount: BigInt;
-    let unitPrice: BigInt;
+    let type: string;
     if (event.params.inputUnitPrice.isZero()) {
-        id = id + ':' + event.transaction.hash.toHexString();
-        if (event.params.isCircuitBreakerTriggered) {
-            if (event.params.filledAmount.isZero()) {
-                amount = event.params.inputAmount;
-                unitPrice = event.params.inputUnitPrice;
-                status = 'Blocked';
-            } else {
-                amount = event.params.inputAmount;
-                unitPrice = event.params.filledUnitPrice;
-                status = 'PartiallyBlocked';
-            }
-        } else if (!event.params.filledAmount.isZero()) {
-            amount = event.params.filledAmount;
-            unitPrice = event.params.filledUnitPrice;
-            status = 'Filled';
-        } else {
-            return;
-        }
+        type = 'Market';
     } else {
-        amount = event.params.inputAmount;
-        unitPrice = event.params.inputUnitPrice;
-        if (!event.params.placedAmount.isZero()) {
-            if (!event.params.filledAmount.isZero()) {
-                status = 'PartiallyFilled';
-            } else {
-                status = 'Open';
-            }
-        } else if (event.params.isCircuitBreakerTriggered) {
-            id = id + ':' + event.transaction.hash.toHexString();
-            if (event.params.filledAmount.isZero()) {
-                status = 'Blocked';
-            } else {
-                status = 'PartiallyBlocked';
-            }
-        } else {
-            id = id + ':' + event.transaction.hash.toHexString();
-            status = 'Filled';
-        }
+        type = 'Limit';
     }
+
+    if (!event.params.placedAmount.isZero()) {
+        if (!event.params.filledAmount.isZero()) {
+            status = 'PartiallyFilled';
+        } else {
+            status = 'Open';
+        }
+    } else if (event.params.isCircuitBreakerTriggered) {
+        id = id + ':' + event.transaction.hash.toHexString();
+        if (event.params.filledAmount.isZero()) {
+            status = 'Blocked';
+        } else {
+            status = 'PartiallyBlocked';
+        }
+    } else if (!event.params.filledAmount.isZero()) {
+        id = id + ':' + event.transaction.hash.toHexString();
+        status = 'Filled';
+    } else {
+        return;
+    }
+
     initOrder(
         id,
         event.params.placedOrderId,
@@ -72,11 +57,12 @@ export function handleOrderExecuted(event: OrderExecuted): void {
         event.params.ccy,
         event.params.side,
         event.params.maturity,
-        unitPrice,
+        event.params.inputUnitPrice,
+        event.params.inputAmount,
         event.params.filledAmount,
-        amount,
         status,
         false,
+        type,
         event.block.timestamp,
         event.block.number,
         event.transaction.hash
@@ -128,10 +114,11 @@ export function handlePreOrderExecuted(event: PreOrderExecuted): void {
         event.params.side,
         event.params.maturity,
         event.params.unitPrice,
-        BigInt.fromI32(0),
         event.params.amount,
+        BigInt.fromI32(0),
         'Open',
         true,
+        'Limit',
         event.block.timestamp,
         event.block.number,
         event.transaction.hash
@@ -152,11 +139,12 @@ export function handlePositionUnwound(event: PositionUnwound): void {
             event.params.ccy,
             event.params.side,
             event.params.maturity,
-            event.params.filledUnitPrice,
+            BigInt.fromI32(0),
             event.params.filledAmount,
             event.params.filledAmount,
             'Filled',
             false,
+            'Market',
             event.block.timestamp,
             event.block.number,
             event.transaction.hash
@@ -198,6 +186,7 @@ export function handlePositionUnwound(event: PositionUnwound): void {
             BigInt.fromI32(0),
             'Blocked',
             false,
+            'Market',
             event.block.timestamp,
             event.block.number,
             event.transaction.hash
@@ -234,7 +223,7 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
                 i.toString() +
                 ':' +
                 event.logIndex.toString();
-            let unitPrice = order.unitPrice;
+            let unitPrice = order.inputUnitPrice;
             const lendingMarket = getOrInitLendingMarket(
                 event.params.ccy,
                 event.params.maturity
@@ -256,9 +245,9 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
                 order.currency,
                 order.maturity,
                 order.side,
-                order.amount.minus(order.filledAmount),
+                order.inputAmount.minus(order.filledAmount),
                 calculateForwardValue(
-                    order.amount.minus(order.filledAmount),
+                    order.inputAmount.minus(order.filledAmount),
                     unitPrice
                 ),
                 'Lazy',
@@ -266,7 +255,7 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
                 event.block.number,
                 event.transaction.hash
             );
-            order.filledAmount = order.amount;
+            order.filledAmount = order.inputAmount;
             order.status = 'Filled';
             order.save();
         }

@@ -25,12 +25,13 @@ type Order @entity {
   currency: Bytes!
   side: Int!
   maturity: BigInt!
-  unitPrice: BigInt!
+  inputUnitPrice: BigInt!
+  inputAmount: BigInt!
   filledAmount: BigInt!
-  amount: BigInt!
   status: OrderStatus!
   lendingMarket: LendingMarket!
   isPreOrder: Boolean!
+  type: OrderType!
 
   createdAt: BigInt!
   blockNumber: BigInt!
@@ -57,6 +58,11 @@ type LendingMarket @entity {
 enum TransactionExecutionType {
   Sync
   Lazy
+}
+
+enum OrderType {
+  Market
+  Limit
 }
 
 enum OrderStatus {
