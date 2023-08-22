@@ -20,7 +20,8 @@ export function createOrderExecutedEvent(
     inputUnitPrice: BigInt,
     filledAmount: BigInt,
     filledUnitPrice: BigInt,
-    filledFutureValue: BigInt,
+    filledAmountInFV: BigInt,
+    feeInFV: BigInt,
     placedOrderId: BigInt,
     placedAmount: BigInt,
     placedUnitPrice: BigInt,
@@ -84,8 +85,14 @@ export function createOrderExecutedEvent(
     );
     event.parameters.push(
         new ethereum.EventParam(
-            'filledFutureValue',
-            ethereum.Value.fromUnsignedBigInt(filledFutureValue)
+            'filledAmountInFV',
+            ethereum.Value.fromUnsignedBigInt(filledAmountInFV)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'feeInFV',
+            ethereum.Value.fromUnsignedBigInt(feeInFV)
         )
     );
     event.parameters.push(
@@ -180,10 +187,11 @@ export function createPositionUnwoundEvent(
     side: i32,
     ccy: Bytes,
     maturity: BigInt,
-    futureValue: BigInt,
+    inputFutureValue: BigInt,
     filledAmount: BigInt,
     filledUnitPrice: BigInt,
-    filledFutureValue: BigInt,
+    filledAmountInFV: BigInt,
+    feeInFV: BigInt,
     isCircuitBreakerTriggered: boolean,
     blockTimestamp: BigInt = BigInt.fromI32(0)
 ): PositionUnwound {
@@ -221,8 +229,8 @@ export function createPositionUnwoundEvent(
     );
     event.parameters.push(
         new ethereum.EventParam(
-            'futureValue',
-            ethereum.Value.fromUnsignedBigInt(futureValue)
+            'inputFutureValue',
+            ethereum.Value.fromUnsignedBigInt(inputFutureValue)
         )
     );
     event.parameters.push(
@@ -239,8 +247,14 @@ export function createPositionUnwoundEvent(
     );
     event.parameters.push(
         new ethereum.EventParam(
-            'filledFutureValue',
-            ethereum.Value.fromUnsignedBigInt(filledFutureValue)
+            'filledAmountInFV',
+            ethereum.Value.fromUnsignedBigInt(filledAmountInFV)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'feeInFV',
+            ethereum.Value.fromUnsignedBigInt(feeInFV)
         )
     );
     event.parameters.push(
@@ -378,7 +392,7 @@ export function createOrderPartiallyFilledEvent(
     side: i32,
     maturity: BigInt,
     amount: BigInt,
-    futureValue: BigInt,
+    amountInFV: BigInt,
     blockTimestamp: BigInt = BigInt.fromI32(0)
 ): OrderPartiallyFilled {
     const mockEvent = newMockEvent();
@@ -426,8 +440,8 @@ export function createOrderPartiallyFilledEvent(
     );
     event.parameters.push(
         new ethereum.EventParam(
-            'futureValue',
-            ethereum.Value.fromUnsignedBigInt(futureValue)
+            'amountInFV',
+            ethereum.Value.fromUnsignedBigInt(amountInFV)
         )
     );
     return event;

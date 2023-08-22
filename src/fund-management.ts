@@ -1,12 +1,5 @@
-import {
-    Address,
-    BigDecimal,
-    BigInt,
-    Bytes,
-    log,
-} from '@graphprotocol/graph-ts';
-import { Order, Transaction } from '../generated/schema';
 import { OrderPartiallyFilled } from '../generated/FundManagementLogic/LendingMarketController';
+import { Order } from '../generated/schema';
 import { initTransaction } from './helper/initializer';
 import { getOrderEntityId } from './utils/id-generation';
 
@@ -34,7 +27,7 @@ export function handleOrderPartiallyFilled(event: OrderPartiallyFilled): void {
             event.params.maturity,
             event.params.side,
             event.params.amount,
-            event.params.futureValue,
+            event.params.amountInFV,
             'Lazy',
             event.block.timestamp,
             event.block.number,

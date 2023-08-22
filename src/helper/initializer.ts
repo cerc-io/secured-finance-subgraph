@@ -143,7 +143,7 @@ export const initTransaction = (
     maturity: BigInt,
     side: i32,
     filledAmount: BigInt,
-    filledFutureValue: BigInt,
+    filledAmountInFV: BigInt,
     executionType: string,
     timestamp: BigInt,
     blockNumber: BigInt,
@@ -160,10 +160,10 @@ export const initTransaction = (
     transaction.maturity = maturity;
     transaction.side = side;
     transaction.executionType = executionType;
-    transaction.forwardValue = filledFutureValue;
+    transaction.forwardValue = filledAmountInFV;
     transaction.amount = filledAmount;
-    transaction.averagePrice = !filledFutureValue.isZero()
-        ? filledAmount.divDecimal(new BigDecimal(filledFutureValue))
+    transaction.averagePrice = !filledAmountInFV.isZero()
+        ? filledAmount.divDecimal(new BigDecimal(filledAmountInFV))
         : BigDecimal.zero();
     transaction.lendingMarket = getOrInitLendingMarket(currency, maturity).id;
     transaction.createdAt = timestamp;
