@@ -867,6 +867,7 @@ describe('Order Partially Filled', () => {
         );
         assert.fieldEquals('Transaction', txId, 'forwardValue', '30');
         assert.fieldEquals('Transaction', txId, 'amount', '27');
+        assert.fieldEquals('Transaction', txId, 'feeInFV', '0');
 
         assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
         assert.fieldEquals(
@@ -929,6 +930,7 @@ describe('Order Partially Filled', () => {
         );
         assert.fieldEquals('Transaction', txId, 'forwardValue', '60');
         assert.fieldEquals('Transaction', txId, 'amount', '54');
+        assert.fieldEquals('Transaction', txId, 'feeInFV', '0');
 
         assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
         assert.fieldEquals(
