@@ -86,6 +86,7 @@ export function handleOrderExecuted(event: OrderExecuted): void {
             event.params.side,
             event.params.filledAmount,
             event.params.filledAmountInFV,
+            event.params.feeInFV,
             'Sync',
             event.block.timestamp,
             event.block.number,
@@ -162,6 +163,7 @@ export function handlePositionUnwound(event: PositionUnwound): void {
             event.params.side,
             event.params.filledAmount,
             event.params.filledAmountInFV,
+            event.params.feeInFV,
             'Sync',
             event.block.timestamp,
             event.block.number,
@@ -250,6 +252,7 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
                     order.inputAmount.minus(order.filledAmount),
                     unitPrice
                 ),
+                BigInt.fromI32(0),
                 'Lazy',
                 event.block.timestamp,
                 event.block.number,

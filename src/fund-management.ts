@@ -1,3 +1,4 @@
+import { BigInt } from '@graphprotocol/graph-ts';
 import { OrderPartiallyFilled } from '../generated/FundManagementLogic/LendingMarketController';
 import { Order } from '../generated/schema';
 import { initTransaction } from './helper/initializer';
@@ -28,6 +29,7 @@ export function handleOrderPartiallyFilled(event: OrderPartiallyFilled): void {
             event.params.side,
             event.params.amount,
             event.params.amountInFV,
+            BigInt.fromI32(0),
             'Lazy',
             event.block.timestamp,
             event.block.number,

@@ -9,6 +9,7 @@ type Transaction @entity {
 
   forwardValue: BigInt!
   amount: BigInt!
+  feeInFV: BigInt!
   averagePrice: BigDecimal!
 
   createdAt: BigInt!
