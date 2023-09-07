@@ -146,6 +146,7 @@ export const initTransaction = (
     side: i32,
     filledAmount: BigInt,
     filledAmountInFV: BigInt,
+    feeInFV: BigInt,
     executionType: string,
     timestamp: BigInt,
     blockNumber: BigInt,
@@ -164,6 +165,7 @@ export const initTransaction = (
     transaction.executionType = executionType;
     transaction.forwardValue = filledAmountInFV;
     transaction.amount = filledAmount;
+    transaction.feeInFV = feeInFV;
     transaction.averagePrice = !filledAmountInFV.isZero()
         ? filledAmount.divDecimal(new BigDecimal(filledAmountInFV))
         : BigDecimal.zero();

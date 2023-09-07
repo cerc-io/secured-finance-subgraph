@@ -94,6 +94,7 @@ describe('Order Executed', () => {
         const filledAmount = BigInt.fromI32(81);
         const filledUnitPrice = unitPrice;
         const filledAmountInFV = BigInt.fromI32(90);
+        const feeInFV = BigInt.fromI32(1);
         const totalAmount = filledAmount.plus(amount);
 
         const event = createOrderExecutedEvent(
@@ -106,7 +107,7 @@ describe('Order Executed', () => {
             filledAmount,
             filledUnitPrice,
             filledAmountInFV,
-            BigInt.fromI32(0),
+            feeInFV,
             placedOrderId,
             amount,
             unitPrice,
@@ -151,6 +152,8 @@ describe('Order Executed', () => {
             filledAmount.toString()
         );
 
+        assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
+
         assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
         assert.fieldEquals(
             'User',
@@ -165,6 +168,7 @@ describe('Order Executed', () => {
         const filledAmount = BigInt.fromI32(135);
         const filledUnitPrice = unitPrice;
         const filledAmountInFV = BigInt.fromI32(150);
+        const feeInFV = BigInt.fromI32(1);
 
         const event = createOrderExecutedEvent(
             ALICE,
@@ -176,7 +180,7 @@ describe('Order Executed', () => {
             filledAmount,
             filledUnitPrice,
             filledAmountInFV,
-            BigInt.fromI32(0),
+            feeInFV,
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
@@ -223,6 +227,7 @@ describe('Order Executed', () => {
             'amount',
             filledAmount.toString()
         );
+        assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
         assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
         assert.fieldEquals(
@@ -239,6 +244,7 @@ describe('Order Executed', () => {
         const filledUnitPrice = BigInt.fromI32(80);
         const filledAmountInFV = BigInt.fromI32(200);
         const totalAmount = filledAmount.plus(amount);
+        const feeInFV = BigInt.fromI32(1);
 
         const event = createOrderExecutedEvent(
             ALICE,
@@ -250,7 +256,7 @@ describe('Order Executed', () => {
             filledAmount,
             filledUnitPrice,
             filledAmountInFV,
-            BigInt.fromI32(0),
+            feeInFV,
             BigInt.fromI32(0),
             BigInt.fromI32(0),
             BigInt.fromI32(0),
@@ -297,6 +303,7 @@ describe('Order Executed', () => {
             'amount',
             filledAmount.toString()
         );
+        assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
         assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
         assert.fieldEquals(
@@ -341,6 +348,7 @@ describe('Order Executed', () => {
         const filledUnitPrice = unitPrice;
         const filledAmountInFV = BigInt.fromI32(90);
         const totalAmount = filledAmount.plus(amount);
+        const feeInFV = BigInt.fromI32(1);
 
         const event = createOrderExecutedEvent(
             ALICE,
@@ -352,7 +360,7 @@ describe('Order Executed', () => {
             filledAmount,
             filledUnitPrice,
             filledAmountInFV,
-            BigInt.fromI32(0),
+            feeInFV,
             placedOrderId,
             BigInt.fromI32(0),
             BigInt.fromI32(0),
@@ -399,6 +407,7 @@ describe('Order Executed', () => {
             'amount',
             filledAmount.toString()
         );
+        assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
         assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
         assert.fieldEquals(
@@ -448,6 +457,7 @@ describe('Order Executed', () => {
         const filledAmount = BigInt.fromI32(81);
         const filledUnitPrice = unitPrice;
         const filledAmountInFV = BigInt.fromI32(90);
+        const feeInFV = BigInt.fromI32(1);
         const totalAmount = filledAmount.plus(amount);
 
         const event = createOrderExecutedEvent(
@@ -460,7 +470,7 @@ describe('Order Executed', () => {
             filledAmount,
             filledUnitPrice,
             filledAmountInFV,
-            BigInt.fromI32(0),
+            feeInFV,
             placedOrderId,
             BigInt.fromI32(0),
             BigInt.fromI32(0),
@@ -507,6 +517,7 @@ describe('Order Executed', () => {
             'amount',
             filledAmount.toString()
         );
+        assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
         assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
         assert.fieldEquals(
@@ -612,6 +623,7 @@ describe('Position Unwound', () => {
         const filledAmount = BigInt.fromI32(225);
         const filledUnitPrice = unitPrice;
         const filledAmountInFV = BigInt.fromI32(250);
+        const feeInFV = BigInt.fromI32(1);
 
         const event = createPositionUnwoundEvent(
             BOB,
@@ -622,7 +634,7 @@ describe('Position Unwound', () => {
             filledAmount,
             filledUnitPrice,
             filledAmountInFV,
-            BigInt.fromI32(0),
+            feeInFV,
             false
         );
         handlePositionUnwound(event);
@@ -667,6 +679,8 @@ describe('Position Unwound', () => {
             filledAmount.toString()
         );
 
+        assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
+
         assert.fieldEquals('User', BOB.toHexString(), 'orderCount', '1');
         assert.fieldEquals('User', BOB.toHexString(), 'transactionCount', '1');
     });
@@ -677,6 +691,7 @@ describe('Position Unwound', () => {
         const filledAmount = BigInt.fromI32(180);
         const filledUnitPrice = unitPrice;
         const filledAmountInFV = BigInt.fromI32(200);
+        const feeInFV = BigInt.fromI32(1);
 
         const event = createPositionUnwoundEvent(
             BOB,
@@ -687,7 +702,7 @@ describe('Position Unwound', () => {
             filledAmount,
             filledUnitPrice,
             filledAmountInFV,
-            BigInt.fromI32(0),
+            feeInFV,
             true
         );
         handlePositionUnwound(event);
@@ -731,6 +746,8 @@ describe('Position Unwound', () => {
             'amount',
             filledAmount.toString()
         );
+
+        assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
         assert.fieldEquals('User', BOB.toHexString(), 'orderCount', '1');
         assert.fieldEquals('User', BOB.toHexString(), 'transactionCount', '1');
@@ -850,6 +867,7 @@ describe('Order Partially Filled', () => {
         );
         assert.fieldEquals('Transaction', txId, 'forwardValue', '30');
         assert.fieldEquals('Transaction', txId, 'amount', '27');
+        assert.fieldEquals('Transaction', txId, 'feeInFV', '0');
 
         assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
         assert.fieldEquals(
@@ -912,6 +930,7 @@ describe('Order Partially Filled', () => {
         );
         assert.fieldEquals('Transaction', txId, 'forwardValue', '60');
         assert.fieldEquals('Transaction', txId, 'amount', '54');
+        assert.fieldEquals('Transaction', txId, 'feeInFV', '0');
 
         assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
         assert.fieldEquals(
@@ -1120,6 +1139,7 @@ describe('Orders Cleaned', () => {
         );
         assert.fieldEquals('Transaction', txId1, 'forwardValue', '100');
         assert.fieldEquals('Transaction', txId1, 'amount', amount.toString());
+        assert.fieldEquals('Transaction', txId1, 'feeInFV', '0');
 
         const txId2 =
             ordersCleanedEvent.transaction.hash.toHexString() +
@@ -1220,6 +1240,7 @@ describe('Orders Cleaned', () => {
         );
         assert.fieldEquals('Transaction', txId2, 'forwardValue', '50');
         assert.fieldEquals('Transaction', txId2, 'amount', '40');
+        assert.fieldEquals('Transaction', txId1, 'feeInFV', '0');
 
         assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '2');
         assert.fieldEquals(
