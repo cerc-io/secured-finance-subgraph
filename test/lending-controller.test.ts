@@ -85,11 +85,13 @@ describe('With no lending markets existing', () => {
         handleOrderBookCreated(event);
 
         assert.entityCount(PROTOCOL, 1);
-        assert.fieldEquals(
-            PROTOCOL,
-            PROTOCOL_ID,
-            'lendingMarkets',
-            toArrayString([buildLendingMarketId(ethBytes, maturity)])
+        const protocol = getProtocol();
+        assert.bigIntEquals(protocol.totalUsers, BigInt.fromI32(0));
+        const lendingMarkets = protocol.lendingMarkets.load();
+        assert.i32Equals(lendingMarkets.length, 1);
+        assert.stringEquals(
+            lendingMarkets[0].id,
+            buildLendingMarketId(ethBytes, maturity)
         );
     });
 });
@@ -141,6 +143,12 @@ describe('With lending markets already existing', () => {
             'maturity',
             newMaturity.toString()
         );
+        assert.fieldEquals(
+            LENDING_MARKET_ENTITY_NAME,
+            id,
+            'protocol',
+            'ethereum'
+        );
     });
 
     test('Rotate lending market should add the new maturity market to the protocol', () => {
@@ -153,7 +161,7 @@ describe('With lending markets already existing', () => {
         handleOrderBooksRotated(event);
 
         const protocol = getProtocol();
-        const lendingMarkets = protocol.lendingMarkets;
+        const lendingMarkets = protocol.lendingMarkets.load();
         assert.i32Equals(lendingMarkets.length, 9);
     });
 });
