@@ -89,7 +89,10 @@ describe('With no lending markets existing', () => {
         assert.bigIntEquals(protocol.totalUsers, BigInt.fromI32(0));
         const lendingMarkets = protocol.lendingMarkets.load();
         assert.i32Equals(lendingMarkets.length, 1);
-        assert.stringEquals(lendingMarkets[0].id, buildLendingMarketId(ethBytes, maturity));
+        assert.stringEquals(
+            lendingMarkets[0].id,
+            buildLendingMarketId(ethBytes, maturity)
+        );
     });
 });
 
@@ -145,7 +148,7 @@ describe('With lending markets already existing', () => {
             id,
             'protocol',
             'ethereum'
-        )
+        );
     });
 
     test('Rotate lending market should add the new maturity market to the protocol', () => {
