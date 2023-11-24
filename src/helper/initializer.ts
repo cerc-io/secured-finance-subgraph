@@ -53,12 +53,13 @@ export const getOrInitLendingMarket = (
     return lendingMarket as LendingMarket;
 };
 
-export const getOrInitUser = (address: Bytes): User => {
+export const getOrInitUser = (address: Bytes, createdAt: BigInt): User => {
     let user = User.load(address.toHexString());
     if (!user) {
         user = new User(address.toHexString());
         user.transactionCount = BigInt.fromI32(0);
         user.orderCount = BigInt.fromI32(0);
+        user.createdAt = createdAt;
         user.save();
 
         log.debug('New user: {}', [user.id]);
@@ -114,7 +115,7 @@ export const initOrder = (
     txHash: Bytes
 ): void => {
     const order = new Order(id);
-    const user = getOrInitUser(maker);
+    const user = getOrInitUser(maker, createdAt);
 
     order.orderId = orderId;
     order.maker = user.id;
@@ -155,7 +156,7 @@ export const initTransaction = (
     if (filledAmount.isZero()) return;
 
     const transaction = new Transaction(txId);
-    const user = getOrInitUser(taker);
+    const user = getOrInitUser(taker, timestamp);
 
     transaction.orderPrice = unitPrice;
     transaction.taker = user.id;

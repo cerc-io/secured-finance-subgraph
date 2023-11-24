@@ -38,6 +38,7 @@ const ccy = toBytes32('ETH');
 const maturity = BigInt.fromI32(1677628800); // 1st Mar 23
 const amount = BigInt.fromI32(90);
 const unitPrice = BigInt.fromI32(9000);
+const timestamp = BigInt.fromI64(1677620000);
 
 describe('Order Executed', () => {
     beforeEach(() => {
@@ -81,12 +82,13 @@ describe('Order Executed', () => {
             event.logIndex.toString();
         assert.notInStore('Transaction', txId);
 
-        const alice = getOrInitUser(ALICE);
+        const alice = getOrInitUser(ALICE, timestamp);
         assert.bigIntEquals(alice.orderCount, BigInt.fromI32(1));
         assert.bigIntEquals(alice.transactionCount, BigInt.fromI32(0));
         const orders = alice.orders.load();
         assert.i32Equals(orders.length, 1);
         assert.stringEquals(orders[0].id, id);
+        assert.bigIntEquals(alice.createdAt, event.block.timestamp);
     });
 
     test('should create a Partially Filled Order and a Transaction when a limit order is partially filled and order is placed', () => {
@@ -154,7 +156,7 @@ describe('Order Executed', () => {
 
         assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
-        const alice = getOrInitUser(ALICE);
+        const alice = getOrInitUser(ALICE, timestamp);
         assert.bigIntEquals(alice.orderCount, BigInt.fromI32(1));
         assert.bigIntEquals(alice.transactionCount, BigInt.fromI32(1));
         const orders = alice.orders.load();
@@ -163,6 +165,7 @@ describe('Order Executed', () => {
         const transactions = alice.transactions.load();
         assert.i32Equals(transactions.length, 1);
         assert.stringEquals(transactions[0].id, txId);
+        assert.bigIntEquals(alice.createdAt, event.block.timestamp);
     });
 
     test('should create a Filled Order and a Transaction when a limit order is filled completely', () => {
@@ -231,7 +234,7 @@ describe('Order Executed', () => {
         );
         assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
-        const alice = getOrInitUser(ALICE);
+        const alice = getOrInitUser(ALICE, timestamp);
         assert.bigIntEquals(alice.orderCount, BigInt.fromI32(1));
         assert.bigIntEquals(alice.transactionCount, BigInt.fromI32(1));
         const orders = alice.orders.load();
@@ -240,6 +243,7 @@ describe('Order Executed', () => {
         const transactions = alice.transactions.load();
         assert.i32Equals(transactions.length, 1);
         assert.stringEquals(transactions[0].id, txId);
+        assert.bigIntEquals(alice.createdAt, event.block.timestamp);
     });
 
     test('should create a Filled Order and a Transaction with filled unit price when Market Order is executed', () => {
@@ -309,7 +313,7 @@ describe('Order Executed', () => {
         );
         assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
-        const alice = getOrInitUser(ALICE);
+        const alice = getOrInitUser(ALICE, timestamp);
         assert.bigIntEquals(alice.orderCount, BigInt.fromI32(1));
         assert.bigIntEquals(alice.transactionCount, BigInt.fromI32(1));
         const orders = alice.orders.load();
@@ -318,6 +322,7 @@ describe('Order Executed', () => {
         const transactions = alice.transactions.load();
         assert.i32Equals(transactions.length, 1);
         assert.stringEquals(transactions[0].id, txId);
+        assert.bigIntEquals(alice.createdAt, event.block.timestamp);
     });
 
     test('should not create any order when market order is not filled or blocked', () => {
@@ -415,7 +420,7 @@ describe('Order Executed', () => {
         );
         assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
-        const alice = getOrInitUser(ALICE);
+        const alice = getOrInitUser(ALICE, timestamp);
         assert.bigIntEquals(alice.orderCount, BigInt.fromI32(1));
         assert.bigIntEquals(alice.transactionCount, BigInt.fromI32(1));
         const orders = alice.orders.load();
@@ -424,6 +429,7 @@ describe('Order Executed', () => {
         const transactions = alice.transactions.load();
         assert.i32Equals(transactions.length, 1);
         assert.stringEquals(transactions[0].id, txId);
+        assert.bigIntEquals(alice.createdAt, event.block.timestamp);
     });
 
     test('should create a Blocked Order when market order is fully blocked because of circuit breaker', () => {
@@ -527,7 +533,7 @@ describe('Order Executed', () => {
         );
         assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
-        const alice = getOrInitUser(ALICE);
+        const alice = getOrInitUser(ALICE, timestamp);
         assert.bigIntEquals(alice.orderCount, BigInt.fromI32(1));
         assert.bigIntEquals(alice.transactionCount, BigInt.fromI32(1));
         const orders = alice.orders.load();
@@ -536,6 +542,7 @@ describe('Order Executed', () => {
         const transactions = alice.transactions.load();
         assert.i32Equals(transactions.length, 1);
         assert.stringEquals(transactions[0].id, txId);
+        assert.bigIntEquals(alice.createdAt, event.block.timestamp);
     });
 
     test('should create an Blocked Order when limit order is completely blocked', () => {
@@ -577,12 +584,13 @@ describe('Order Executed', () => {
             event.logIndex.toString();
         assert.notInStore('Transaction', txId);
 
-        const alice = getOrInitUser(ALICE);
+        const alice = getOrInitUser(ALICE, timestamp);
         assert.bigIntEquals(alice.orderCount, BigInt.fromI32(1));
         assert.bigIntEquals(alice.transactionCount, BigInt.fromI32(0));
         const orders = alice.orders.load();
         assert.i32Equals(orders.length, 1);
         assert.stringEquals(orders[0].id, id);
+        assert.bigIntEquals(alice.createdAt, event.block.timestamp);
     });
 });
 
@@ -615,12 +623,13 @@ describe('PreOrder Executed', () => {
         assert.fieldEquals('Order', id, 'isPreOrder', 'true');
         assert.fieldEquals('Order', id, 'type', 'Limit');
 
-        const bob = getOrInitUser(BOB);
+        const bob = getOrInitUser(BOB, timestamp);
         assert.bigIntEquals(bob.orderCount, BigInt.fromI32(1));
         assert.bigIntEquals(bob.transactionCount, BigInt.fromI32(0));
         const orders = bob.orders.load();
         assert.i32Equals(orders.length, 1);
         assert.stringEquals(orders[0].id, id);
+        assert.bigIntEquals(bob.createdAt, event.block.timestamp);
     });
 });
 
@@ -694,7 +703,7 @@ describe('Position Unwound', () => {
 
         assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
-        const bob = getOrInitUser(BOB);
+        const bob = getOrInitUser(BOB, timestamp);
         assert.bigIntEquals(bob.orderCount, BigInt.fromI32(1));
         assert.bigIntEquals(bob.transactionCount, BigInt.fromI32(1));
         const orders = bob.orders.load();
@@ -703,6 +712,7 @@ describe('Position Unwound', () => {
         const transactions = bob.transactions.load();
         assert.i32Equals(transactions.length, 1);
         assert.stringEquals(transactions[0].id, txId);
+        assert.bigIntEquals(bob.createdAt, event.block.timestamp);
     });
 
     test('should create an Filled Order and a transaction when futureValue is not filled completely', () => {
@@ -769,7 +779,7 @@ describe('Position Unwound', () => {
 
         assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
-        const bob = getOrInitUser(BOB);
+        const bob = getOrInitUser(BOB, timestamp);
         assert.bigIntEquals(bob.orderCount, BigInt.fromI32(1));
         assert.bigIntEquals(bob.transactionCount, BigInt.fromI32(1));
         const orders = bob.orders.load();
@@ -778,6 +788,7 @@ describe('Position Unwound', () => {
         const transactions = bob.transactions.load();
         assert.i32Equals(transactions.length, 1);
         assert.stringEquals(transactions[0].id, txId);
+        assert.bigIntEquals(bob.createdAt, event.block.timestamp);
     });
 
     test('should create a Blocked Order when order is fully blocked', () => {
@@ -896,7 +907,7 @@ describe('Order Partially Filled', () => {
         assert.fieldEquals('Transaction', txId, 'amount', '27');
         assert.fieldEquals('Transaction', txId, 'feeInFV', '0');
 
-        const alice = getOrInitUser(ALICE);
+        const alice = getOrInitUser(ALICE, timestamp);
         assert.bigIntEquals(alice.orderCount, BigInt.fromI32(1));
         assert.bigIntEquals(alice.transactionCount, BigInt.fromI32(1));
         const orders = alice.orders.load();
@@ -905,6 +916,7 @@ describe('Order Partially Filled', () => {
         const transactions = alice.transactions.load();
         assert.i32Equals(transactions.length, 1);
         assert.stringEquals(transactions[0].id, txId);
+        assert.bigIntEquals(alice.createdAt, event.block.timestamp);
     });
 
     test('should update an PartiallyFilled and add a transaction', () => {
