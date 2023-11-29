@@ -34,10 +34,30 @@ describe('Liquidation Executed', () => {
             ':' +
             event.logIndex.toString();
 
-        assert.fieldEquals('Liquidation', id, 'collateralCurrency', ethBytes.toHexString());
-        assert.fieldEquals('Liquidation', id, 'debtCurrency', filBytes.toHexString());
-        assert.fieldEquals('Liquidation', id, 'debtMaturity', debtMaturity.toString());
-        assert.fieldEquals('Liquidation', id, 'debtAmount', debtAmount.toString());
+        assert.fieldEquals(
+            'Liquidation',
+            id,
+            'collateralCurrency',
+            ethBytes.toHexString()
+        );
+        assert.fieldEquals(
+            'Liquidation',
+            id,
+            'debtCurrency',
+            filBytes.toHexString()
+        );
+        assert.fieldEquals(
+            'Liquidation',
+            id,
+            'debtMaturity',
+            debtMaturity.toString()
+        );
+        assert.fieldEquals(
+            'Liquidation',
+            id,
+            'debtAmount',
+            debtAmount.toString()
+        );
 
         const alice = getOrInitUser(ALICE, event.block.timestamp);
         assert.bigIntEquals(alice.liquidationCount, BigInt.fromI32(1));
