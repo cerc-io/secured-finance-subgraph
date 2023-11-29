@@ -83,6 +83,8 @@ type User @entity {
   transactions: [Transaction!]! @derivedFrom(field: "taker")
   orderCount: BigInt!
   orders: [Order!]! @derivedFrom(field: "maker")
+  liquidationCount: BigInt!
+  liquidations: [Liquidation!]! @derivedFrom(field: "user")
 }
 
 type DailyVolume @entity {
@@ -99,4 +101,17 @@ type Protocol @entity {
   id: ID! # ethereum
   totalUsers: BigInt!
   lendingMarkets: [LendingMarket!]! @derivedFrom(field: "protocol")
+}
+
+type Liquidation @entity {
+  id: ID!
+  collateralCurrency: Bytes!
+  debtCurrency: Bytes!
+  debtMaturity: BigInt!
+  debtAmount: BigInt!
+  user: User!
+
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  txHash: Bytes!
 }
