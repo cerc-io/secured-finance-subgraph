@@ -63,6 +63,24 @@ dataSources:
         - event: OrderPartiallyFilled(uint48,indexed address,indexed bytes32,uint8,uint256,uint256,uint256)
           handler: handleOrderPartiallyFilled
       file: ./src/fund-management.ts
+  - kind: ethereum
+    name: LiquidationLogic
+    network: ~
+    source:
+      abi: LiquidationLogic
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Liquidation
+      abis:
+        - name: LiquidationLogic
+          file: ./abis/protocol/libraries/logics/LiquidationLogic.sol/LiquidationLogic.json
+      eventHandlers:
+        - event: LiquidationExecuted(indexed address,bytes32,indexed bytes32,indexed uint256,uint256)
+          handler: handleLiquidationExecuted
+      file: ./src/liquidation.ts
 templates:
   - kind: ethereum
     name: OrderActionLogic
@@ -110,21 +128,3 @@ templates:
         - event: ItayoseExecuted(bytes32,uint256,uint256,uint256,uint256,uint256)
           handler: handleItayoseExecuted
       file: ./src/lending-market.ts
-  - kind: ethereum
-    name: LiquidationLogic
-    network: ~
-    source:
-      abi: LiquidationLogic
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - Liquidation
-      abis:
-        - name: LiquidationLogic
-          file: ./abis/protocol/libraries/logics/LiquidationLogic.sol/LiquidationLogic.json
-      eventHandlers:
-        - event: LiquidationExecuted(indexed address,bytes32,indexed bytes32,indexed uint256,uint256)
-          handler: handleLiquidationExecuted
-      file: ./src/liquidation.ts
