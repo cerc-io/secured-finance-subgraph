@@ -20,14 +20,14 @@
     "format:fix": "prettier --config ./.prettierrc.json --write '**/*.{js,jsx,ts,tsx,json}' '*.{js,jsx,ts,tsx,json}'"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "^0.60.0",
-    "@graphprotocol/graph-ts": "^0.31.0",
+    "@graphprotocol/graph-cli": "0.62.0",
+    "@graphprotocol/graph-ts": "0.31.0",
     "@secured-finance/smart-contracts": "0.1.11-beta.0",
-    "@types/js-yaml": "^4.0.5",
-    "@types/node": "^16.14.2",
-    "js-yaml": "^4.1.0",
+    "@types/js-yaml": "4.0.5",
+    "@types/node": "16.18.67",
+    "js-yaml": "4.1.0",
     "matchstick-as": "0.6.0",
-    "prettier": "^2.8.3",
-    "ts-node": "^10.9.1"
+    "prettier": "2.8.3",
+    "ts-node": "10.9.1"
   }
 }
