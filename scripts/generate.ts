@@ -33,7 +33,7 @@ class Main {
 
         for (const dataSource of data.dataSources) {
             const deployment = await import(
-                `@secured-finance/smart-contracts/deployments/${this.environment}/${dataSource.source.abi}.json`
+                `@secured-finance/contracts/deployments/${this.environment}/${dataSource.source.abi}.json`
             );
 
             const proxyAddress = deployment.address;
