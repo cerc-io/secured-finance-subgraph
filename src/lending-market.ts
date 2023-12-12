@@ -205,6 +205,7 @@ export function handleOrderCanceled(event: OrderCanceled): void {
     const order = Order.load(id);
     if (order) {
         order.status = 'Cancelled';
+        order.statusUpdatedAt = event.block.timestamp;
         order.save();
     }
 }
@@ -260,6 +261,7 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
             );
             order.filledAmount = order.inputAmount;
             order.status = 'Filled';
+            order.statusUpdatedAt = event.block.timestamp;
             order.save();
         }
     }

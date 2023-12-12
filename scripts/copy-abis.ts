@@ -4,7 +4,7 @@ class Main {
     run() {
         const rootDir = process.cwd();
         const modulePath = require
-            .resolve('@secured-finance/smart-contracts/package.json')
+            .resolve('@secured-finance/contracts/package.json')
             .replace('/package.json', '');
 
         const abiDir = `${rootDir}/abis`;

@@ -21,6 +21,7 @@ import {
 
 const orderBookId = BigInt.fromI32(1);
 const openingDate = BigInt.fromI32(12345);
+const preOpeningDate = BigInt.fromI32(1234);
 const maturity = BigInt.fromI32(365);
 
 afterEach(() => {
@@ -55,6 +56,7 @@ describe('With no lending markets existing', () => {
             ethBytes,
             orderBookId,
             openingDate,
+            preOpeningDate,
             maturity
         );
         handleOrderBookCreated(event);
@@ -80,6 +82,7 @@ describe('With no lending markets existing', () => {
             ethBytes,
             orderBookId,
             openingDate,
+            preOpeningDate,
             maturity
         );
         handleOrderBookCreated(event);
@@ -106,6 +109,7 @@ describe('With lending markets already existing', () => {
                     filBytes,
                     BigInt.fromI32(i + 1),
                     openingDate,
+                    preOpeningDate,
                     maturity
                 )
             );
@@ -114,6 +118,7 @@ describe('With lending markets already existing', () => {
                     ethBytes,
                     BigInt.fromI32(i + 1),
                     openingDate,
+                    preOpeningDate,
                     maturity
                 )
             );

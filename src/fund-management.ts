@@ -14,6 +14,7 @@ export function handleOrderPartiallyFilled(event: OrderPartiallyFilled): void {
     if (order) {
         order.filledAmount = order.filledAmount.plus(event.params.amount);
         order.status = 'PartiallyFilled';
+        order.statusUpdatedAt = event.block.timestamp;
         order.save();
 
         const txId =

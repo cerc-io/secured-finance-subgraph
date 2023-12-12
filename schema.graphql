@@ -30,6 +30,7 @@ type Order @entity {
   inputAmount: BigInt!
   filledAmount: BigInt!
   status: OrderStatus!
+  statusUpdatedAt: BigInt!
   lendingMarket: LendingMarket!
   isPreOrder: Boolean!
   type: OrderType!
