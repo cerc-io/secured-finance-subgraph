@@ -20,7 +20,7 @@ dataSources:
       eventHandlers:
         - event: LendingMarketInitialized(indexed bytes32,uint256,uint256,uint256,uint256,address,address)
           handler: handleLendingMarketInitialized
-        - event: OrderBookCreated(indexed bytes32,indexed uint8,uint256,uint256)
+        - event: OrderBookCreated(indexed bytes32,indexed uint8,uint256,uint256,uint256)
           handler: handleOrderBookCreated
         - event: OrderBooksRotated(bytes32,uint256,uint256)
           handler: handleOrderBooksRotated

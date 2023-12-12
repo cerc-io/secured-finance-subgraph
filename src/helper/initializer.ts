@@ -112,12 +112,12 @@ export const initOrder = (
     status: string,
     isPreOrder: boolean,
     type: string,
-    createdAt: BigInt,
+    timestamp: BigInt,
     blockNumber: BigInt,
     txHash: Bytes
 ): void => {
     const order = new Order(id);
-    const user = getOrInitUser(maker, createdAt);
+    const user = getOrInitUser(maker, timestamp);
 
     order.orderId = orderId;
     order.maker = user.id;
@@ -128,10 +128,11 @@ export const initOrder = (
     order.filledAmount = filledAmount;
     order.inputAmount = inputAmount;
     order.status = status;
+    order.statusUpdatedAt = timestamp;
     order.lendingMarket = getOrInitLendingMarket(currency, maturity).id;
     order.isPreOrder = isPreOrder;
     order.type = type;
-    order.createdAt = createdAt;
+    order.createdAt = timestamp;
     order.blockNumber = blockNumber;
     order.txHash = txHash;
     order.save();

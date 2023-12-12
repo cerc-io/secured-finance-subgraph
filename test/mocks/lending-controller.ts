@@ -9,6 +9,7 @@ export function createOrderBookCreatedEvent(
     ccy: Bytes,
     orderBookId: BigInt,
     openingDate: BigInt,
+    preOpeningDate: BigInt,
     maturity: BigInt
 ): OrderBookCreated {
     const mockEvent = changetype<OrderBookCreated>(newMockEvent());
@@ -37,6 +38,12 @@ export function createOrderBookCreatedEvent(
         new ethereum.EventParam(
             'openingDate',
             ethereum.Value.fromUnsignedBigInt(openingDate)
+        )
+    );
+    event.parameters.push(
+        new ethereum.EventParam(
+            'preOpeningDate',
+            ethereum.Value.fromUnsignedBigInt(preOpeningDate)
         )
     );
     event.parameters.push(
