@@ -1,18 +1,23 @@
 import { readFileSync, writeFileSync } from 'fs';
 
-const arrowedEnvironments = ['development', 'staging', 'production'] as const;
-type Environment = (typeof arrowedEnvironments)[number];
+const arrowedNetworks = [
+    'development',
+    'staging',
+    'sepolia',
+    'mainnet',
+] as const;
+type Network = (typeof arrowedNetworks)[number];
 
 class Main {
-    private environment: Environment;
+    private network: Network;
 
-    constructor(environment: string) {
-        if (!arrowedEnvironments.includes(environment as Environment)) {
-            console.error('error: invalid environment:', environment);
+    constructor(network: string) {
+        if (!arrowedNetworks.includes(network as Network)) {
+            console.error('error: invalid network:', network);
             process.exit(1);
         }
 
-        this.environment = environment as Environment;
+        this.network = network as Network;
     }
 
     run() {
@@ -21,8 +26,7 @@ class Main {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data = JSON.parse(jsonText) as any;
 
-        const { version, isMajorUpdate, isMinorUpdate } =
-            data[this.environment];
+        const { version, isMajorUpdate, isMinorUpdate } = data[this.network];
         const versions: string[] = version.split('.');
 
         if (isMajorUpdate) {
@@ -36,15 +40,15 @@ class Main {
             versions[2] = String(Number(versions[2]) + 1);
         }
 
-        data[this.environment].version = versions.join('.');
-        data[this.environment].isMajorUpdate = false;
-        data[this.environment].isMinorUpdate = false;
+        data[this.network].version = versions.join('.');
+        data[this.network].isMajorUpdate = false;
+        data[this.network].isMinorUpdate = false;
         const newYamlText = JSON.stringify(data, null, 2);
 
         writeFileSync(path, newYamlText, 'utf8');
     }
 }
 
-const [, , environment] = process.argv;
+const [, , network] = process.argv;
 
-new Main(environment).run();
+new Main(network).run();

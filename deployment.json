@@ -8,5 +8,15 @@
     "isMajorUpdate": false,
     "isMinorUpdate": false,
     "version": "0.0.10"
+  },
+  "sepolia": {
+    "isMajorUpdate": false,
+    "isMinorUpdate": false,
+    "version": "0.0.1"
+  },
+  "mainnet": {
+    "isMajorUpdate": false,
+    "isMinorUpdate": false,
+    "version": "0.0.0"
   }
 }

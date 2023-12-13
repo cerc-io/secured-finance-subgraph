@@ -30,10 +30,14 @@ class Main {
         const yamlText = readFileSync(`${rootDir}/subgraph.yaml`, 'utf8');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data = load(yamlText) as any;
+        const networkName =
+            this.environment === 'development'
+                ? this.environment
+                : this.network;
 
         for (const dataSource of data.dataSources) {
             const deployment = await import(
-                `@secured-finance/contracts/deployments/${this.environment}/${dataSource.source.abi}.json`
+                `@secured-finance/contracts/deployments/${networkName}/${dataSource.source.abi}.json`
             );
 
             const proxyAddress = deployment.address;
@@ -48,7 +52,7 @@ class Main {
         const newYamlText = dump(data);
 
         writeFileSync(
-            `${rootDir}/subgraph.${this.environment}.yaml`,
+            `${rootDir}/subgraph.${networkName}.yaml`,
             newYamlText,
             'utf8'
         );
