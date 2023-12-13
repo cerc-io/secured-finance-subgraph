@@ -7,29 +7,47 @@ on:
         description: 'True to bypass the check for changes'
         required: false
         type: boolean
+      network:
+        description: 'Network'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - staging
+          - sepolia
+          - mainnet
   push:
     branches:
       - main
       - develop
 
 jobs:
+  identify-env:
+    name: Identify the environment
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.network) || steps.extract_branch.outputs.branch == 'main' && 'staging' || 'development' }}
+      branch: ${{ steps.extract_branch.outputs.branch }}
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >>$GITHUB_OUTPUT
+        id: extract_branch
   paths:
     name: Path Filter
     runs-on: ubuntu-latest
+    needs: [identify-env]
     if: ${{ github.actor != 'secured-finance-machine-user[bot]' }}
     outputs:
       subgraph: ${{ steps.changes.outputs.subgraph }}
     steps:
       - uses: actions/checkout@v3
-      - name: Extract branch name
-        shell: bash
-        run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >>$GITHUB_OUTPUT
-        id: extract_branch
       - name: Check Paths
         uses: dorny/paths-filter@v2
         id: changes
         with:
-          base: ${{ steps.extract_branch.outputs.branch }}
+          base: ${{ needs.identify-env.outputs.branch }}
           filters: |
             subgraph:
               - 'src/**'
@@ -39,12 +57,11 @@ jobs:
   deploy:
     name: Deploy Graph
     runs-on: ubuntu-latest
-    needs: [paths]
+    needs: [paths, identify-env]
+    environment: ${{ needs.identify-env.outputs.environment }}
     if: ${{ needs.paths.outputs.subgraph == 'true' || github.event.inputs.force_publish == 'true' }}
     steps:
       - run: echo "${{ needs.paths.outputs.subgraph }}"
-      - run: echo "${{ needs.paths.outputs.client }}"
-      - run: echo "${{ needs.paths.outputs.packages }}"
       - name: Generate token
         id: generate_token
         uses: tibdex/github-app-token@v1
@@ -69,25 +86,14 @@ jobs:
 
       - name: Build
         run: npm run build
-      - name: Extract branch name
-        shell: bash
-        run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >>$GITHUB_OUTPUT
-        id: extract_branch
       - name: Deploy Subgraph
         id: deploy
         run: |
           npm run auth ${{secrets.GRAPH_ACCESS_TOKEN}}
-          if [ ${{ steps.extract_branch.outputs.branch }} = main ]; then
-            npm run update-subgraphrc staging
-            version=$(cat deployment.json | jq -r .staging.version | tr -d '"')
-            npm run generate:stg
-            npm run deploy:stg ${version}
-          else
-            npm run update-subgraphrc development
-            version=$(cat deployment.json | jq -r .development.version | tr -d '"')
-            npm run generate:dev
-            npm run deploy:dev ${version}
-          fi
+          npm run update-subgraphrc ${{needs.identify-env.outputs.environment}}
+          version=$(cat deployment.json | jq -r .${{needs.identify-env.outputs.environment}}.version | tr -d '"')
+          npm run generate:${{needs.identify-env.outputs.environment}}
+          npm run deploy:${{needs.identify-env.outputs.environment}} ${version}
       - name: Commit and push
         shell: bash
         run: |
@@ -99,7 +105,7 @@ jobs:
           git push
       - name: Merge main into develop
         shell: bash
-        if: ${{ steps.extract_branch.outputs.branch == 'main' }}
+        if: ${{ needs.identify-env.outputs.branch == 'main' }}
         run: |
           git switch develop
           git merge main
