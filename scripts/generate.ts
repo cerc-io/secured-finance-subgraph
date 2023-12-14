@@ -31,7 +31,7 @@ class Main {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data = load(yamlText) as any;
         const networkName =
-            this.environment === 'development'
+            this.environment === 'development' || this.environment === 'staging'
                 ? this.environment
                 : this.network;
 
