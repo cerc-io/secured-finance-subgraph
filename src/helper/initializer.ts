@@ -257,6 +257,8 @@ export const initTransfer = (
         user.depositAUSDC = user.depositAUSDC.plus(amount);
     } else if (currencyString == 'axlFIL') {
         user.depositAXLFIL = user.depositAXLFIL.plus(amount);
+    } else {
+        console.error('Invalid currency: ' + currencyString);
     }
     user.transferCount = user.transferCount.plus(BigInt.fromI32(1));
     user.save();
