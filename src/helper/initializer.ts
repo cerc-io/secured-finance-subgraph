@@ -258,7 +258,7 @@ export const initTransfer = (
     } else if (currencyString == 'axlFIL') {
         user.depositAXLFIL = user.depositAXLFIL.plus(amount);
     } else {
-        console.error('Invalid currency: ' + currencyString);
+        log.error('Invalid currency: ', currencyString.split(','));
     }
     user.transferCount = user.transferCount.plus(BigInt.fromI32(1));
     user.save();
