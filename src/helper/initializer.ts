@@ -13,6 +13,7 @@ import {
     Transaction,
     User,
     Liquidation,
+    Transfer,
 } from '../../generated/schema';
 import { getDailyVolumeEntityId } from '../utils/id-generation';
 import { buildLendingMarketId } from '../utils/string';
@@ -61,6 +62,13 @@ export const getOrInitUser = (address: Bytes, createdAt: BigInt): User => {
         user.transactionCount = BigInt.fromI32(0);
         user.orderCount = BigInt.fromI32(0);
         user.liquidationCount = BigInt.fromI32(0);
+        user.transferCount = BigInt.fromI32(0);
+        user.depositETH = BigInt.fromI32(0);
+        user.depositUSDC = BigInt.fromI32(0);
+        user.depositWBTC = BigInt.fromI32(0);
+        user.depositWFIL = BigInt.fromI32(0);
+        user.depositAUSDC = BigInt.fromI32(0);
+        user.depositAXLFIL = BigInt.fromI32(0);
         user.createdAt = createdAt;
         user.save();
 
@@ -209,5 +217,47 @@ export const initLiquidation = (
     liquidation.save();
 
     user.liquidationCount = user.liquidationCount.plus(BigInt.fromI32(1));
+    user.save();
+};
+
+export const initTransfer = (
+    id: string,
+    userAddress: Address,
+    currency: Bytes,
+    amount: BigInt,
+    transferType: string,
+    timestamp: BigInt,
+    blockNumber: BigInt,
+    txHash: Bytes
+): void => {
+    const transfer = new Transfer(id);
+
+    const user = getOrInitUser(userAddress, timestamp);
+
+    transfer.user = user.id;
+    transfer.currency = currency;
+    transfer.amount = amount;
+    transfer.transferType = transferType;
+    transfer.timestamp = timestamp;
+    transfer.blockNumber = blockNumber;
+    transfer.txHash = txHash;
+    transfer.save();
+
+    const currencyString = currency.toString();
+
+    if (currencyString == 'ETH') {
+        user.depositETH = user.depositETH.plus(amount);
+    } else if (currencyString == 'USDC') {
+        user.depositUSDC = user.depositUSDC.plus(amount);
+    } else if (currencyString == 'WBTC') {
+        user.depositWBTC = user.depositWBTC.plus(amount);
+    } else if (currencyString == 'WFIL') {
+        user.depositWFIL = user.depositWFIL.plus(amount);
+    } else if (currencyString == 'aUSDC') {
+        user.depositAUSDC = user.depositAUSDC.plus(amount);
+    } else if (currencyString == 'axlFIL') {
+        user.depositAXLFIL = user.depositAXLFIL.plus(amount);
+    }
+    user.transferCount = user.transferCount.plus(BigInt.fromI32(1));
     user.save();
 };

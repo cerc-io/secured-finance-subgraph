@@ -86,6 +86,14 @@ type User @entity {
   orders: [Order!]! @derivedFrom(field: "maker")
   liquidationCount: BigInt!
   liquidations: [Liquidation!]! @derivedFrom(field: "user")
+  transferCount: BigInt!
+  transfers: [Transfer!]! @derivedFrom(field: "user")
+  depositETH: BigInt!
+  depositUSDC: BigInt!
+  depositWBTC: BigInt!
+  depositWFIL: BigInt!
+  depositAUSDC: BigInt!
+  depositAXLFIL: BigInt!
 }
 
 type DailyVolume @entity {
@@ -111,6 +119,23 @@ type Liquidation @entity {
   debtMaturity: BigInt!
   debtAmount: BigInt!
   user: User!
+
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  txHash: Bytes!
+}
+
+enum TransferType {
+  Deposit
+  Withdraw
+}
+
+type Transfer @entity {
+  id: ID!
+  user: User!
+  currency: Bytes!
+  amount: BigInt!
+  transferType: TransferType!
 
   timestamp: BigInt!
   blockNumber: BigInt!
