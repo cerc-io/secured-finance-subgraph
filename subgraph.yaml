@@ -43,6 +43,8 @@ dataSources:
       eventHandlers:
         - event: Deposit(indexed address,bytes32,uint256)
           handler: handleDeposit
+        - event: Withdraw(indexed address,bytes32,uint256)
+          handler: handleWithdraw
       file: ./src/token-vault.ts
   - kind: ethereum
     name: FundManagementLogic
