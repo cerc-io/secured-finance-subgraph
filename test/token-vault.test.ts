@@ -34,12 +34,9 @@ describe('Deposit & Withdraw', () => {
         assert.entityCount('User', 1);
         assert.fieldEquals('Protocol', 'ethereum', 'totalUsers', '1');
         assert.fieldEquals('User', ALICE.toHexString(), 'transferCount', '1');
-        assert.fieldEquals(
-            'User',
-            ALICE.toHexString(),
-            'depositETH',
-            amount.toString()
-        );
+
+        const depositID = ALICE.toHexString() + ':' + ccy.toString();
+        assert.fieldEquals('Deposit', depositID, 'amount', amount.toString());
 
         assert.entityCount('Transfer', 1);
         assert.fieldEquals('Transfer', id, 'user', ALICE.toHexString());
@@ -104,7 +101,7 @@ describe('Deposit & Withdraw', () => {
         assert.fieldEquals('Transfer', id, 'transferType', 'Withdraw');
     });
 
-    test('Should increment the deposit amount for each currency', () => {
+    test('Should create deposit for currency', () => {
         const amount1 = BigInt.fromI32(10000000);
         const amount2 = BigInt.fromI32(20000000);
         const amount3 = BigInt.fromI32(50000000);
@@ -120,24 +117,37 @@ describe('Deposit & Withdraw', () => {
         handleDeposit(event2);
         handleDeposit(event3);
 
-        assert.fieldEquals('User', ALICE.toHexString(), 'depositETH', '0');
+        assert.notInStore(
+            'Deposit',
+            ALICE.toHexString() + ':' + ccy.toString()
+        );
         assert.fieldEquals(
-            'User',
-            ALICE.toHexString(),
-            'depositWFIL',
+            'Deposit',
+            ALICE.toHexString() + ':' + wfil.toString(),
+            'amount',
             amount1.toString()
         );
         assert.fieldEquals(
-            'User',
-            ALICE.toHexString(),
-            'depositUSDC',
+            'Deposit',
+            ALICE.toHexString() + ':' + usdc.toString(),
+            'amount',
             amount2.toString()
         );
         assert.fieldEquals(
-            'User',
-            ALICE.toHexString(),
-            'depositAXLFIL',
+            'Deposit',
+            ALICE.toHexString() + ':' + axlFIL.toString(),
+            'amount',
             amount3.toString()
+        );
+
+        const event4 = createDepositEvent(ALICE, axlFIL, amount2);
+        handleDeposit(event4);
+
+        assert.fieldEquals(
+            'Deposit',
+            ALICE.toHexString() + ':' + axlFIL.toString(),
+            'amount',
+            (amount3 + amount2).toString()
         );
     });
 });
