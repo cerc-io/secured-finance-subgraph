@@ -4,10 +4,20 @@
     "isMinorUpdate": false,
     "version": "0.0.43"
   },
+  "development-arb": {
+    "version": "0.0.1",
+    "isMajorUpdate": false,
+    "isMinorUpdate": false
+  },
   "staging": {
     "isMajorUpdate": false,
     "isMinorUpdate": false,
     "version": "0.0.12"
+  },
+  "staging-arb": {
+    "version": "0.0.1",
+    "isMajorUpdate": false,
+    "isMinorUpdate": false
   },
   "sepolia": {
     "isMajorUpdate": false,

@@ -2,11 +2,20 @@ import { readFileSync, writeFileSync } from 'fs';
 
 const arrowedNetworks = [
     'development',
+    'development-arb',
     'staging',
+    'staging-arb',
     'sepolia',
     'mainnet',
+    'arbitrum-one',
 ] as const;
 type Network = (typeof arrowedNetworks)[number];
+
+const EMPTY_DEPLOYMENT = {
+    version: '0.0.0',
+    isMajorUpdate: false,
+    isMinorUpdate: false,
+};
 
 class Main {
     private network: Network;
@@ -25,6 +34,10 @@ class Main {
         const jsonText = readFileSync(path, 'utf8');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data = JSON.parse(jsonText) as any;
+
+        if (!data[this.network]) {
+            data[this.network] = EMPTY_DEPLOYMENT;
+        }
 
         const { version, isMajorUpdate, isMinorUpdate } = data[this.network];
         const versions: string[] = version.split('.');
