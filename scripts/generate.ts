@@ -1,27 +1,33 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { dump, load } from 'js-yaml';
 
-const arrowedEnvironments = ['development', 'staging', 'production'] as const;
-const arrowedNetworks = ['sepolia', 'mainnet'] as const;
-type Environment = (typeof arrowedEnvironments)[number];
+const arrowedNetworks = [
+    'development',
+    'development-arb',
+    'staging',
+    'staging-arb',
+    'sepolia',
+    'mainnet',
+    'arbitrum-one',
+] as const;
 type Network = (typeof arrowedNetworks)[number];
 
+const devNetworkMap: Partial<Record<Network, string>> = {
+    development: 'sepolia',
+    'development-arb': 'arbitrum-sepolia',
+    staging: 'sepolia',
+    'staging-arb': 'arbitrum-sepolia',
+};
+
 class Main {
-    private environment: Environment;
     private network: Network;
 
-    constructor(environment: string, network: string) {
-        if (!arrowedEnvironments.includes(environment as Environment)) {
-            console.error('Invalid environment:', environment);
-            process.exit(1);
-        }
-
+    constructor(network: string) {
         if (!arrowedNetworks.includes(network as Network)) {
             console.error('Invalid network:', network);
             process.exit(1);
         }
 
-        this.environment = environment as Environment;
         this.network = network as Network;
     }
 
@@ -30,34 +36,36 @@ class Main {
         const yamlText = readFileSync(`${rootDir}/subgraph.yaml`, 'utf8');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data = load(yamlText) as any;
-        const networkName =
-            this.environment === 'development' || this.environment === 'staging'
-                ? this.environment
-                : this.network;
+        const network = devNetworkMap[this.network] || this.network;
+
+        if (!network) {
+            console.error('Network not found:', this.network);
+            process.exit(1);
+        }
 
         for (const dataSource of data.dataSources) {
             const deployment = await import(
-                `@secured-finance/contracts/deployments/${networkName}/${dataSource.source.abi}.json`
+                `@secured-finance/contracts/deployments/${this.network}/${dataSource.source.abi}.json`
             );
 
             const proxyAddress = deployment.address;
             dataSource.source.address = proxyAddress;
-            dataSource.network = this.network;
+            dataSource.network = network;
         }
 
         for (const template of data.templates) {
-            template.network = this.network;
+            template.network = network;
         }
 
         const newYamlText = dump(data);
 
         writeFileSync(
-            `${rootDir}/subgraph.${networkName}.yaml`,
+            `${rootDir}/subgraph.${this.network}.yaml`,
             newYamlText,
             'utf8'
         );
     }
 }
 
-const [, , environment, network] = process.argv;
-new Main(environment, network).run();
+const [, , network] = process.argv;
+new Main(network).run();
