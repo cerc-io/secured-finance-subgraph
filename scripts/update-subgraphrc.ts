@@ -13,9 +13,9 @@ const arrowedNetworks = [
 type Network = (typeof arrowedNetworks)[number];
 
 const EMPTY_DEPLOYMENT = {
-    version: '0.0.0',
     isMajorUpdate: false,
     isMinorUpdate: false,
+    version: '0.0.0',
 };
 
 class Main {

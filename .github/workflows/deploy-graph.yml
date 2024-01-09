@@ -95,7 +95,7 @@ jobs:
         run: |
           npm run auth ${{secrets.GRAPH_ACCESS_TOKEN}}
           npm run update-subgraphrc ${{needs.identify-env.outputs.environment}}
-          version=$(cat deployment.json | jq -r .${{needs.identify-env.outputs.environment}}.version | tr -d '"')
+          version=$(cat deployment.json | jq -r '."${{needs.identify-env.outputs.environment}}".version' | tr -d '"')
           npm run generate ${{needs.identify-env.outputs.environment}}
           npm run deploy:${{needs.identify-env.outputs.environment}} ${version}
       - name: Commit and push
