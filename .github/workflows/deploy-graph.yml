@@ -19,6 +19,7 @@ on:
           - staging-arb
           - sepolia
           - mainnet
+          - arbitrum-sepolia
           - arbitrum-one
   push:
     branches:

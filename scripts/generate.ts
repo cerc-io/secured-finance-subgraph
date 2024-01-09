@@ -8,6 +8,7 @@ const arrowedNetworks = [
     'staging-arb',
     'sepolia',
     'mainnet',
+    'arbitrum-sepolia',
     'arbitrum-one',
 ] as const;
 type Network = (typeof arrowedNetworks)[number];
