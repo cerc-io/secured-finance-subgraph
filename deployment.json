@@ -28,5 +28,15 @@
     "isMajorUpdate": false,
     "isMinorUpdate": false,
     "version": "0.0.2"
+  },
+  "arbitrum-sepolia": {
+    "version": "0.0.0",
+    "isMajorUpdate": false,
+    "isMinorUpdate": false
+  },
+  "arbitrum-one": {
+    "version": "0.0.0",
+    "isMajorUpdate": false,
+    "isMinorUpdate": false
   }
 }
