@@ -2,7 +2,7 @@
   "development": {
     "isMajorUpdate": false,
     "isMinorUpdate": false,
-    "version": "0.0.44"
+    "version": "0.0.45"
   },
   "development-arb": {
     "version": "0.0.1",
