@@ -5,9 +5,9 @@
     "version": "0.0.45"
   },
   "development-arb": {
-    "version": "0.0.1",
     "isMajorUpdate": false,
-    "isMinorUpdate": false
+    "isMinorUpdate": false,
+    "version": "0.0.1"
   },
   "staging": {
     "isMajorUpdate": false,
@@ -15,9 +15,9 @@
     "version": "0.0.12"
   },
   "staging-arb": {
-    "version": "0.0.1",
     "isMajorUpdate": false,
-    "isMinorUpdate": false
+    "isMinorUpdate": false,
+    "version": "0.0.1"
   },
   "sepolia": {
     "isMajorUpdate": false,
@@ -30,13 +30,13 @@
     "version": "0.0.2"
   },
   "arbitrum-sepolia": {
-    "version": "0.0.0",
     "isMajorUpdate": false,
-    "isMinorUpdate": false
+    "isMinorUpdate": false,
+    "version": "0.0.0"
   },
   "arbitrum-one": {
-    "version": "0.0.0",
     "isMajorUpdate": false,
-    "isMinorUpdate": false
+    "isMinorUpdate": false,
+    "version": "0.0.0"
   }
 }
