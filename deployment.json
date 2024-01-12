@@ -9,12 +9,22 @@
     "isMinorUpdate": false,
     "version": "0.0.1"
   },
+  "development-ava": {
+    "isMajorUpdate": false,
+    "isMinorUpdate": false,
+    "version": "0.0.1"
+  },
   "staging": {
     "isMajorUpdate": false,
     "isMinorUpdate": false,
     "version": "0.0.12"
   },
   "staging-arb": {
+    "isMajorUpdate": false,
+    "isMinorUpdate": false,
+    "version": "0.0.1"
+  },
+  "staging-ava": {
     "isMajorUpdate": false,
     "isMinorUpdate": false,
     "version": "0.0.1"
@@ -35,6 +45,11 @@
     "version": "0.0.1"
   },
   "arbitrum-one": {
+    "isMajorUpdate": false,
+    "isMinorUpdate": false,
+    "version": "0.0.1"
+  },
+  "avalanche-mainnet": {
     "isMajorUpdate": false,
     "isMinorUpdate": false,
     "version": "0.0.1"
