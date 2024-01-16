@@ -3,12 +3,15 @@ import { readFileSync, writeFileSync } from 'fs';
 const arrowedNetworks = [
     'development',
     'development-arb',
+    'development-ava',
     'staging',
     'staging-arb',
+    'staging-ava',
     'sepolia',
     'mainnet',
     'arbitrum-sepolia',
     'arbitrum-one',
+    'avalanche-mainnet',
 ] as const;
 type Network = (typeof arrowedNetworks)[number];
 

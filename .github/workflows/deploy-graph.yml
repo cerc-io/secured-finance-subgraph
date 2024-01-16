@@ -15,12 +15,15 @@ on:
         options:
           - development
           - development-arb
+          - development-ava
           - staging
           - staging-arb
+          - staging-ava
           - sepolia
           - mainnet
           - arbitrum-sepolia
           - arbitrum-one
+          - avalanche-mainnet
   push:
     branches:
       - main
