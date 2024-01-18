@@ -246,11 +246,12 @@ export const initTransfer = (
         deposit.user = user.id;
         deposit.currency = currency;
         deposit.amount = amount;
-        deposit.save();
-    } else {
+    } else if (transferType === 'Deposit') {
         deposit.amount = deposit.amount.plus(amount);
-        deposit.save();
+    } else if (transferType === 'Withdraw') {
+        deposit.amount = deposit.amount.minus(amount);
     }
+    deposit.save();
 
     user.transferCount = user.transferCount.plus(BigInt.fromI32(1));
     user.save();
