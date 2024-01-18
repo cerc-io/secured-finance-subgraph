@@ -21,6 +21,7 @@
     "deploy:mainnet": "cat ./subgraph.mainnet.yaml && graph deploy sf-protocol-prd-mainnet ./subgraph.mainnet.yaml --studio --output-dir ./build/mainnet --version-label",
     "deploy:arbitrum-sepolia": "cat ./subgraph.arbitrum-sepolia.yaml && graph deploy sf-protocol-prd-arb-sepolia ./subgraph.arbitrum-sepolia.yaml --studio --output-dir ./build/arbitrum-sepolia --version-label",
     "deploy:arbitrum-one": "cat ./subgraph.arbitrum-one.yaml && graph deploy sf-protocol-prd-arb-one ./subgraph.arbitrum-one.yaml --studio --output-dir ./build/arbitrum-one --version-label",
+    "deploy:avalanche-mainnet": "cat ./subgraph.avalanche-mainnet.yaml && graph deploy sf-protocol-prd-ava-mainnet ./subgraph.avalanche-mainnet.yaml --studio --output-dir ./build/avalanche-mainnet --version-label",
     "prepublish": "npm run codegen",
     "update-subgraphrc": "ts-node ./scripts/update-subgraphrc.ts",
     "format": "prettier --config ./.prettierrc.json --check '**/*.{js,jsx,ts,tsx,json}' '*.{js,jsx,ts,tsx,json}'",
@@ -29,7 +30,7 @@
   "devDependencies": {
     "@graphprotocol/graph-cli": "0.62.0",
     "@graphprotocol/graph-ts": "0.31.0",
-    "@secured-finance/contracts": "1.0.2-beta.1",
+    "@secured-finance/contracts": "1.0.2",
     "@types/js-yaml": "4.0.5",
     "@types/node": "16.18.67",
     "js-yaml": "4.1.0",

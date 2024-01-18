@@ -16,13 +16,14 @@ const arrowedNetworks = [
 ] as const;
 type Network = (typeof arrowedNetworks)[number];
 
-const devNetworkMap: Partial<Record<Network, string>> = {
+const networkMap: Partial<Record<Network, string>> = {
     development: 'sepolia',
     'development-arb': 'arbitrum-sepolia',
     'development-ava': 'fuji',
     staging: 'sepolia',
     'staging-arb': 'arbitrum-sepolia',
     'staging-ava': 'fuji',
+    'avalanche-mainnet': 'avalanche',
 };
 
 class Main {
@@ -42,7 +43,7 @@ class Main {
         const yamlText = readFileSync(`${rootDir}/subgraph.yaml`, 'utf8');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data = load(yamlText) as any;
-        const network = devNetworkMap[this.network] || this.network;
+        const network = networkMap[this.network] || this.network;
 
         if (!network) {
             console.error('Network not found:', this.network);
