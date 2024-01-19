@@ -238,9 +238,8 @@ export const initTransfer = (
     transfer.txHash = txHash;
     transfer.save();
 
-    const currencyString = currency.toString();
-
     if (transferType === 'Deposit') {
+        const currencyString = currency.toString();
         const depositID = user.id + ':' + currencyString;
         let deposit = Deposit.load(depositID);
         if (!deposit) {
