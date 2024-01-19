@@ -32,7 +32,7 @@
   "sepolia": {
     "isMajorUpdate": false,
     "isMinorUpdate": false,
-    "version": "0.0.2"
+    "version": "0.0.3"
   },
   "mainnet": {
     "isMajorUpdate": false,
