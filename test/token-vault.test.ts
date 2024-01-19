@@ -151,7 +151,7 @@ describe('Deposit & Withdraw', () => {
         );
     });
 
-    test('Should reduce deposit amount for currency when user withdraws', () => {
+    test('Should not affect deposit amount when user withdraws', () => {
         const amount1 = BigInt.fromI32(10000000);
         const amount2 = BigInt.fromI32(20000000);
         const amount3 = BigInt.fromI32(15000000);
@@ -169,7 +169,7 @@ describe('Deposit & Withdraw', () => {
             'Deposit',
             ALICE.toHexString() + ':' + usdc.toString(),
             'amount',
-            '15000000'
+            (amount1 + amount2).toString()
         );
 
         const event4 = createDepositEvent(ALICE, usdc, amount2);
@@ -179,7 +179,7 @@ describe('Deposit & Withdraw', () => {
             'Deposit',
             ALICE.toHexString() + ':' + usdc.toString(),
             'amount',
-            '35000000'
+            (amount1 + amount2 + amount2).toString()
         );
     });
 });

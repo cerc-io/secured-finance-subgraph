@@ -239,19 +239,20 @@ export const initTransfer = (
     transfer.save();
 
     const currencyString = currency.toString();
-    const depositID = user.id + ':' + currencyString;
-    let deposit = Deposit.load(depositID);
-    if (!deposit) {
-        deposit = new Deposit(depositID);
-        deposit.user = user.id;
-        deposit.currency = currency;
-        deposit.amount = amount;
-    } else if (transferType === 'Deposit') {
-        deposit.amount = deposit.amount.plus(amount);
-    } else if (transferType === 'Withdraw') {
-        deposit.amount = deposit.amount.minus(amount);
+
+    if (transferType === 'Deposit') {
+        const depositID = user.id + ':' + currencyString;
+        let deposit = Deposit.load(depositID);
+        if (!deposit) {
+            deposit = new Deposit(depositID);
+            deposit.user = user.id;
+            deposit.currency = currency;
+            deposit.amount = amount;
+        } else {
+            deposit.amount = deposit.amount.plus(amount);
+        }
+        deposit.save();
     }
-    deposit.save();
 
     user.transferCount = user.transferCount.plus(BigInt.fromI32(1));
     user.save();
