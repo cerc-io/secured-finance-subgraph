@@ -238,17 +238,18 @@ export const initTransfer = (
     transfer.txHash = txHash;
     transfer.save();
 
-    const currencyString = currency.toString();
-    const depositID = user.id + ':' + currencyString;
-    let deposit = Deposit.load(depositID);
-    if (!deposit) {
-        deposit = new Deposit(depositID);
-        deposit.user = user.id;
-        deposit.currency = currency;
-        deposit.amount = amount;
-        deposit.save();
-    } else {
-        deposit.amount = deposit.amount.plus(amount);
+    if (transferType === 'Deposit') {
+        const currencyString = currency.toString();
+        const depositID = user.id + ':' + currencyString;
+        let deposit = Deposit.load(depositID);
+        if (!deposit) {
+            deposit = new Deposit(depositID);
+            deposit.user = user.id;
+            deposit.currency = currency;
+            deposit.amount = amount;
+        } else {
+            deposit.amount = deposit.amount.plus(amount);
+        }
         deposit.save();
     }
 

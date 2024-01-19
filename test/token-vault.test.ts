@@ -150,4 +150,36 @@ describe('Deposit & Withdraw', () => {
             (amount3 + amount2).toString()
         );
     });
+
+    test('Should not affect deposit amount when user withdraws', () => {
+        const amount1 = BigInt.fromI32(10000000);
+        const amount2 = BigInt.fromI32(20000000);
+        const amount3 = BigInt.fromI32(15000000);
+        const usdc = toBytes32('USDC');
+
+        const event1 = createDepositEvent(ALICE, usdc, amount1);
+        const event2 = createDepositEvent(ALICE, usdc, amount2);
+        const event3 = createWithdrawEvent(ALICE, usdc, amount3);
+
+        handleDeposit(event1);
+        handleDeposit(event2);
+        handleWithdraw(event3);
+
+        assert.fieldEquals(
+            'Deposit',
+            ALICE.toHexString() + ':' + usdc.toString(),
+            'amount',
+            (amount1 + amount2).toString()
+        );
+
+        const event4 = createDepositEvent(ALICE, usdc, amount2);
+        handleDeposit(event4);
+
+        assert.fieldEquals(
+            'Deposit',
+            ALICE.toHexString() + ':' + usdc.toString(),
+            'amount',
+            (amount1 + amount2 + amount2).toString()
+        );
+    });
 });
