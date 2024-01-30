@@ -1,4 +1,5 @@
-import { cpSync, existsSync, mkdirSync, rmSync } from 'fs';
+import { existsSync, mkdirSync, rmSync, copyFileSync } from 'fs';
+import glob from 'glob';
 
 class Main {
     run() {
@@ -13,8 +14,27 @@ class Main {
         }
         mkdirSync(abiDir);
 
-        cpSync(`${modulePath}/build/contracts/`, abiDir, {
-            recursive: true,
+        // Add the contracts used in the
+        const filesToCopy = [
+            'LendingMarketOperationLogic.json',
+            'TokenVault.json',
+            'FundManagementLogic.json',
+            'LiquidationLogic.json',
+            'OrderActionLogic.json',
+            'OrderBookLogic.json',
+        ];
+
+        filesToCopy.forEach(file => {
+            const filePaths = glob.sync(
+                `${modulePath}/build/contracts/**/${file}`
+            );
+
+            filePaths.forEach(filePath => {
+                const destinationPath = `${abiDir}/${filePath
+                    .split('/')
+                    .pop()}`;
+                copyFileSync(filePath, destinationPath);
+            });
         });
     }
 }

@@ -74,4 +74,3 @@ test/.latest.json
 
 # Subgraph
 subgraph.*.yaml
-abis/

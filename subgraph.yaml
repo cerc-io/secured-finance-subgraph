@@ -16,7 +16,7 @@ dataSources:
         - LendingMarket
       abis:
         - name: LendingMarketController
-          file: ./abis/protocol/libraries/logics/LendingMarketOperationLogic.sol/LendingMarketOperationLogic.json
+          file: ./abis/LendingMarketOperationLogic.json
       eventHandlers:
         - event: LendingMarketInitialized(indexed bytes32,uint256,uint256,uint256,uint256,address,address)
           handler: handleLendingMarketInitialized
@@ -39,7 +39,7 @@ dataSources:
       abis:
         - name: TokenVault
           file: >-
-            ./abis/protocol/TokenVault.sol/TokenVault.json
+            ./abis/TokenVault.json
       eventHandlers:
         - event: Deposit(indexed address,bytes32,uint256)
           handler: handleDeposit
@@ -60,7 +60,7 @@ dataSources:
         - Transaction
       abis:
         - name: FundManagementLogic
-          file: ./abis/protocol/libraries/logics/FundManagementLogic.sol/FundManagementLogic.json
+          file: ./abis/FundManagementLogic.json
       eventHandlers:
         - event: OrderPartiallyFilled(uint48,indexed address,indexed bytes32,uint8,uint256,uint256,uint256)
           handler: handleOrderPartiallyFilled
@@ -78,7 +78,7 @@ dataSources:
         - Liquidation
       abis:
         - name: LiquidationLogic
-          file: ./abis/protocol/libraries/logics/LiquidationLogic.sol/LiquidationLogic.json
+          file: ./abis/LiquidationLogic.json
       eventHandlers:
         - event: LiquidationExecuted(indexed address,bytes32,indexed bytes32,indexed uint256,uint256)
           handler: handleLiquidationExecuted
@@ -99,7 +99,7 @@ templates:
         - DailyVolume
       abis:
         - name: OrderActionLogic
-          file: ./abis/protocol/libraries/logics/OrderActionLogic.sol/OrderActionLogic.json
+          file: ./abis/OrderActionLogic.json
       eventHandlers:
         - event: OrderExecuted(indexed address,uint8,indexed bytes32,indexed uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint48,uint256,uint256,bool)
           handler: handleOrderExecuted
@@ -125,7 +125,7 @@ templates:
         - LendingMarket
       abis:
         - name: OrderBookLogic
-          file: ./abis/protocol/libraries/logics/OrderBookLogic.sol/OrderBookLogic.json
+          file: ./abis/OrderBookLogic.json
       eventHandlers:
         - event: ItayoseExecuted(bytes32,uint256,uint256,uint256,uint256,uint256)
           handler: handleItayoseExecuted
