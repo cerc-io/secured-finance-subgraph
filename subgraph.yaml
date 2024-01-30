@@ -24,7 +24,7 @@ dataSources:
           handler: handleOrderBookCreated
         - event: OrderBooksRotated(bytes32,uint256,uint256)
           handler: handleOrderBooksRotated
-      file: ./src/lending-controller.ts
+      file: ./src/mappings/lending-controller.ts
   - kind: ethereum
     name: TokenVault
     network: ~
@@ -45,12 +45,12 @@ dataSources:
           handler: handleDeposit
         - event: Withdraw(indexed address,bytes32,uint256)
           handler: handleWithdraw
-      file: ./src/token-vault.ts
+      file: ./src/mappings/token-vault.ts
   - kind: ethereum
     name: FundManagementLogic
     network: ~
     source:
-      abi: LendingMarketController
+      abi: FundManagementLogic
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -59,12 +59,12 @@ dataSources:
         - Order
         - Transaction
       abis:
-        - name: LendingMarketController
+        - name: FundManagementLogic
           file: ./abis/protocol/libraries/logics/FundManagementLogic.sol/FundManagementLogic.json
       eventHandlers:
         - event: OrderPartiallyFilled(uint48,indexed address,indexed bytes32,uint8,uint256,uint256,uint256)
           handler: handleOrderPartiallyFilled
-      file: ./src/fund-management.ts
+      file: ./src/mappings/fund-management.ts
   - kind: ethereum
     name: LiquidationLogic
     network: ~
@@ -82,7 +82,7 @@ dataSources:
       eventHandlers:
         - event: LiquidationExecuted(indexed address,bytes32,indexed bytes32,indexed uint256,uint256)
           handler: handleLiquidationExecuted
-      file: ./src/liquidation.ts
+      file: ./src/mappings/liquidation.ts
 templates:
   - kind: ethereum
     name: OrderActionLogic
@@ -111,7 +111,7 @@ templates:
           handler: handleOrderCanceled
         - event: OrdersCleaned(uint48[],indexed address,uint8,indexed bytes32,uint256,uint256,uint256)
           handler: handleOrdersCleaned
-      file: ./src/lending-market.ts
+      file: ./src/mappings/lending-market.ts
   - kind: ethereum
     name: OrderBookLogic
     network: ~
@@ -129,4 +129,4 @@ templates:
       eventHandlers:
         - event: ItayoseExecuted(bytes32,uint256,uint256,uint256,uint256,uint256)
           handler: handleItayoseExecuted
-      file: ./src/lending-market.ts
+      file: ./src/mappings/lending-market.ts

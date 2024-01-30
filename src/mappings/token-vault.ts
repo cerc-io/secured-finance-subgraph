@@ -1,5 +1,5 @@
-import { Deposit, Withdraw } from '../generated/TokenVault/TokenVault';
-import { initTransfer } from './helper/initializer';
+import { Deposit, Withdraw } from '../../generated/TokenVault/TokenVault';
+import { initTransfer } from '../helper/initializer';
 
 export function handleDeposit(event: Deposit): void {
     const id =

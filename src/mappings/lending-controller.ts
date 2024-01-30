@@ -2,9 +2,9 @@ import {
     LendingMarketInitialized,
     OrderBookCreated,
     OrderBooksRotated,
-} from '../generated/LendingMarketOperationLogic/LendingMarketController';
-import { OrderActionLogic, OrderBookLogic } from '../generated/templates';
-import { getOrInitLendingMarket } from './helper/initializer';
+} from '../../generated/LendingMarketOperationLogic/LendingMarketController';
+import { OrderActionLogic, OrderBookLogic } from '../../generated/templates';
+import { getOrInitLendingMarket } from '../helper/initializer';
 
 export function handleLendingMarketInitialized(
     event: LendingMarketInitialized
