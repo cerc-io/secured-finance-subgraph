@@ -14,7 +14,7 @@ class Main {
         }
         mkdirSync(abiDir);
 
-        // Add the contracts used in the
+        // Add the contract file used 
         const filesToCopy = [
             'LendingMarketOperationLogic.json',
             'TokenVault.json',
