@@ -14,30 +14,14 @@ This subgraph tracks of the current state of Secured Finance Protocol smart cont
 
 ## Entities Overview
 
-#### LendingMarket
-
-This entity contains all the orderbook markets data. It stores each market's daily transaction volume amount, along with the orders and transactions.
-
-#### Transaction
-
-This entity contains all transactions data.
-
-#### Order
-
-This entity contains all orders details. It stores key information for the user address who placed, input amount, filled amount, status etc.
-
-#### Transfer
-
-This entity contains user's deposit and withdraw history.
-
-#### Liquidation
-
-This entity contains liquidation information.
-
-#### User
-
-This entity contains user's details like address, transactions, orders, liquidations and transfer history.
-
+| Entity         | Description                                                                                           |
+| -------------- | ----------------------------------------------------------------------------------------------------- |
+| LendingMarket  | This entity contains all the orderbook markets data. It stores each market's daily transaction volume amount, along with the orders and transactions.                                                                                                        |
+| Transaction    | This entity contains all transactions data.                                                           |
+| Order          | This entity contains all orders details. It stores key information for the user address who placed, input amount, filled amount status etc.      |
+| Transfer       | This entity contains user's deposit and withdraw history.                                             |
+| Liquidation    | This entity contains liquidation information.                                                         |
+| User           | This entity contains user's details like address, transactions, orders, liquidations and transfer history. |
 
 ## Quick start
 
@@ -47,23 +31,11 @@ This entity contains user's details like address, transactions, orders, liquidat
 4. Execute `npm run test` to run the tests.
 
 ## Deployment
+
 Follow the steps bellow to deploy the subgraph
 
 1. Run `npm run generate <ENV>` to create a migration file for the subgraph
 2. Run `npm run deploy:<ENV>` to deploy the subgraph
-
-## Active Deployments
-
-#### Mainnet
-
-* [ETH Mainnet](https://api.studio.thegraph.com/query/61214/sf-protocol-prd-mainnet/version/latest)
-* [Arbitrum One](https://api.studio.thegraph.com/query/61214/sf-protocol-prd-arb-one/version/latest)
-* [Avalanche Mainnet](https://api.studio.thegraph.com/query/61214/sf-protocol-prd-ava-mainnet/version/latest)
-
-#### Testnet
-
-* [ETH Sepolia](https://api.studio.thegraph.com/query/61214/sf-protocol-prd-sepolia/version/latest)
-* [Arbitrum Sepolia](https://api.studio.thegraph.com/query/61214/sf-protocol-prd-arb-sepolia/version/latest)
 
 ## License
 
