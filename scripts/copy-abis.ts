@@ -14,7 +14,7 @@ class Main {
         }
         mkdirSync(abiDir);
 
-        // Add the contract file used 
+        // These files define the smart contracts that emit events, and the subgraph will index data based on these events.
         const filesToCopy = [
             'LendingMarketOperationLogic.json',
             'TokenVault.json',
