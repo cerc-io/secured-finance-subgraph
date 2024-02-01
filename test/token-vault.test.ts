@@ -8,7 +8,7 @@ import {
     test,
 } from 'matchstick-as/assembly/index';
 import { Deposit } from '../generated/TokenVault/TokenVault';
-import { handleDeposit, handleWithdraw } from '../src/token-vault';
+import { handleDeposit, handleWithdraw } from '../src/mappings/token-vault';
 import { toBytes32, toBytes20 } from '../src/utils/string';
 import { ALICE, BOB } from './utils/createEntities';
 import { createDepositEvent, createWithdrawEvent } from './mocks';

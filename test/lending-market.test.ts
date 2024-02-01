@@ -6,7 +6,7 @@ import {
     describe,
     test,
 } from 'matchstick-as/assembly/index';
-import { handleOrderPartiallyFilled } from '../src/fund-management';
+import { handleOrderPartiallyFilled } from '../src/mappings/fund-management';
 import {
     handleItayoseExecuted,
     handleOrderCanceled,
@@ -14,7 +14,7 @@ import {
     handleOrdersCleaned,
     handlePositionUnwound,
     handlePreOrderExecuted,
-} from '../src/lending-market';
+} from '../src/mappings/lending-market';
 import {
     getDailyVolumeEntityId,
     getOrderEntityId,

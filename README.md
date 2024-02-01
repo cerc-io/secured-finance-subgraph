@@ -6,10 +6,22 @@ Secured Finance is an institutional-grade financial transaction platform with au
 
 This subgraph tracks of the current state of Secured Finance Protocol smart contracts, and provides historical data about activity for Secured Finance DApp.
 
-* Lending contracts state and history with active and closed positions,
-* Order-book market data for Secured Finance terminal,
-* Secured Finance users collateral state
-* Historical data from Secured Finance aggregated by days, hours, minutes, etc.
+* Lending Markets' status data,
+* Orderbook data,
+* Transactions data,
+* Users withdraw and deposit data
+* Liquidation data
+
+## Entities Overview
+
+| Entity         | Description                                                                                           |
+| -------------- | ----------------------------------------------------------------------------------------------------- |
+| LendingMarket  | This entity contains all the orderbook markets data. It stores each market's daily transaction volume amount, along with the orders and transactions.                                                                                                        |
+| Transaction    | This entity contains all transactions data.                                                           |
+| Order          | This entity contains all orders details. It stores key information for the user address who placed, input amount, filled amount status etc.      |
+| Transfer       | This entity contains user's deposit and withdraw history.                                             |
+| Liquidation    | This entity contains liquidation information.                                                         |
+| User           | This entity contains user's details like address, transactions, orders, liquidations and transfer history. |
 
 ## Quick start
 
@@ -18,12 +30,25 @@ This subgraph tracks of the current state of Secured Finance Protocol smart cont
 3. Install repository dependencies by running `npm install`
 4. Execute `npm run test` to run the tests.
 
-
 ## Deployment
+
 Follow the steps bellow to deploy the subgraph
 
 1. Run `npm run generate <ENV>` to create a migration file for the subgraph
 2. Run `npm run deploy:<ENV>` to deploy the subgraph
+
+## Active Deployments
+
+#### Mainnet
+
+* [ETH Mainnet](https://api.studio.thegraph.com/query/64582/sf-prd-mainnet/version/latest)
+* [Arbitrum One](https://api.studio.thegraph.com/query/64582/sf-prd-arbitrum-one/version/latest)
+* [Avalanche Mainnet](https://api.studio.thegraph.com/query/64582/sf-prd-avalanche-mainnet/version/latest)
+
+#### Testnet
+
+* [ETH Sepolia](https://api.studio.thegraph.com/query/64582/sf-prd-sepolia/version/latest)
+* [Arbitrum Sepolia](https://api.studio.thegraph.com/query/64582/sf-prd-arbitrum-sepolia/version/latest)
 
 ## License
 

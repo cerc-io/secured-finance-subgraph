@@ -1,20 +1,20 @@
 import { Address, BigInt, log } from '@graphprotocol/graph-ts';
-import { DailyVolume, Order, Transaction } from '../generated/schema';
+import { DailyVolume, Order, Transaction } from '../../generated/schema';
 import {
     OrderCanceled,
     OrderExecuted,
     OrdersCleaned,
     PositionUnwound,
     PreOrderExecuted,
-} from '../generated/templates/OrderActionLogic/OrderActionLogic';
-import { ItayoseExecuted } from '../generated/templates/OrderBookLogic/OrderBookLogic';
+} from '../../generated/templates/OrderActionLogic/OrderActionLogic';
+import { ItayoseExecuted } from '../../generated/templates/OrderBookLogic/OrderBookLogic';
 import {
     getOrInitDailyVolume,
     getOrInitLendingMarket,
     initOrder,
     initTransaction,
-} from './helper/initializer';
-import { getOrderEntityId } from './utils/id-generation';
+} from '../helper/initializer';
+import { getOrderEntityId } from '../utils/id-generation';
 
 export function handleOrderExecuted(event: OrderExecuted): void {
     let id = getOrderEntityId(

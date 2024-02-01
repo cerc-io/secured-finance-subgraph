@@ -6,7 +6,7 @@ import {
     describe,
     test,
 } from 'matchstick-as/assembly/index';
-import { handleLiquidationExecuted } from '../src/liquidation';
+import { handleLiquidationExecuted } from '../src/mappings/liquidation';
 import { getOrInitUser } from '../src/helper/initializer';
 import { createLiquidationExecutedEvent } from './mocks';
 import { ALICE, BOB, createLendingMarket } from './utils/createEntities';

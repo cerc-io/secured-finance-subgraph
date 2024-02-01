@@ -11,7 +11,7 @@ import { PROTOCOL_ID, getProtocol } from '../src/helper/initializer';
 import {
     handleOrderBookCreated,
     handleOrderBooksRotated,
-} from '../src/lending-controller';
+} from '../src/mappings/lending-controller';
 import { buildLendingMarketId, toBytes32 } from '../src/utils/string';
 import {
     createOrderBookCreatedEvent,

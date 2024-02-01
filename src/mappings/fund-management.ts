@@ -1,8 +1,8 @@
 import { BigInt } from '@graphprotocol/graph-ts';
-import { OrderPartiallyFilled } from '../generated/FundManagementLogic/LendingMarketController';
-import { Order } from '../generated/schema';
-import { initTransaction } from './helper/initializer';
-import { getOrderEntityId } from './utils/id-generation';
+import { OrderPartiallyFilled } from '../../generated/FundManagementLogic/FundManagementLogic';
+import { Order } from '../../generated/schema';
+import { initTransaction } from '../helper/initializer';
+import { getOrderEntityId } from '../utils/id-generation';
 
 export function handleOrderPartiallyFilled(event: OrderPartiallyFilled): void {
     const id = getOrderEntityId(
