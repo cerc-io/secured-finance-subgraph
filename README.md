@@ -37,6 +37,19 @@ Follow the steps bellow to deploy the subgraph
 1. Run `npm run generate <ENV>` to create a migration file for the subgraph
 2. Run `npm run deploy:<ENV>` to deploy the subgraph
 
+## Active Deployments
+
+#### Mainnet
+
+* [ETH Mainnet](https://api.studio.thegraph.com/query/64582/sf-prd-mainnet/version/latest)
+* [Arbitrum One](https://api.studio.thegraph.com/query/64582/sf-prd-arbitrum-one/version/latest)
+* [Avalanche Mainnet](https://api.studio.thegraph.com/query/64582/sf-prd-avalanche-mainnet/version/latest)
+
+#### Testnet
+
+* [ETH Sepolia](https://api.studio.thegraph.com/query/64582/sf-prd-sepolia/version/latest)
+* [Arbitrum Sepolia](https://api.studio.thegraph.com/query/64582/sf-prd-arbitrum-sepolia/version/latest)
+
 ## License
 
 This project is licensed under the MIT license, Copyright (c) 2021 Secured Finance. For more information see LICENSE.
