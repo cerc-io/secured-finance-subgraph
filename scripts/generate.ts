@@ -13,6 +13,7 @@ const arrowedNetworks = [
     'arbitrum-sepolia',
     'arbitrum-one',
     'avalanche-mainnet',
+    'polygon-zkevm-mainnet',
 ] as const;
 type Network = (typeof arrowedNetworks)[number];
 
@@ -24,6 +25,7 @@ const networkMap: Partial<Record<Network, string>> = {
     'staging-arb': 'arbitrum-sepolia',
     'staging-ava': 'fuji',
     'avalanche-mainnet': 'avalanche',
+    'polygon-zkevm-mainnet': 'polygon-zkevm',
 };
 
 class Main {

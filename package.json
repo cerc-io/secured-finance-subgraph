@@ -22,6 +22,7 @@
     "deploy:arbitrum-sepolia": "graph deploy sf-prd-arbitrum-sepolia ./subgraph.arbitrum-sepolia.yaml --studio --output-dir ./build/arbitrum-sepolia --version-label",
     "deploy:arbitrum-one": "graph deploy sf-prd-arbitrum-one ./subgraph.arbitrum-one.yaml --studio --output-dir ./build/arbitrum-one --version-label",
     "deploy:avalanche-mainnet": "graph deploy sf-prd-avalanche-mainnet ./subgraph.avalanche-mainnet.yaml --studio --output-dir ./build/avalanche-mainnet --version-label",
+    "deploy:polygon-zkevm-mainnet": "graph deploy sf-prd-polygon-zkevm-mainnet ./subgraph.polygon-zkevm-mainnet.yaml --studio --output-dir ./build/polygon-zkevm-mainnet --version-label",
     "prepublish": "npm run codegen",
     "update-subgraphrc": "ts-node ./scripts/update-subgraphrc.ts",
     "format": "prettier --config ./.prettierrc.json --check '**/*.{js,jsx,ts,tsx,json}' '*.{js,jsx,ts,tsx,json}'",
@@ -30,7 +31,7 @@
   "devDependencies": {
     "@graphprotocol/graph-cli": "0.62.0",
     "@graphprotocol/graph-ts": "0.31.0",
-    "@secured-finance/contracts": "1.0.2",
+    "@secured-finance/contracts": "1.0.3",
     "@types/js-yaml": "4.0.5",
     "@types/node": "16.18.67",
     "js-yaml": "4.1.0",

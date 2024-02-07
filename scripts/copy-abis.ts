@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, rmSync, copyFileSync } from 'fs';
+import { copyFileSync, existsSync, mkdirSync, rmSync } from 'fs';
 import glob from 'glob';
 
 class Main {
