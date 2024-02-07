@@ -44,6 +44,7 @@ Follow the steps bellow to deploy the subgraph
 * [ETH Mainnet](https://api.studio.thegraph.com/query/64582/sf-prd-mainnet/version/latest)
 * [Arbitrum One](https://api.studio.thegraph.com/query/64582/sf-prd-arbitrum-one/version/latest)
 * [Avalanche Mainnet](https://api.studio.thegraph.com/query/64582/sf-prd-avalanche-mainnet/version/latest)
+* [Polygon zkEVM Mainnet](https://api.studio.thegraph.com/query/64582/sf-prd-polygon-zkevm-mainnet/version/latest)
 
 #### Testnet
 
