@@ -12,6 +12,7 @@ const arrowedNetworks = [
     'arbitrum-sepolia',
     'arbitrum-one',
     'avalanche-mainnet',
+    'polygon-zkevm-mainnet',
 ] as const;
 type Network = (typeof arrowedNetworks)[number];
 
