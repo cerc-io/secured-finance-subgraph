@@ -4,10 +4,11 @@
   "private": "true",
   "scripts": {
     "generate": "ts-node ./scripts/generate.ts",
+    "set-protocol-id": "ts-node ./scripts/set-protocol-id.ts",
     "codegen": "graph codegen ./subgraph.yaml",
     "precodegen": "ts-node ./scripts/copy-abis.ts",
     "build": "graph build ./subgraph.yaml",
-    "prebuild": "npm run codegen",
+    "prebuild": "npm run codegen && npm run set-protocol-id",
     "test": "graph test",
     "coverage": "graph test -- -c",
     "auth": "graph auth --studio",
@@ -29,7 +30,7 @@
     "format:fix": "prettier --config ./.prettierrc.json --write '**/*.{js,jsx,ts,tsx,json}' '*.{js,jsx,ts,tsx,json}'"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "0.62.0",
+    "@graphprotocol/graph-cli": "0.68.0",
     "@graphprotocol/graph-ts": "0.31.0",
     "@secured-finance/contracts": "1.0.3",
     "@types/js-yaml": "4.0.5",

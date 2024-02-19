@@ -7,7 +7,7 @@ import {
     describe,
     test,
 } from 'matchstick-as/assembly/index';
-import { PROTOCOL_ID, getProtocol } from '../src/helper/initializer';
+import { getProtocol } from '../src/helper/initializer';
 import {
     handleOrderBookCreated,
     handleOrderBooksRotated,
@@ -22,7 +22,7 @@ import {
 const orderBookId = BigInt.fromI32(1);
 const openingDate = BigInt.fromI32(12345);
 const preOpeningDate = BigInt.fromI32(1234);
-const maturity = BigInt.fromI32(365);
+const maturity = BigInt.fromI32(1677628800);
 
 afterEach(() => {
     clearStore();
@@ -75,6 +75,12 @@ describe('With no lending markets existing', () => {
             maturity.toString()
         );
         assert.fieldEquals(LENDING_MARKET_ENTITY_NAME, id, 'isActive', 'true');
+        assert.fieldEquals(
+            LENDING_MARKET_ENTITY_NAME,
+            id,
+            'prettyName',
+            'ETH-MAR2023'
+        );
     });
 
     test('Creating a new lending market should add it to the protocol', () => {
