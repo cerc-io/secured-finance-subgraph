@@ -66,6 +66,7 @@ typings/
 
 # Generated code
 generated/
+protocol/
 
 .DS_Store
 

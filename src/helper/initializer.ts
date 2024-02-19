@@ -16,10 +16,12 @@ import {
     Transfer,
     Deposit,
 } from '../../generated/schema';
-import { getDailyVolumeEntityId } from '../utils/id-generation';
+import {
+    getDailyVolumeEntityId,
+    getUTCMonthYear,
+} from '../utils/id-generation';
 import { buildLendingMarketId } from '../utils/string';
-
-export const PROTOCOL_ID = 'ethereum';
+import { PROTOCOL_ID } from '../../protocol';
 
 export const getProtocol = (): Protocol => {
     let protocol = Protocol.load(PROTOCOL_ID);
@@ -41,7 +43,8 @@ export const getOrInitLendingMarket = (
         lendingMarket = new LendingMarket(id);
         lendingMarket.currency = ccy;
         lendingMarket.maturity = maturity;
-        lendingMarket.prettyName = ccy.toString() + '-' + maturity.toString();
+        lendingMarket.prettyName =
+            ccy.toString() + '-' + getUTCMonthYear(maturity);
         lendingMarket.isActive = true;
         lendingMarket.protocol = getProtocol().id;
         lendingMarket.volume = BigInt.fromI32(0);
