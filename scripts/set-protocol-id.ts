@@ -4,26 +4,25 @@ class Main {
     run(network: string) {
         let protocolId = 'ethereum';
         if (
-            network === 'development' ||
-            network === 'staging' ||
-            network === 'sepolia' ||
-            network === 'mainnet'
+            ['development', 'staging', 'sepolia', 'mainnet'].includes(network)
         ) {
             protocolId = 'ethereum';
         } else if (
-            network === 'development-arb' ||
-            network === 'staging-arb' ||
-            network === 'arbitrum-sepolia' ||
-            network === 'arbitrum-one'
+            [
+                'development-arb',
+                'staging-arb',
+                'arbitrum-sepolia',
+                'arbitrum-one',
+            ].includes(network)
         ) {
             protocolId = 'arbitrum';
         } else if (
-            network === 'development-ava' ||
-            network === 'staging-ava' ||
-            network === 'avalanche-mainnet'
+            ['development-ava', 'staging-ava', 'avalanche-mainnet'].includes(
+                network
+            )
         ) {
             protocolId = 'avalanche';
-        } else if (network === 'polygon-zkevm-mainnet') {
+        } else if (['polygon-zkevm-mainnet'].includes(network)) {
             protocolId = 'polygon-zkevm';
         }
         const dirPath = 'protocol';
