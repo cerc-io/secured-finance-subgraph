@@ -283,6 +283,7 @@ export function handleItayoseExecuted(event: ItayoseExecuted): void {
         event.params.maturity,
         event.block.timestamp
     );
+    addToTransactionVolume(event.params.offsetAmount, dailyVolume);
 }
 
 function addToTransactionVolume(
