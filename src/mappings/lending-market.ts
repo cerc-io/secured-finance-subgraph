@@ -97,7 +97,7 @@ export function handleOrderExecuted(event: OrderExecuted): void {
             event.params.maturity,
             event.block.timestamp
         );
-        addToTransactionVolume(txId, dailyVolume);
+        addToTransactionVolume(event.params.filledAmount, dailyVolume);
     }
 }
 
@@ -174,7 +174,7 @@ export function handlePositionUnwound(event: PositionUnwound): void {
             event.params.maturity,
             event.block.timestamp
         );
-        addToTransactionVolume(txId, dailyVolume);
+        addToTransactionVolume(event.params.filledAmount, dailyVolume);
     } else if (event.params.isCircuitBreakerTriggered) {
         initOrder(
             id,
@@ -277,16 +277,20 @@ export function handleItayoseExecuted(event: ItayoseExecuted): void {
     lendingMarket.lastBorrowUnitPrice = event.params.lastBorrowUnitPrice;
     lendingMarket.offsetAmount = event.params.offsetAmount;
     lendingMarket.save();
+
+    const dailyVolume = getOrInitDailyVolume(
+        event.params.ccy,
+        event.params.maturity,
+        event.block.timestamp
+    );
 }
 
-function addToTransactionVolume(txId: string, dailyVolume: DailyVolume): void {
-    const transaction = Transaction.load(txId);
-    if (transaction) {
-        dailyVolume.volume = dailyVolume.volume.plus(transaction.amount);
-        dailyVolume.save();
-    } else {
-        log.error('Transaction entity not found: {}', [txId]);
-    }
+function addToTransactionVolume(
+    amount: BigInt,
+    dailyVolume: DailyVolume
+): void {
+    dailyVolume.volume = dailyVolume.volume.plus(amount);
+    dailyVolume.save();
 }
 
 function calculateForwardValue(amount: BigInt, unitPrice: BigInt): BigInt {
