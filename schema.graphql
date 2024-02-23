@@ -2,6 +2,7 @@ type Transaction @entity {
   id: ID!
   currency: Bytes!
   maturity: BigInt!
+  maturityISO8601: String!
   side: Int!
   executionPrice: BigInt!
   user: User!
@@ -25,6 +26,7 @@ type Order @entity {
   currency: Bytes!
   side: Int!
   maturity: BigInt!
+  maturityISO8601: String!
   inputUnitPrice: BigInt!
   inputAmount: BigInt!
   filledAmount: BigInt!
@@ -43,13 +45,12 @@ type Order @entity {
 
 type LendingMarket @entity {
   id: ID!
-  prettyName: String!
   currency: Bytes!
   maturity: BigInt!
+  maturityISO8601: String!
   isActive: Boolean!
   transactions: [Transaction!]! @derivedFrom(field: "lendingMarket")
   orders: [Order!]! @derivedFrom(field: "lendingMarket")
-  protocol: Protocol!
   volume: BigInt!
   dailyVolume: [DailyVolume!]! @derivedFrom(field: "lendingMarket")
   openingUnitPrice: BigInt!
@@ -92,9 +93,10 @@ type User @entity {
 }
 
 type DailyVolume @entity {
-  id: ID! # currency-maturity-date(dd-mm-yyyy)
+  id: ID! # currency-maturity-date(yyyy-mm-dd)
   currency: Bytes!
   maturity: BigInt!
+  maturityISO8601: String!
   day: String! # dd-mm-yyyy
   volume: BigInt!
   timestamp: BigInt!
@@ -104,7 +106,6 @@ type DailyVolume @entity {
 type Protocol @entity {
   id: ID! # ethereum
   totalUsers: BigInt!
-  lendingMarkets: [LendingMarket!]! @derivedFrom(field: "protocol")
 }
 
 type Liquidation @entity {

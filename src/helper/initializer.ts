@@ -33,6 +33,12 @@ export const getProtocol = (): Protocol => {
     return protocol as Protocol;
 };
 
+const getISO8601Date = (date: BigInt): string => {
+    const utcDate = new Date(date.times(BigInt.fromI32(1000)).toI64());
+    const dayStr = utcDate.toISOString().substring(0, 10); //yyyy-mm-dd
+    return dayStr;
+}
+
 export const getOrInitLendingMarket = (
     ccy: Bytes,
     maturity: BigInt
@@ -43,10 +49,8 @@ export const getOrInitLendingMarket = (
         lendingMarket = new LendingMarket(id);
         lendingMarket.currency = ccy;
         lendingMarket.maturity = maturity;
-        lendingMarket.prettyName =
-            ccy.toString() + '-' + getUTCMonthYear(maturity);
+        lendingMarket.maturityISO8601 = getISO8601Date(maturity);
         lendingMarket.isActive = true;
-        lendingMarket.protocol = getProtocol().id;
         lendingMarket.volume = BigInt.fromI32(0);
         lendingMarket.openingUnitPrice = BigInt.fromI32(0);
         lendingMarket.lastLendUnitPrice = BigInt.fromI32(0);
@@ -54,7 +58,7 @@ export const getOrInitLendingMarket = (
         lendingMarket.offsetAmount = BigInt.fromI32(0);
 
         lendingMarket.save();
-        log.debug('Created lending market: {}', [lendingMarket.prettyName]);
+        log.debug('Created lending market: {} {}', [lendingMarket.currency.toString(), lendingMarket.maturityISO8601]);
     }
     return lendingMarket as LendingMarket;
 };
@@ -85,8 +89,7 @@ export const getOrInitDailyVolume = (
     maturity: BigInt,
     date: BigInt
 ): DailyVolume => {
-    const utcDate = new Date(date.times(BigInt.fromI32(1000)).toI64());
-    const dayStr = utcDate.toISOString().substring(0, 10); //yyyy-mm-dd
+    const dayStr = getISO8601Date(date);
 
     let id = getDailyVolumeEntityId(ccy, maturity, dayStr);
     let dailyVolume = DailyVolume.load(id);
@@ -94,6 +97,7 @@ export const getOrInitDailyVolume = (
         dailyVolume = new DailyVolume(id);
         dailyVolume.currency = ccy;
         dailyVolume.maturity = maturity;
+        dailyVolume.maturityISO8601 = getISO8601Date(maturity);
         dailyVolume.day = dayStr;
         dailyVolume.timestamp = BigInt.fromI64(
             Date.parse(dayStr).getTime() / 1000
@@ -131,6 +135,7 @@ export const initOrder = (
     order.currency = currency;
     order.side = side;
     order.maturity = maturity;
+    order.maturityISO8601 = getISO8601Date(maturity);
     order.inputUnitPrice = inputUnitPrice;
     order.filledAmount = filledAmount;
     order.inputAmount = inputAmount;
@@ -179,6 +184,7 @@ export const initTransaction = (
     transaction.user = user.id;
     transaction.currency = currency;
     transaction.maturity = maturity;
+    transaction.maturityISO8601 = getISO8601Date(maturity);
     transaction.side = side;
     transaction.executionType = executionType;
     transaction.futureValue = filledAmountInFV;
