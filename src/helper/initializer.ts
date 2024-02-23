@@ -37,7 +37,7 @@ const getISO8601Date = (date: BigInt): string => {
     const utcDate = new Date(date.times(BigInt.fromI32(1000)).toI64());
     const dayStr = utcDate.toISOString().substring(0, 10); //yyyy-mm-dd
     return dayStr;
-}
+};
 
 export const getOrInitLendingMarket = (
     ccy: Bytes,
@@ -58,7 +58,10 @@ export const getOrInitLendingMarket = (
         lendingMarket.offsetAmount = BigInt.fromI32(0);
 
         lendingMarket.save();
-        log.debug('Created lending market: {} {}', [lendingMarket.currency.toString(), lendingMarket.maturityISO8601]);
+        log.debug('Created lending market: {} {}', [
+            lendingMarket.currency.toString(),
+            lendingMarket.maturityISO8601,
+        ]);
     }
     return lendingMarket as LendingMarket;
 };
