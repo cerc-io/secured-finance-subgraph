@@ -20,7 +20,7 @@ import {
     getOrderEntityId,
 } from '../src/utils/id-generation';
 import { toBytes32 } from '../src/utils/string';
-import { getOrInitDailyVolume, getOrInitUser, getProtocol } from '../src/helper/initializer';
+import { getOrInitUser, getProtocol } from '../src/helper/initializer';
 import {
     createItayoseExecutedEvent,
     createOrderCanceledEvent,
