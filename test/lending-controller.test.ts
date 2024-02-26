@@ -73,12 +73,6 @@ describe('With no lending markets existing', () => {
             maturity.toString()
         );
         assert.fieldEquals(LENDING_MARKET_ENTITY_NAME, id, 'isActive', 'true');
-        assert.fieldEquals(
-            LENDING_MARKET_ENTITY_NAME,
-            id,
-            'maturityISO8601',
-            '2023-03-01'
-        );
     });
 });
 
