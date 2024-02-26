@@ -3,26 +3,25 @@ type Transaction @entity {
   currency: Bytes!
   maturity: BigInt!
   side: Int!
-  orderPrice: BigInt!
-  taker: User!
+  executionPrice: BigInt!
+  user: User!
   executionType: TransactionExecutionType!
-
-  forwardValue: BigInt!
+  futureValue: BigInt!
   amount: BigInt!
   feeInFV: BigInt!
   averagePrice: BigDecimal!
+  lendingMarket: LendingMarket!
+  order: Order!
 
-  createdAt: BigInt!
+  executedAt: BigInt!
   blockNumber: BigInt!
   txHash: Bytes!
-
-  lendingMarket: LendingMarket!
 }
 
 type Order @entity {
   id: ID!
   orderId: BigInt!
-  maker: User!
+  user: User!
   currency: Bytes!
   side: Int!
   maturity: BigInt!
@@ -34,6 +33,8 @@ type Order @entity {
   lendingMarket: LendingMarket!
   isPreOrder: Boolean!
   type: OrderType!
+  transactions: [Transaction!]! @derivedFrom(field: "order")
+  isCircuitBreakerTriggered: Boolean!
 
   createdAt: BigInt!
   blockNumber: BigInt!
@@ -58,8 +59,8 @@ type LendingMarket @entity {
 }
 
 enum TransactionExecutionType {
-  Sync
-  Lazy
+  Maker
+  Taker
 }
 
 enum OrderType {
@@ -69,21 +70,19 @@ enum OrderType {
 
 enum OrderStatus {
   Open
-  Cancelled
-  Filled
   PartiallyFilled
-  Blocked
-  PartiallyBlocked
-  Expired
+  Filled
+  Killed
+  Cancelled
 }
 
 type User @entity {
   id: ID! # wallet address
   createdAt: BigInt!
   transactionCount: BigInt!
-  transactions: [Transaction!]! @derivedFrom(field: "taker")
+  transactions: [Transaction!]! @derivedFrom(field: "user")
   orderCount: BigInt!
-  orders: [Order!]! @derivedFrom(field: "maker")
+  orders: [Order!]! @derivedFrom(field: "user")
   liquidationCount: BigInt!
   liquidations: [Liquidation!]! @derivedFrom(field: "user")
   transferCount: BigInt!
