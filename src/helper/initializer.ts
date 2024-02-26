@@ -49,7 +49,6 @@ export const getOrInitLendingMarket = (
         lendingMarket = new LendingMarket(id);
         lendingMarket.currency = ccy;
         lendingMarket.maturity = maturity;
-        lendingMarket.maturityISO8601 = getISO8601Date(maturity);
         lendingMarket.isActive = true;
         lendingMarket.volume = BigInt.fromI32(0);
         lendingMarket.openingUnitPrice = BigInt.fromI32(0);
@@ -60,7 +59,7 @@ export const getOrInitLendingMarket = (
         lendingMarket.save();
         log.debug('Created lending market: {} {}', [
             lendingMarket.currency.toString(),
-            lendingMarket.maturityISO8601,
+            lendingMarket.maturity.toString(),
         ]);
     }
     return lendingMarket as LendingMarket;
@@ -100,7 +99,6 @@ export const getOrInitDailyVolume = (
         dailyVolume = new DailyVolume(id);
         dailyVolume.currency = ccy;
         dailyVolume.maturity = maturity;
-        dailyVolume.maturityISO8601 = getISO8601Date(maturity);
         dailyVolume.day = dayStr;
         dailyVolume.timestamp = BigInt.fromI64(
             Date.parse(dayStr).getTime() / 1000
@@ -137,7 +135,6 @@ export const initOrder = (
     order.currency = currency;
     order.side = side;
     order.maturity = maturity;
-    order.maturityISO8601 = getISO8601Date(maturity);
     order.inputUnitPrice = inputUnitPrice;
     order.filledAmount = filledAmount;
     order.inputAmount = inputAmount;
@@ -179,7 +176,6 @@ export const initTransaction = (
     transaction.taker = user.id;
     transaction.currency = currency;
     transaction.maturity = maturity;
-    transaction.maturityISO8601 = getISO8601Date(maturity);
     transaction.side = side;
     transaction.executionType = executionType;
     transaction.forwardValue = filledAmountInFV;

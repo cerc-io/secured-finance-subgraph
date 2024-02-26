@@ -2,7 +2,6 @@ type Transaction @entity {
   id: ID!
   currency: Bytes!
   maturity: BigInt!
-  maturityISO8601: String!
   side: Int!
   orderPrice: BigInt!
   taker: User!
@@ -27,7 +26,6 @@ type Order @entity {
   currency: Bytes!
   side: Int!
   maturity: BigInt!
-  maturityISO8601: String!
   inputUnitPrice: BigInt!
   inputAmount: BigInt!
   filledAmount: BigInt!
@@ -46,7 +44,6 @@ type LendingMarket @entity {
   id: ID!
   currency: Bytes!
   maturity: BigInt!
-  maturityISO8601: String!
   isActive: Boolean!
   transactions: [Transaction!]! @derivedFrom(field: "lendingMarket")
   orders: [Order!]! @derivedFrom(field: "lendingMarket")
@@ -96,7 +93,6 @@ type DailyVolume @entity {
   id: ID! # currency-maturity-date(yyyy-mm-dd)
   currency: Bytes!
   maturity: BigInt!
-  maturityISO8601: String!
   day: String! # dd-mm-yyyy
   volume: BigInt!
   timestamp: BigInt!
