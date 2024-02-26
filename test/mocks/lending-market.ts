@@ -453,7 +453,8 @@ export function createItayoseExecutedEvent(
     openingUnitPrice: BigInt,
     lastLendUnitPrice: BigInt,
     lastBorrowUnitPrice: BigInt,
-    offsetAmount: BigInt
+    offsetAmount: BigInt,
+    blockTimestamp: BigInt = BigInt.fromI32(0)
 ): ItayoseExecuted {
     const mockEvent = newMockEvent();
     const event = new ItayoseExecuted(
@@ -466,6 +467,10 @@ export function createItayoseExecutedEvent(
         mockEvent.parameters,
         mockEvent.receipt
     );
+
+    if (!blockTimestamp.isZero()) {
+        event.block.timestamp = blockTimestamp;
+    }
 
     event.parameters = new Array();
     event.parameters.push(

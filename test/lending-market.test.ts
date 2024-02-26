@@ -20,7 +20,7 @@ import {
     getOrderEntityId,
 } from '../src/utils/id-generation';
 import { toBytes32 } from '../src/utils/string';
-import { getOrInitUser } from '../src/helper/initializer';
+import { getOrInitDailyVolume, getOrInitUser } from '../src/helper/initializer';
 import {
     createItayoseExecutedEvent,
     createOrderCanceledEvent,
@@ -1709,6 +1709,36 @@ describe('Daily Volume', () => {
             id,
             'volume',
             filledAmount.toString()
+        );
+    });
+
+    test('itayose executed event should update the daily volume with totalOffsetAmount', () => {
+        const openingUnitPrice = BigInt.fromI32(8050);
+        const lastLendUnitPrice = BigInt.fromI32(8100);
+        const lastBorrowUnitPrice = BigInt.fromI32(8000);
+        const offsetAmount = BigInt.fromI32(300);
+        const itayoseExecutedEvent = createItayoseExecutedEvent(
+            ccy,
+            maturity,
+            openingUnitPrice,
+            lastLendUnitPrice,
+            lastBorrowUnitPrice,
+            offsetAmount,
+            BigInt.fromI32(1675878200)
+        );
+        handleItayoseExecuted(itayoseExecutedEvent);
+
+        const dailyVolumeId = getDailyVolumeEntityId(
+            ccy,
+            maturity,
+            '2023-02-08'
+        );
+
+        assert.fieldEquals(
+            'DailyVolume',
+            dailyVolumeId,
+            'volume',
+            offsetAmount.toString()
         );
     });
 });
