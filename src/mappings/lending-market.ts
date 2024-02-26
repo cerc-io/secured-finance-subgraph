@@ -150,25 +150,25 @@ export function handlePositionUnwound(event: PositionUnwound): void {
         return;
     }
 
-    initOrder(
-        orderId,
-        BigInt.fromI32(0),
-        event.params.user,
-        event.params.ccy,
-        event.params.side,
-        event.params.maturity,
-        BigInt.fromI32(0),
-        event.params.inputFutureValue,
-        event.params.filledAmountInFV,
+        initOrder(
+                        orderId,
+BigInt.fromI32(0),
+            event.params.user,
+            event.params.ccy,
+            event.params.side,
+            event.params.maturity,
+            BigInt.fromI32(0),
+            event.params.inputFutureValue,
+            event.params.filledAmountInFV,
         status,
-        false,
-        'Unwind',
+            false,
+            'Unwind',
         event.params.isCircuitBreakerTriggered,
-        event.block.timestamp,
-        event.block.number,
-        event.transaction.hash
-    );
-    if (!event.params.filledAmount.isZero()) {
+            event.block.timestamp,
+            event.block.number,
+            event.transaction.hash
+        );
+if (!event.params.filledAmount.isZero()) {
         const txId =
             event.transaction.hash.toHexString() +
             ':' +
@@ -195,7 +195,7 @@ export function handlePositionUnwound(event: PositionUnwound): void {
             event.block.timestamp
         );
         addToTransactionVolume(event.params.filledAmount, dailyVolume);
-    }
+        }
 }
 
 export function handleOrderCanceled(event: OrderCanceled): void {
