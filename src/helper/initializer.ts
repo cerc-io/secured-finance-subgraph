@@ -115,10 +115,11 @@ export const initOrder = (
     status: string,
     isPreOrder: boolean,
     type: string,
+    isCircuitBreakerTriggered: boolean,
     timestamp: BigInt,
     blockNumber: BigInt,
     txHash: Bytes
-): Order => {
+): void => {
     const order = new Order(id);
     const user = getOrInitUser(userAddress, timestamp);
 
@@ -135,6 +136,7 @@ export const initOrder = (
     order.lendingMarket = getOrInitLendingMarket(currency, maturity).id;
     order.isPreOrder = isPreOrder;
     order.type = type;
+    order.isCircuitBreakerTriggered = isCircuitBreakerTriggered;
     order.createdAt = timestamp;
     order.blockNumber = blockNumber;
     order.txHash = txHash;
@@ -143,7 +145,7 @@ export const initOrder = (
     user.orderCount = user.orderCount.plus(BigInt.fromI32(1));
     user.save();
 
-    return order;
+    log.debug('Order created with: {}', [id]);
 };
 
 export const initTransaction = (
@@ -183,7 +185,7 @@ export const initTransaction = (
         ? filledAmount.divDecimal(new BigDecimal(filledAmountInFV))
         : BigDecimal.zero();
     transaction.lendingMarket = getOrInitLendingMarket(currency, maturity).id;
-    transaction.executedAt = timestamp;
+    transaction.createdAt = timestamp;
     transaction.blockNumber = blockNumber;
     transaction.txHash = txHash;
     transaction.order = order.id;

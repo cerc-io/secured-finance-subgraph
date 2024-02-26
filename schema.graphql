@@ -13,7 +13,7 @@ type Transaction @entity {
   lendingMarket: LendingMarket!
   order: Order!
 
-  executedAt: BigInt!
+  createdAt: BigInt!
   blockNumber: BigInt!
   txHash: Bytes!
 }
@@ -66,6 +66,7 @@ enum TransactionExecutionType {
 enum OrderType {
   Market
   Limit
+  Unwind
 }
 
 enum OrderStatus {

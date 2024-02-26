@@ -65,6 +65,7 @@ export function handleOrderExecuted(event: OrderExecuted): void {
         status,
         false,
         type,
+        event.params.isCircuitBreakerTriggered,
         event.block.timestamp,
         event.block.number,
         event.transaction.hash
@@ -119,6 +120,7 @@ export function handlePreOrderExecuted(event: PreOrderExecuted): void {
         'Open',
         true,
         'Limit',
+        false,
         event.block.timestamp,
         event.block.number,
         event.transaction.hash
@@ -134,24 +136,39 @@ export function handlePositionUnwound(event: PositionUnwound): void {
         ) +
         ':' +
         event.transaction.hash.toHexString();
+    let status: string;
+    if (
+        event.params.isCircuitBreakerTriggered ||
+        !event.params.filledAmountInFV.equals(event.params.inputFutureValue)
+    ) {
+        status = 'Killed';
+    } else if (
+        event.params.filledAmountInFV.equals(event.params.inputFutureValue)
+    ) {
+        status = 'Filled';
+    } else {
+        return;
+    }
+
+    initOrder(
+        orderId,
+        BigInt.fromI32(0),
+        event.params.user,
+        event.params.ccy,
+        event.params.side,
+        event.params.maturity,
+        BigInt.fromI32(0),
+        event.params.inputFutureValue,
+        event.params.filledAmountInFV,
+        status,
+        false,
+        'Unwind',
+        event.params.isCircuitBreakerTriggered,
+        event.block.timestamp,
+        event.block.number,
+        event.transaction.hash
+    );
     if (!event.params.filledAmount.isZero()) {
-        initOrder(
-            orderId,
-            BigInt.fromI32(0),
-            event.params.user,
-            event.params.ccy,
-            event.params.side,
-            event.params.maturity,
-            BigInt.fromI32(0),
-            event.params.filledAmount,
-            event.params.filledAmount,
-            'Filled',
-            false,
-            'Market',
-            event.block.timestamp,
-            event.block.number,
-            event.transaction.hash
-        );
         const txId =
             event.transaction.hash.toHexString() +
             ':' +
@@ -178,24 +195,6 @@ export function handlePositionUnwound(event: PositionUnwound): void {
             event.block.timestamp
         );
         addToTransactionVolume(event.params.filledAmount, dailyVolume);
-    } else if (event.params.isCircuitBreakerTriggered) {
-        initOrder(
-            orderId,
-            BigInt.fromI32(0),
-            event.params.user,
-            event.params.ccy,
-            event.params.side,
-            event.params.maturity,
-            BigInt.fromI32(0),
-            BigInt.fromI32(0),
-            BigInt.fromI32(0),
-            'Blocked',
-            false,
-            'Market',
-            event.block.timestamp,
-            event.block.number,
-            event.transaction.hash
-        );
     }
 }
 

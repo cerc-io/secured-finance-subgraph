@@ -75,6 +75,7 @@ describe('Order Executed', () => {
         assert.fieldEquals('Order', id, 'status', 'Open');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
         assert.fieldEquals('Order', id, 'type', 'Limit');
+        assert.fieldEquals('Order', id, 'isCircuitBreakerTriggered', 'false');
 
         const txId =
             event.transaction.hash.toHexString() +
@@ -91,7 +92,7 @@ describe('Order Executed', () => {
         assert.bigIntEquals(alice.createdAt, event.block.timestamp);
     });
 
-    test('should create a Partially Filled Order and a Transaction when a limit order is partially filled and order is placed', () => {
+    test('should create a Partially Filled Order and a Transaction when a limit order is partially filled and remaining order is placed', () => {
         const placedOrderId = BigInt.fromI32(1);
         const filledAmount = BigInt.fromI32(81);
         const filledUnitPrice = unitPrice;
@@ -138,13 +139,13 @@ describe('Order Executed', () => {
         assert.fieldEquals(
             'Transaction',
             txId,
-            'orderPrice',
+            'executionPrice',
             unitPrice.toString()
         );
         assert.fieldEquals(
             'Transaction',
             txId,
-            'forwardValue',
+            'futureValue',
             filledAmountInFV.toString()
         );
         assert.fieldEquals(
@@ -153,7 +154,8 @@ describe('Order Executed', () => {
             'amount',
             filledAmount.toString()
         );
-
+        assert.fieldEquals('Transaction', txId, 'order', id);
+        assert.fieldEquals('Transaction', txId, 'executionType', 'Taker');
         assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
         const alice = getOrInitUser(ALICE, timestamp);
@@ -217,13 +219,13 @@ describe('Order Executed', () => {
         assert.fieldEquals(
             'Transaction',
             txId,
-            'orderPrice',
+            'executionPrice',
             unitPrice.toString()
         );
         assert.fieldEquals(
             'Transaction',
             txId,
-            'forwardValue',
+            'futureValue',
             filledAmountInFV.toString()
         );
         assert.fieldEquals(
@@ -232,6 +234,8 @@ describe('Order Executed', () => {
             'amount',
             filledAmount.toString()
         );
+        assert.fieldEquals('Transaction', txId, 'order', id);
+        assert.fieldEquals('Transaction', txId, 'executionType', 'Taker');
         assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
         const alice = getOrInitUser(ALICE, timestamp);
@@ -246,12 +250,92 @@ describe('Order Executed', () => {
         assert.bigIntEquals(alice.createdAt, event.block.timestamp);
     });
 
-    test('should create a Filled Order and a Transaction with filled unit price when Market Order is executed', () => {
+    test('should create a Filled Order and a Transaction with filled unit price when Market Order is executed completely', () => {
         const placedOrderId = BigInt.fromI32(0);
         const filledAmount = BigInt.fromI32(160);
         const filledUnitPrice = BigInt.fromI32(80);
         const filledAmountInFV = BigInt.fromI32(200);
-        const totalAmount = filledAmount.plus(amount);
+        const feeInFV = BigInt.fromI32(1);
+
+        const event = createOrderExecutedEvent(
+            ALICE,
+            borrow,
+            ccy,
+            maturity,
+            filledAmount,
+            BigInt.fromI32(0),
+            filledAmount,
+            filledUnitPrice,
+            filledAmountInFV,
+            feeInFV,
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            BigInt.fromI32(0),
+            false
+        );
+        handleOrderExecuted(event);
+
+        const id =
+            getOrderEntityId(placedOrderId, ccy, maturity) +
+            ':' +
+            event.transaction.hash.toHexString();
+        assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
+        assert.fieldEquals('Order', id, 'inputUnitPrice', '0');
+        assert.fieldEquals(
+            'Order',
+            id,
+            'filledAmount',
+            filledAmount.toString()
+        );
+        assert.fieldEquals('Order', id, 'inputAmount', filledAmount.toString());
+        assert.fieldEquals('Order', id, 'status', 'Filled');
+        assert.fieldEquals('Order', id, 'isPreOrder', 'false');
+        assert.fieldEquals('Order', id, 'type', 'Market');
+
+        const txId =
+            event.transaction.hash.toHexString() +
+            ':' +
+            event.logIndex.toString();
+        assert.fieldEquals(
+            'Transaction',
+            txId,
+            'executionPrice',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'Transaction',
+            txId,
+            'futureValue',
+            filledAmountInFV.toString()
+        );
+        assert.fieldEquals(
+            'Transaction',
+            txId,
+            'amount',
+            filledAmount.toString()
+        );
+        assert.fieldEquals('Transaction', txId, 'order', id);
+        assert.fieldEquals('Transaction', txId, 'executionType', 'Taker');
+        assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
+
+        const alice = getOrInitUser(ALICE, timestamp);
+        assert.bigIntEquals(alice.orderCount, BigInt.fromI32(1));
+        assert.bigIntEquals(alice.transactionCount, BigInt.fromI32(1));
+        const orders = alice.orders.load();
+        assert.i32Equals(orders.length, 1);
+        assert.stringEquals(orders[0].id, id);
+        const transactions = alice.transactions.load();
+        assert.i32Equals(transactions.length, 1);
+        assert.stringEquals(transactions[0].id, txId);
+        assert.bigIntEquals(alice.createdAt, event.block.timestamp);
+    });
+
+    test('should create a Order with status Killed and a Transaction with filled unit price when Market Order is executed partially and remaining amount is killed because of insufficient liquidity', () => {
+        const placedOrderId = BigInt.fromI32(0);
+        const filledAmount = BigInt.fromI32(160);
+        const filledUnitPrice = BigInt.fromI32(80);
+        const filledAmountInFV = BigInt.fromI32(200);
+        const totalAmount = BigInt.fromI32(400);
         const feeInFV = BigInt.fromI32(1);
 
         const event = createOrderExecutedEvent(
@@ -285,7 +369,7 @@ describe('Order Executed', () => {
             filledAmount.toString()
         );
         assert.fieldEquals('Order', id, 'inputAmount', totalAmount.toString());
-        assert.fieldEquals('Order', id, 'status', 'Filled');
+        assert.fieldEquals('Order', id, 'status', 'Killed');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
         assert.fieldEquals('Order', id, 'type', 'Market');
 
@@ -296,13 +380,13 @@ describe('Order Executed', () => {
         assert.fieldEquals(
             'Transaction',
             txId,
-            'orderPrice',
+            'executionPrice',
             filledUnitPrice.toString()
         );
         assert.fieldEquals(
             'Transaction',
             txId,
-            'forwardValue',
+            'futureValue',
             filledAmountInFV.toString()
         );
         assert.fieldEquals(
@@ -311,6 +395,8 @@ describe('Order Executed', () => {
             'amount',
             filledAmount.toString()
         );
+        assert.fieldEquals('Transaction', txId, 'order', id);
+        assert.fieldEquals('Transaction', txId, 'executionType', 'Taker');
         assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
         const alice = getOrInitUser(ALICE, timestamp);
@@ -325,7 +411,7 @@ describe('Order Executed', () => {
         assert.bigIntEquals(alice.createdAt, event.block.timestamp);
     });
 
-    test('should not create any order when market order is not filled or blocked', () => {
+    test('should create an order with status Killed when market order is not filled bacause of insufficient liquidity', () => {
         const placedOrderId = BigInt.fromI32(0);
 
         const event = createOrderExecutedEvent(
@@ -350,10 +436,16 @@ describe('Order Executed', () => {
             getOrderEntityId(placedOrderId, ccy, maturity) +
             ':' +
             event.transaction.hash.toHexString();
-        assert.notInStore('Order', id);
+        assert.fieldEquals('Order', id, 'orderId', placedOrderId.toString());
+        assert.fieldEquals('Order', id, 'inputUnitPrice', '0');
+        assert.fieldEquals('Order', id, 'filledAmount', '0');
+        assert.fieldEquals('Order', id, 'inputAmount', amount.toString());
+        assert.fieldEquals('Order', id, 'status', 'Killed');
+        assert.fieldEquals('Order', id, 'isPreOrder', 'false');
+        assert.fieldEquals('Order', id, 'type', 'Market');
     });
 
-    test('should create a Partially Blocked Order and a Transaction when market order is blocked partially because of circuit breaker', () => {
+    test('should create a Killed Order and a Transaction when market order is killed partially because of circuit breaker', () => {
         const placedOrderId = BigInt.fromI32(0);
         const filledAmount = BigInt.fromI32(81);
         const filledUnitPrice = unitPrice;
@@ -392,9 +484,10 @@ describe('Order Executed', () => {
             filledAmount.toString()
         );
         assert.fieldEquals('Order', id, 'inputAmount', totalAmount.toString());
-        assert.fieldEquals('Order', id, 'status', 'PartiallyBlocked');
+        assert.fieldEquals('Order', id, 'status', 'Killed');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
         assert.fieldEquals('Order', id, 'type', 'Market');
+        assert.fieldEquals('Order', id, 'isCircuitBreakerTriggered', 'true');
 
         const txId =
             event.transaction.hash.toHexString() +
@@ -403,13 +496,13 @@ describe('Order Executed', () => {
         assert.fieldEquals(
             'Transaction',
             txId,
-            'orderPrice',
+            'executionPrice',
             unitPrice.toString()
         );
         assert.fieldEquals(
             'Transaction',
             txId,
-            'forwardValue',
+            'futureValue',
             filledAmountInFV.toString()
         );
         assert.fieldEquals(
@@ -418,6 +511,7 @@ describe('Order Executed', () => {
             'amount',
             filledAmount.toString()
         );
+        assert.fieldEquals('Transaction', txId, 'executionType', 'Taker');
         assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
         const alice = getOrInitUser(ALICE, timestamp);
@@ -432,7 +526,7 @@ describe('Order Executed', () => {
         assert.bigIntEquals(alice.createdAt, event.block.timestamp);
     });
 
-    test('should create a Blocked Order when market order is fully blocked because of circuit breaker', () => {
+    test('should create a Killed Order when market order is fully killed because of circuit breaker', () => {
         const placedOrderId = BigInt.fromI32(0);
 
         const event = createOrderExecutedEvent(
@@ -461,12 +555,13 @@ describe('Order Executed', () => {
         assert.fieldEquals('Order', id, 'inputUnitPrice', '0');
         assert.fieldEquals('Order', id, 'filledAmount', '0');
         assert.fieldEquals('Order', id, 'inputAmount', amount.toString());
-        assert.fieldEquals('Order', id, 'status', 'Blocked');
+        assert.fieldEquals('Order', id, 'status', 'Killed');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
         assert.fieldEquals('Order', id, 'type', 'Market');
+        assert.fieldEquals('Order', id, 'isCircuitBreakerTriggered', 'true');
     });
 
-    test('should create a Partially Blocked Order and a Transaction when order is filled partially and remaining amount is not placed', () => {
+    test('should create a Killed Order and a Transaction when limit order is filled partially filled and remaining amount is not killed because of circuit breaker', () => {
         const placedOrderId = BigInt.fromI32(0);
         const filledAmount = BigInt.fromI32(81);
         const filledUnitPrice = unitPrice;
@@ -505,9 +600,10 @@ describe('Order Executed', () => {
             filledAmount.toString()
         );
         assert.fieldEquals('Order', id, 'inputAmount', totalAmount.toString());
-        assert.fieldEquals('Order', id, 'status', 'PartiallyBlocked');
+        assert.fieldEquals('Order', id, 'status', 'Killed');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
         assert.fieldEquals('Order', id, 'type', 'Limit');
+        assert.fieldEquals('Order', id, 'isCircuitBreakerTriggered', 'true');
 
         const txId =
             event.transaction.hash.toHexString() +
@@ -516,13 +612,13 @@ describe('Order Executed', () => {
         assert.fieldEquals(
             'Transaction',
             txId,
-            'orderPrice',
+            'executionPrice',
             unitPrice.toString()
         );
         assert.fieldEquals(
             'Transaction',
             txId,
-            'forwardValue',
+            'futureValue',
             filledAmountInFV.toString()
         );
         assert.fieldEquals(
@@ -545,7 +641,7 @@ describe('Order Executed', () => {
         assert.bigIntEquals(alice.createdAt, event.block.timestamp);
     });
 
-    test('should create an Blocked Order when limit order is completely blocked', () => {
+    test('should create an Killed Order when limit order is completely killed because of circuit breaker', () => {
         const placedOrderId = BigInt.fromI32(0);
 
         const event = createOrderExecutedEvent(
@@ -574,9 +670,10 @@ describe('Order Executed', () => {
         assert.fieldEquals('Order', id, 'inputUnitPrice', unitPrice.toString());
         assert.fieldEquals('Order', id, 'filledAmount', '0');
         assert.fieldEquals('Order', id, 'inputAmount', amount.toString());
-        assert.fieldEquals('Order', id, 'status', 'Blocked');
+        assert.fieldEquals('Order', id, 'status', 'Killed');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
         assert.fieldEquals('Order', id, 'type', 'Limit');
+        assert.fieldEquals('Order', id, 'isCircuitBreakerTriggered', 'true');
 
         const txId =
             event.transaction.hash.toHexString() +
@@ -671,12 +768,17 @@ describe('Position Unwound', () => {
             'Order',
             id,
             'filledAmount',
-            filledAmount.toString()
+            filledAmountInFV.toString()
         );
-        assert.fieldEquals('Order', id, 'inputAmount', filledAmount.toString());
+        assert.fieldEquals(
+            'Order',
+            id,
+            'inputAmount',
+            filledAmountInFV.toString()
+        );
         assert.fieldEquals('Order', id, 'status', 'Filled');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
-        assert.fieldEquals('Order', id, 'type', 'Market');
+        assert.fieldEquals('Order', id, 'type', 'Unwind');
 
         const txId =
             event.transaction.hash.toHexString() +
@@ -685,13 +787,13 @@ describe('Position Unwound', () => {
         assert.fieldEquals(
             'Transaction',
             txId,
-            'orderPrice',
+            'executionPrice',
             filledUnitPrice.toString()
         );
         assert.fieldEquals(
             'Transaction',
             txId,
-            'forwardValue',
+            'futureValue',
             filledAmountInFV.toString()
         );
         assert.fieldEquals(
@@ -700,7 +802,8 @@ describe('Position Unwound', () => {
             'amount',
             filledAmount.toString()
         );
-
+        assert.fieldEquals('Transaction', txId, 'order', id);
+        assert.fieldEquals('Transaction', txId, 'executionType', 'Taker');
         assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
         const bob = getOrInitUser(BOB, timestamp);
@@ -715,7 +818,7 @@ describe('Position Unwound', () => {
         assert.bigIntEquals(bob.createdAt, event.block.timestamp);
     });
 
-    test('should create an Filled Order and a transaction when futureValue is not filled completely', () => {
+    test('should create an Killed Order and a transaction when futureValue is not filled completely', () => {
         const orderId = BigInt.fromI32(0);
         const futureValue = BigInt.fromI32(400);
         const filledAmount = BigInt.fromI32(180);
@@ -747,12 +850,12 @@ describe('Position Unwound', () => {
             'Order',
             id,
             'filledAmount',
-            filledAmount.toString()
+            filledAmountInFV.toString()
         );
-        assert.fieldEquals('Order', id, 'inputAmount', filledAmount.toString());
-        assert.fieldEquals('Order', id, 'status', 'Filled');
+        assert.fieldEquals('Order', id, 'inputAmount', futureValue.toString());
+        assert.fieldEquals('Order', id, 'status', 'Killed');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
-        assert.fieldEquals('Order', id, 'type', 'Market');
+        assert.fieldEquals('Order', id, 'type', 'Unwind');
 
         const txId =
             event.transaction.hash.toHexString() +
@@ -761,13 +864,13 @@ describe('Position Unwound', () => {
         assert.fieldEquals(
             'Transaction',
             txId,
-            'orderPrice',
+            'executionPrice',
             filledUnitPrice.toString()
         );
         assert.fieldEquals(
             'Transaction',
             txId,
-            'forwardValue',
+            'futureValue',
             filledAmountInFV.toString()
         );
         assert.fieldEquals(
@@ -776,7 +879,8 @@ describe('Position Unwound', () => {
             'amount',
             filledAmount.toString()
         );
-
+        assert.fieldEquals('Transaction', txId, 'order', id);
+        assert.fieldEquals('Transaction', txId, 'executionType', 'Taker');
         assert.fieldEquals('Transaction', txId, 'feeInFV', feeInFV.toString());
 
         const bob = getOrInitUser(BOB, timestamp);
@@ -791,7 +895,7 @@ describe('Position Unwound', () => {
         assert.bigIntEquals(bob.createdAt, event.block.timestamp);
     });
 
-    test('should create a Blocked Order when order is fully blocked', () => {
+    test('should create a Killed Order when order is fully killed by circuit breaker', () => {
         const orderId = BigInt.fromI32(0);
         const futureValue = BigInt.fromI32(250);
 
@@ -815,13 +919,13 @@ describe('Position Unwound', () => {
             event.transaction.hash.toHexString();
         assert.fieldEquals('Order', id, 'inputUnitPrice', '0');
         assert.fieldEquals('Order', id, 'filledAmount', '0');
-        assert.fieldEquals('Order', id, 'inputAmount', '0');
-        assert.fieldEquals('Order', id, 'status', 'Blocked');
+        assert.fieldEquals('Order', id, 'inputAmount', futureValue.toString());
+        assert.fieldEquals('Order', id, 'status', 'Killed');
         assert.fieldEquals('Order', id, 'isPreOrder', 'false');
-        assert.fieldEquals('Order', id, 'type', 'Market');
+        assert.fieldEquals('Order', id, 'type', 'Unwind');
     });
 
-    test('should not create any order when position unwound order is not filled or blocked', () => {
+    test('should create a Killed order when position unwound order is not filled because of in sufficient liquidity', () => {
         const orderId = BigInt.fromI32(0);
         const futureValue = BigInt.fromI32(250);
 
@@ -843,7 +947,12 @@ describe('Position Unwound', () => {
             getOrderEntityId(orderId, ccy, maturity) +
             ':' +
             event.transaction.hash.toHexString();
-        assert.notInStore('Order', id);
+        assert.fieldEquals('Order', id, 'inputUnitPrice', '0');
+        assert.fieldEquals('Order', id, 'filledAmount', '0');
+        assert.fieldEquals('Order', id, 'inputAmount', futureValue.toString());
+        assert.fieldEquals('Order', id, 'status', 'Killed');
+        assert.fieldEquals('Order', id, 'isPreOrder', 'false');
+        assert.fieldEquals('Order', id, 'type', 'Unwind');
     });
 });
 
@@ -853,7 +962,7 @@ describe('Order Partially Filled', () => {
         createLendingMarket(ccy, maturity);
     });
 
-    test('should update an Open Order and add a transaction', () => {
+    test('should update an Open Order to Partially Filled and add a transaction', () => {
         const placedOrderId = BigInt.fromI32(1);
 
         const event = createOrderExecutedEvent(
@@ -900,11 +1009,12 @@ describe('Order Partially Filled', () => {
         assert.fieldEquals(
             'Transaction',
             txId,
-            'orderPrice',
+            'executionPrice',
             unitPrice.toString()
         );
-        assert.fieldEquals('Transaction', txId, 'forwardValue', '30');
+        assert.fieldEquals('Transaction', txId, 'futureValue', '30');
         assert.fieldEquals('Transaction', txId, 'amount', '27');
+        assert.fieldEquals('Transaction', txId, 'executionType', 'Maker');
         assert.fieldEquals('Transaction', txId, 'feeInFV', '0');
 
         const alice = getOrInitUser(ALICE, timestamp);
@@ -919,7 +1029,7 @@ describe('Order Partially Filled', () => {
         assert.bigIntEquals(alice.createdAt, event.block.timestamp);
     });
 
-    test('should update an PartiallyFilled and add a transaction', () => {
+    test('should update an PartiallyFilled order amount and add a transaction', () => {
         const placedOrderId = BigInt.fromI32(1);
 
         const event = createOrderExecutedEvent(
@@ -966,11 +1076,12 @@ describe('Order Partially Filled', () => {
         assert.fieldEquals(
             'Transaction',
             txId,
-            'orderPrice',
+            'executionPrice',
             unitPrice.toString()
         );
-        assert.fieldEquals('Transaction', txId, 'forwardValue', '60');
+        assert.fieldEquals('Transaction', txId, 'futureValue', '60');
         assert.fieldEquals('Transaction', txId, 'amount', '54');
+        assert.fieldEquals('Transaction', txId, 'executionType', 'Maker');
         assert.fieldEquals('Transaction', txId, 'feeInFV', '0');
 
         assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '1');
@@ -1175,12 +1286,13 @@ describe('Orders Cleaned', () => {
         assert.fieldEquals(
             'Transaction',
             txId1,
-            'orderPrice',
+            'executionPrice',
             unitPrice.toString()
         );
-        assert.fieldEquals('Transaction', txId1, 'forwardValue', '100');
+        assert.fieldEquals('Transaction', txId1, 'futureValue', '100');
         assert.fieldEquals('Transaction', txId1, 'amount', amount.toString());
         assert.fieldEquals('Transaction', txId1, 'feeInFV', '0');
+        assert.fieldEquals('Transaction', txId1, 'executionType', 'Maker');
 
         const txId2 =
             ordersCleanedEvent.transaction.hash.toHexString() +
@@ -1189,11 +1301,12 @@ describe('Orders Cleaned', () => {
         assert.fieldEquals(
             'Transaction',
             txId2,
-            'orderPrice',
+            'executionPrice',
             unitPrice2.toString()
         );
-        assert.fieldEquals('Transaction', txId2, 'forwardValue', '150');
+        assert.fieldEquals('Transaction', txId2, 'futureValue', '150');
         assert.fieldEquals('Transaction', txId2, 'amount', amount2.toString());
+        assert.fieldEquals('Transaction', txId2, 'executionType', 'Maker');
     });
 
     test('should mark all the open orders as filled and add transactions', () => {
@@ -1264,10 +1377,11 @@ describe('Orders Cleaned', () => {
         assert.fieldEquals(
             'Transaction',
             txId1,
-            'orderPrice',
+            'executionPrice',
             unitPrice.toString()
         );
         assert.fieldEquals('Transaction', txId1, 'amount', '54');
+        assert.fieldEquals('Transaction', txId1, 'executionType', 'Maker');
 
         const txId2 =
             ordersCleanedEvent.transaction.hash.toHexString() +
@@ -1276,12 +1390,13 @@ describe('Orders Cleaned', () => {
         assert.fieldEquals(
             'Transaction',
             txId2,
-            'orderPrice',
+            'executionPrice',
             unitPrice2.toString()
         );
-        assert.fieldEquals('Transaction', txId2, 'forwardValue', '50');
+        assert.fieldEquals('Transaction', txId2, 'futureValue', '50');
         assert.fieldEquals('Transaction', txId2, 'amount', '40');
-        assert.fieldEquals('Transaction', txId1, 'feeInFV', '0');
+        assert.fieldEquals('Transaction', txId2, 'feeInFV', '0');
+        assert.fieldEquals('Transaction', txId2, 'executionType', 'Maker');
 
         assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '2');
         assert.fieldEquals(
@@ -1480,24 +1595,24 @@ describe('Itayose Executed', () => {
         assert.fieldEquals(
             'Transaction',
             txId10,
-            'orderPrice',
+            'executionPrice',
             openingUnitPrice.toString()
         );
-        assert.fieldEquals('Transaction', txId10, 'forwardValue', '111');
+        assert.fieldEquals('Transaction', txId10, 'futureValue', '111');
         assert.fieldEquals(
             'Transaction',
             txId11,
-            'orderPrice',
+            'executionPrice',
             openingUnitPrice.toString()
         );
-        assert.fieldEquals('Transaction', txId11, 'forwardValue', '111');
+        assert.fieldEquals('Transaction', txId11, 'futureValue', '111');
         assert.fieldEquals(
             'Transaction',
             txId12,
-            'orderPrice',
+            'executionPrice',
             unitPrice3.toString()
         );
-        assert.fieldEquals('Transaction', txId12, 'forwardValue', '112');
+        assert.fieldEquals('Transaction', txId12, 'futureValue', '112');
 
         const cleanEvent2 = createOrdersCleanedEvent(
             [orderId4, orderId5, orderId6, orderId7],
@@ -1519,31 +1634,31 @@ describe('Itayose Executed', () => {
         assert.fieldEquals(
             'Transaction',
             txId20,
-            'orderPrice',
+            'executionPrice',
             openingUnitPrice.toString()
         );
-        assert.fieldEquals('Transaction', txId20, 'forwardValue', '111');
+        assert.fieldEquals('Transaction', txId20, 'futureValue', '111');
         assert.fieldEquals(
             'Transaction',
             txId21,
-            'orderPrice',
+            'executionPrice',
             openingUnitPrice.toString()
         );
-        assert.fieldEquals('Transaction', txId21, 'forwardValue', '111');
+        assert.fieldEquals('Transaction', txId21, 'futureValue', '111');
         assert.fieldEquals(
             'Transaction',
             txId22,
-            'orderPrice',
+            'executionPrice',
             unitPrice6.toString()
         );
-        assert.fieldEquals('Transaction', txId22, 'forwardValue', '112');
+        assert.fieldEquals('Transaction', txId22, 'futureValue', '112');
         assert.fieldEquals(
             'Transaction',
             txId23,
-            'orderPrice',
+            'executionPrice',
             unitPrice7.toString()
         );
-        assert.fieldEquals('Transaction', txId23, 'forwardValue', '115');
+        assert.fieldEquals('Transaction', txId23, 'futureValue', '115');
 
         assert.fieldEquals('User', ALICE.toHexString(), 'orderCount', '4');
         assert.fieldEquals(
