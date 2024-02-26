@@ -191,7 +191,7 @@ export const initTransaction = (
         ? filledAmount.divDecimal(new BigDecimal(filledAmountInFV))
         : BigDecimal.zero();
     transaction.lendingMarket = getOrInitLendingMarket(currency, maturity).id;
-    transaction.executedAt = timestamp;
+    transaction.createdAt = timestamp;
     transaction.blockNumber = blockNumber;
     transaction.txHash = txHash;
     transaction.order = order.id;
