@@ -5,7 +5,7 @@ export function getDailyVolumeEntityId(
     maturity: BigInt,
     date: string
 ): string {
-    return `${ccy}-${maturity.toString()}-${date}`;
+    return `${ccy.toString()}-${maturity.toString()}-${date}`;
 }
 
 export function getOrderEntityId(
@@ -13,9 +13,7 @@ export function getOrderEntityId(
     ccy: Bytes,
     maturity: BigInt
 ): string {
-    return (
-        orderId.toHexString() + ':' + ccy.toString() + ':' + maturity.toString()
-    );
+    return `${orderId.toHexString()}-${ccy.toString()}-${maturity.toString()}`;
 }
 
 export function getCandleStickEntityId(

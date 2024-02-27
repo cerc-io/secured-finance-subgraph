@@ -7,7 +7,6 @@ import {
     describe,
     test,
 } from 'matchstick-as/assembly/index';
-import { PROTOCOL_ID, getProtocol } from '../src/helper/initializer';
 import {
     handleOrderBookCreated,
     handleOrderBooksRotated,
@@ -22,7 +21,7 @@ import {
 const orderBookId = BigInt.fromI32(1);
 const openingDate = BigInt.fromI32(12345);
 const preOpeningDate = BigInt.fromI32(1234);
-const maturity = BigInt.fromI32(365);
+const maturity = BigInt.fromI32(1677628800);
 
 afterEach(() => {
     clearStore();
@@ -48,7 +47,6 @@ const maturityList = [
 const newMaturity = BigInt.fromI32(1701388800);
 
 const LENDING_MARKET_ENTITY_NAME = 'LendingMarket';
-const PROTOCOL = 'Protocol';
 
 describe('With no lending markets existing', () => {
     test('Creating a new lending market should create the entity', () => {
@@ -75,27 +73,6 @@ describe('With no lending markets existing', () => {
             maturity.toString()
         );
         assert.fieldEquals(LENDING_MARKET_ENTITY_NAME, id, 'isActive', 'true');
-    });
-
-    test('Creating a new lending market should add it to the protocol', () => {
-        const event = createOrderBookCreatedEvent(
-            ethBytes,
-            orderBookId,
-            openingDate,
-            preOpeningDate,
-            maturity
-        );
-        handleOrderBookCreated(event);
-
-        assert.entityCount(PROTOCOL, 1);
-        const protocol = getProtocol();
-        assert.bigIntEquals(protocol.totalUsers, BigInt.fromI32(0));
-        const lendingMarkets = protocol.lendingMarkets.load();
-        assert.i32Equals(lendingMarkets.length, 1);
-        assert.stringEquals(
-            lendingMarkets[0].id,
-            buildLendingMarketId(ethBytes, maturity)
-        );
     });
 });
 
@@ -148,25 +125,5 @@ describe('With lending markets already existing', () => {
             'maturity',
             newMaturity.toString()
         );
-        assert.fieldEquals(
-            LENDING_MARKET_ENTITY_NAME,
-            id,
-            'protocol',
-            'ethereum'
-        );
-    });
-
-    test('Rotate lending market should add the new maturity market to the protocol', () => {
-        const event = createOrderBooksRotatedEvent(
-            filBytes,
-            maturityList[0],
-            newMaturity
-        );
-
-        handleOrderBooksRotated(event);
-
-        const protocol = getProtocol();
-        const lendingMarkets = protocol.lendingMarkets.load();
-        assert.i32Equals(lendingMarkets.length, 9);
     });
 });

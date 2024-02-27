@@ -1,16 +1,14 @@
-import { Address, BigInt, ethereum } from '@graphprotocol/graph-ts';
+import { Address, BigInt } from '@graphprotocol/graph-ts';
 import {
     afterEach,
     assert,
     clearStore,
     describe,
-    newMockEvent,
     test,
 } from 'matchstick-as/assembly/index';
-import { Deposit } from '../generated/TokenVault/TokenVault';
 import { handleDeposit, handleWithdraw } from '../src/mappings/token-vault';
 import { toBytes32, toBytes20 } from '../src/utils/string';
-import { ALICE, BOB } from './utils/createEntities';
+import { ALICE } from './utils/createEntities';
 import { createDepositEvent, createWithdrawEvent } from './mocks';
 
 const ccy = toBytes32('ETH');
@@ -32,7 +30,7 @@ describe('Deposit & Withdraw', () => {
         handleDeposit(event);
 
         assert.entityCount('User', 1);
-        assert.fieldEquals('Protocol', 'ethereum', 'totalUsers', '1');
+        assert.fieldEquals('Protocol', '1', 'totalUsers', '1');
         assert.fieldEquals('User', ALICE.toHexString(), 'transferCount', '1');
 
         const depositID = ALICE.toHexString() + ':' + ccy.toString();
@@ -59,7 +57,7 @@ describe('Deposit & Withdraw', () => {
             handleDeposit(event);
         }
         assert.entityCount('User', 100);
-        assert.fieldEquals('Protocol', 'ethereum', 'totalUsers', '100');
+        assert.fieldEquals('Protocol', '1', 'totalUsers', '100');
         assert.entityCount('Transfer', 100);
     });
 
@@ -71,7 +69,7 @@ describe('Deposit & Withdraw', () => {
             handleDeposit(event);
         }
         assert.entityCount('User', 1);
-        assert.fieldEquals('Protocol', 'ethereum', 'totalUsers', '1');
+        assert.fieldEquals('Protocol', '1', 'totalUsers', '1');
         assert.fieldEquals('User', ALICE.toHexString(), 'transferCount', '10');
         assert.entityCount('Transfer', 10);
     });
@@ -91,7 +89,7 @@ describe('Deposit & Withdraw', () => {
             withdrawEvent.logIndex.toString();
 
         assert.entityCount('User', 1);
-        assert.fieldEquals('Protocol', 'ethereum', 'totalUsers', '1');
+        assert.fieldEquals('Protocol', '1', 'totalUsers', '1');
         assert.fieldEquals('User', ALICE.toHexString(), 'transferCount', '2');
 
         assert.entityCount('Transfer', 2);
@@ -179,7 +177,7 @@ describe('Deposit & Withdraw', () => {
             'Deposit',
             ALICE.toHexString() + ':' + usdc.toString(),
             'amount',
-            amount1.plus(amount2.plus(amount2)).toString()
+            amount1.plus(amount2.times(BigInt.fromI32(2))).toString()
         );
     });
 });

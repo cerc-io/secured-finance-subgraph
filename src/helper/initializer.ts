@@ -23,7 +23,7 @@ import {
 } from '../utils/id-generation';
 import { buildLendingMarketId } from '../utils/string';
 
-export const PROTOCOL_ID = 'ethereum';
+const PROTOCOL_ID = '1';
 
 export const getProtocol = (): Protocol => {
     let protocol = Protocol.load(PROTOCOL_ID);
@@ -33,6 +33,12 @@ export const getProtocol = (): Protocol => {
         protocol.save();
     }
     return protocol as Protocol;
+};
+
+const getISO8601Date = (date: BigInt): string => {
+    const utcDate = new Date(date.times(BigInt.fromI32(1000)).toI64());
+    const dayStr = utcDate.toISOString().substring(0, 10); //yyyy-mm-dd
+    return dayStr;
 };
 
 export const getOrInitLendingMarket = (
@@ -45,9 +51,7 @@ export const getOrInitLendingMarket = (
         lendingMarket = new LendingMarket(id);
         lendingMarket.currency = ccy;
         lendingMarket.maturity = maturity;
-        lendingMarket.prettyName = ccy.toString() + '-' + maturity.toString();
         lendingMarket.isActive = true;
-        lendingMarket.protocol = getProtocol().id;
         lendingMarket.volume = BigInt.fromI32(0);
         lendingMarket.openingUnitPrice = BigInt.fromI32(0);
         lendingMarket.lastLendUnitPrice = BigInt.fromI32(0);
@@ -55,7 +59,10 @@ export const getOrInitLendingMarket = (
         lendingMarket.offsetAmount = BigInt.fromI32(0);
 
         lendingMarket.save();
-        log.debug('Created lending market: {}', [lendingMarket.prettyName]);
+        log.debug('Created lending market: {} {}', [
+            lendingMarket.currency.toString(),
+            lendingMarket.maturity.toString(),
+        ]);
     }
     return lendingMarket as LendingMarket;
 };
@@ -86,8 +93,7 @@ export const getOrInitDailyVolume = (
     maturity: BigInt,
     date: BigInt
 ): DailyVolume => {
-    const utcDate = new Date(date.times(BigInt.fromI32(1000)).toI64());
-    const dayStr = utcDate.toISOString().substring(0, 10); //yyyy-mm-dd
+    const dayStr = getISO8601Date(date);
 
     let id = getDailyVolumeEntityId(ccy, maturity, dayStr);
     let dailyVolume = DailyVolume.load(id);
