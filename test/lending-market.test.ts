@@ -20,7 +20,7 @@ import {
     getOrderEntityId,
 } from '../src/utils/id-generation';
 import { toBytes32 } from '../src/utils/string';
-import { getOrInitDailyVolume, getOrInitUser } from '../src/helper/initializer';
+import { getOrInitUser, getProtocol } from '../src/helper/initializer';
 import {
     createItayoseExecutedEvent,
     createOrderCanceledEvent,
@@ -89,6 +89,9 @@ describe('Order Executed', () => {
         assert.i32Equals(orders.length, 1);
         assert.stringEquals(orders[0].id, id);
         assert.bigIntEquals(alice.createdAt, event.block.timestamp);
+
+        const protocol = getProtocol();
+        assert.fieldEquals('Protocol', protocol.id, 'totalUsers', '1');
     });
 
     test('should create a Partially Filled Order and a Transaction when a limit order is partially filled and order is placed', () => {
