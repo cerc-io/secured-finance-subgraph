@@ -16,9 +16,7 @@ import {
     Transfer,
     Deposit,
 } from '../../generated/schema';
-import {
-    getDailyVolumeEntityId
-} from '../utils/id-generation';
+import { getDailyVolumeEntityId } from '../utils/id-generation';
 import { buildLendingMarketId } from '../utils/string';
 
 const PROTOCOL_ID = '1';
