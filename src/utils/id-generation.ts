@@ -17,3 +17,13 @@ export function getOrderEntityId(
         orderId.toHexString() + ':' + ccy.toString() + ':' + maturity.toString()
     );
 }
+
+export function getCandleStickEntityId(
+    ccy: Bytes,
+    maturity: BigInt,
+    epochTime: BigInt
+): string {
+    return (
+        ccy.toString() + '-' + maturity.toString() + '-' + epochTime.toString()
+    );
+}

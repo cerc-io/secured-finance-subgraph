@@ -13,8 +13,11 @@ import {
     getOrInitLendingMarket,
     initOrder,
     initTransaction,
+    initOrUpdateCandleStick,
 } from '../helper/initializer';
 import { getOrderEntityId } from '../utils/id-generation';
+
+const intervals = [900, 3600, 21600, 86400]; // [15min, 1h, 6h, 1d]
 
 export function handleOrderExecuted(event: OrderExecuted): void {
     let id = getOrderEntityId(
@@ -98,6 +101,10 @@ export function handleOrderExecuted(event: OrderExecuted): void {
             event.block.timestamp
         );
         addToTransactionVolume(event.params.filledAmount, dailyVolume);
+
+        for (let i = 0; i < intervals.length; i++) {
+            initOrUpdateCandleStick(txId, BigInt.fromI32(intervals[i]));
+        }
     }
 }
 
@@ -175,6 +182,9 @@ export function handlePositionUnwound(event: PositionUnwound): void {
             event.block.timestamp
         );
         addToTransactionVolume(event.params.filledAmount, dailyVolume);
+        for (let i = 0; i < intervals.length; i++) {
+            initOrUpdateCandleStick(txId, BigInt.fromI32(intervals[i]));
+        }
     } else if (event.params.isCircuitBreakerTriggered) {
         initOrder(
             id,

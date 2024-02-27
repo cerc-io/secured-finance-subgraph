@@ -18,6 +18,7 @@ import {
 import {
     getDailyVolumeEntityId,
     getOrderEntityId,
+    getCandleStickEntityId,
 } from '../src/utils/id-generation';
 import { toBytes32 } from '../src/utils/string';
 import { getOrInitDailyVolume, getOrInitUser } from '../src/helper/initializer';
@@ -38,7 +39,7 @@ const ccy = toBytes32('ETH');
 const maturity = BigInt.fromI32(1677628800); // 1st Mar 23
 const amount = BigInt.fromI32(90);
 const unitPrice = BigInt.fromI32(9000);
-const timestamp = BigInt.fromI64(1677620000);
+const timestamp = BigInt.fromI64(1675878200);
 
 describe('Order Executed', () => {
     beforeEach(() => {
@@ -1586,7 +1587,7 @@ describe('Daily Volume', () => {
             amount,
             unitPrice,
             false,
-            BigInt.fromI32(1675878200)
+            timestamp
         );
         handleOrderExecuted(event);
 
@@ -1617,7 +1618,7 @@ describe('Daily Volume', () => {
             amount,
             unitPrice,
             false,
-            BigInt.fromI32(1675878200)
+            timestamp
         );
         handleOrderExecuted(event2);
         assert.fieldEquals(
@@ -1646,7 +1647,7 @@ describe('Daily Volume', () => {
             filledAmountInFV,
             BigInt.fromI32(0),
             false,
-            BigInt.fromI32(1675878200)
+            timestamp
         );
         handlePositionUnwound(event);
 
@@ -1681,7 +1682,7 @@ describe('Daily Volume', () => {
             amount,
             unitPrice,
             false,
-            BigInt.fromI32(1675878200)
+            timestamp
         );
         handleOrderExecuted(event);
 
@@ -1701,7 +1702,7 @@ describe('Daily Volume', () => {
             maturity,
             BigInt.fromI32(27),
             BigInt.fromI32(30),
-            BigInt.fromI32(1675878200)
+            timestamp
         );
         handleOrderPartiallyFilled(orderPartiallyFilled);
         assert.fieldEquals(
@@ -1724,7 +1725,7 @@ describe('Daily Volume', () => {
             lastLendUnitPrice,
             lastBorrowUnitPrice,
             offsetAmount,
-            BigInt.fromI32(1675878200)
+            timestamp
         );
         handleItayoseExecuted(itayoseExecutedEvent);
 
@@ -1740,5 +1741,528 @@ describe('Daily Volume', () => {
             'volume',
             offsetAmount.toString()
         );
+    });
+});
+
+describe('Candle Stick', () => {
+    beforeEach(() => {
+        clearStore();
+        createLendingMarket(ccy, maturity);
+    });
+
+    test('taker transaction should create or update the 15 min candle stick data', () => {
+        const placedOrderId = BigInt.fromI32(1);
+        const filledAmount = BigInt.fromI32(81);
+        const filledUnitPrice = BigInt.fromI32(90);
+        const filledAmountInFV = BigInt.fromI32(90);
+        const totalAmount = filledAmount.plus(amount);
+        const interval = BigInt.fromI32(900);
+
+        const event = createOrderExecutedEvent(
+            ALICE,
+            borrow,
+            ccy,
+            maturity,
+            totalAmount,
+            unitPrice,
+            filledAmount,
+            filledUnitPrice,
+            filledAmountInFV,
+            BigInt.fromI32(0),
+            placedOrderId,
+            amount,
+            unitPrice,
+            false,
+            timestamp
+        );
+        handleOrderExecuted(event);
+
+        const epochTime = timestamp.div(interval);
+        const id = getCandleStickEntityId(ccy, maturity, epochTime);
+        assert.fieldEquals('CandleStick', id, 'interval', interval.toString());
+        assert.fieldEquals('CandleStick', id, 'currency', ccy.toHexString());
+        assert.fieldEquals('CandleStick', id, 'maturity', maturity.toString());
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'open',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'close',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'high',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'low',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'volume',
+            filledAmount.toString()
+        );
+
+        const placedOrderId2 = BigInt.fromI32(2);
+        const filledAmount2 = BigInt.fromI32(95);
+        const filledUnitPrice2 = BigInt.fromI32(95);
+        const filledAmountInFV2 = BigInt.fromI32(100);
+        const totalAmount2 = filledAmount2.plus(amount);
+        const event2 = createOrderExecutedEvent(
+            BOB,
+            borrow,
+            ccy,
+            maturity,
+            totalAmount2,
+            unitPrice,
+            filledAmount2,
+            filledUnitPrice2,
+            filledAmountInFV2,
+            BigInt.fromI32(0),
+            placedOrderId2,
+            amount,
+            unitPrice,
+            false,
+            timestamp
+        );
+        handleOrderExecuted(event2);
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'open',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'close',
+            filledUnitPrice2.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'high',
+            filledUnitPrice2.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'low',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'volume',
+            filledAmount.plus(filledAmount2).toString()
+        );
+    });
+
+    test('taker transaction should create or update the 1 hr candle stick data', () => {
+        const placedOrderId = BigInt.fromI32(1);
+        const filledAmount = BigInt.fromI32(81);
+        const filledUnitPrice = BigInt.fromI32(90);
+        const filledAmountInFV = BigInt.fromI32(90);
+        const totalAmount = filledAmount.plus(amount);
+        const interval = BigInt.fromI32(3600);
+
+        const event = createOrderExecutedEvent(
+            ALICE,
+            borrow,
+            ccy,
+            maturity,
+            totalAmount,
+            unitPrice,
+            filledAmount,
+            filledUnitPrice,
+            filledAmountInFV,
+            BigInt.fromI32(0),
+            placedOrderId,
+            amount,
+            unitPrice,
+            false,
+            timestamp
+        );
+        handleOrderExecuted(event);
+
+        const epochTime = timestamp.div(interval);
+        const id = getCandleStickEntityId(ccy, maturity, epochTime);
+        assert.fieldEquals('CandleStick', id, 'interval', interval.toString());
+        assert.fieldEquals('CandleStick', id, 'currency', ccy.toHexString());
+        assert.fieldEquals('CandleStick', id, 'maturity', maturity.toString());
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'open',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'close',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'high',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'low',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'volume',
+            filledAmount.toString()
+        );
+
+        const placedOrderId2 = BigInt.fromI32(2);
+        const filledAmount2 = BigInt.fromI32(95);
+        const filledUnitPrice2 = BigInt.fromI32(95);
+        const filledAmountInFV2 = BigInt.fromI32(100);
+        const totalAmount2 = filledAmount2.plus(amount);
+        const event2 = createOrderExecutedEvent(
+            BOB,
+            borrow,
+            ccy,
+            maturity,
+            totalAmount2,
+            unitPrice,
+            filledAmount2,
+            filledUnitPrice2,
+            filledAmountInFV2,
+            BigInt.fromI32(0),
+            placedOrderId2,
+            amount,
+            unitPrice,
+            false,
+            timestamp
+        );
+        handleOrderExecuted(event2);
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'open',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'close',
+            filledUnitPrice2.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'high',
+            filledUnitPrice2.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'low',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'volume',
+            filledAmount.plus(filledAmount2).toString()
+        );
+    });
+
+    test('taker transaction should create or update the 6 hr candle stick data', () => {
+        const placedOrderId = BigInt.fromI32(1);
+        const filledAmount = BigInt.fromI32(81);
+        const filledUnitPrice = BigInt.fromI32(90);
+        const filledAmountInFV = BigInt.fromI32(90);
+        const totalAmount = filledAmount.plus(amount);
+        const interval = BigInt.fromI32(21600);
+
+        const event = createOrderExecutedEvent(
+            ALICE,
+            borrow,
+            ccy,
+            maturity,
+            totalAmount,
+            unitPrice,
+            filledAmount,
+            filledUnitPrice,
+            filledAmountInFV,
+            BigInt.fromI32(0),
+            placedOrderId,
+            amount,
+            unitPrice,
+            false,
+            timestamp
+        );
+        handleOrderExecuted(event);
+
+        const epochTime = timestamp.div(interval);
+        const id = getCandleStickEntityId(ccy, maturity, epochTime);
+        assert.fieldEquals('CandleStick', id, 'interval', interval.toString());
+        assert.fieldEquals('CandleStick', id, 'currency', ccy.toHexString());
+        assert.fieldEquals('CandleStick', id, 'maturity', maturity.toString());
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'open',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'close',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'high',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'low',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'volume',
+            filledAmount.toString()
+        );
+
+        const placedOrderId2 = BigInt.fromI32(2);
+        const filledAmount2 = BigInt.fromI32(95);
+        const filledUnitPrice2 = BigInt.fromI32(95);
+        const filledAmountInFV2 = BigInt.fromI32(100);
+        const totalAmount2 = filledAmount2.plus(amount);
+        const event2 = createOrderExecutedEvent(
+            BOB,
+            borrow,
+            ccy,
+            maturity,
+            totalAmount2,
+            unitPrice,
+            filledAmount2,
+            filledUnitPrice2,
+            filledAmountInFV2,
+            BigInt.fromI32(0),
+            placedOrderId2,
+            amount,
+            unitPrice,
+            false,
+            timestamp
+        );
+        handleOrderExecuted(event2);
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'open',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'close',
+            filledUnitPrice2.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'high',
+            filledUnitPrice2.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'low',
+            filledUnitPrice.toString()
+        );
+        assert.fieldEquals(
+            'CandleStick',
+            id,
+            'volume',
+            filledAmount.plus(filledAmount2).toString()
+        );
+    });
+
+    test('position unwound should update the Candle Stick data', () => {
+        const futureValue = BigInt.fromI32(250);
+        const filledAmount = BigInt.fromI32(225);
+        const filledUnitPrice = unitPrice;
+        const filledAmountInFV = BigInt.fromI32(250);
+        const intervals = [900, 3600, 21600, 86400];
+
+        const event = createPositionUnwoundEvent(
+            BOB,
+            lend,
+            ccy,
+            maturity,
+            futureValue,
+            filledAmount,
+            filledUnitPrice,
+            filledAmountInFV,
+            BigInt.fromI32(0),
+            false,
+            timestamp
+        );
+        handlePositionUnwound(event);
+
+        for (let i = 0; i < intervals.length; i++) {
+            const interval = BigInt.fromI32(intervals[i]);
+            const epochTime = timestamp.div(interval);
+            const id = getCandleStickEntityId(ccy, maturity, epochTime);
+            assert.fieldEquals(
+                'CandleStick',
+                id,
+                'interval',
+                interval.toString()
+            );
+            assert.fieldEquals(
+                'CandleStick',
+                id,
+                'currency',
+                ccy.toHexString()
+            );
+            assert.fieldEquals(
+                'CandleStick',
+                id,
+                'maturity',
+                maturity.toString()
+            );
+            assert.fieldEquals(
+                'CandleStick',
+                id,
+                'open',
+                filledUnitPrice.toString()
+            );
+            assert.fieldEquals(
+                'CandleStick',
+                id,
+                'close',
+                filledUnitPrice.toString()
+            );
+            assert.fieldEquals(
+                'CandleStick',
+                id,
+                'high',
+                filledUnitPrice.toString()
+            );
+            assert.fieldEquals(
+                'CandleStick',
+                id,
+                'low',
+                filledUnitPrice.toString()
+            );
+            assert.fieldEquals(
+                'CandleStick',
+                id,
+                'volume',
+                filledAmount.toString()
+            );
+        }
+    });
+
+    test('transaction should update the 15 min candle stick volume data correctly', () => {
+        const filledAmount = BigInt.fromI32(81);
+        const filledUnitPrice = BigInt.fromI32(90);
+        const filledAmountInFV = BigInt.fromI32(90);
+        const totalAmount = filledAmount.plus(amount);
+        const interval = BigInt.fromI32(900);
+        const timestamps = [9000, 9900, 10800, 11700];
+
+        for (let i = 0; i < 4; i++) {
+            const placedOrderId = BigInt.fromI32(i + 1);
+            const event = createOrderExecutedEvent(
+                ALICE,
+                borrow,
+                ccy,
+                maturity,
+                totalAmount,
+                unitPrice,
+                filledAmount,
+                filledUnitPrice,
+                filledAmountInFV,
+                BigInt.fromI32(0),
+                placedOrderId,
+                amount,
+                unitPrice,
+                false,
+                BigInt.fromI32(timestamps[i])
+            );
+            handleOrderExecuted(event);
+        }
+
+        for (let i = 0; i < 4; i++) {
+            const timestamp = BigInt.fromI32(timestamps[i]);
+            const epochTime = timestamp.div(interval);
+            const id = getCandleStickEntityId(ccy, maturity, epochTime);
+            assert.fieldEquals(
+                'CandleStick',
+                id,
+                'interval',
+                interval.toString()
+            );
+            assert.fieldEquals(
+                'CandleStick',
+                id,
+                'currency',
+                ccy.toHexString()
+            );
+            assert.fieldEquals(
+                'CandleStick',
+                id,
+                'maturity',
+                maturity.toString()
+            );
+            assert.fieldEquals(
+                'CandleStick',
+                id,
+                'open',
+                filledUnitPrice.toString()
+            );
+            assert.fieldEquals(
+                'CandleStick',
+                id,
+                'close',
+                filledUnitPrice.toString()
+            );
+            assert.fieldEquals(
+                'CandleStick',
+                id,
+                'high',
+                filledUnitPrice.toString()
+            );
+            assert.fieldEquals(
+                'CandleStick',
+                id,
+                'low',
+                filledUnitPrice.toString()
+            );
+            assert.fieldEquals(
+                'CandleStick',
+                id,
+                'volume',
+                filledAmount.toString()
+            );
+        }
     });
 });

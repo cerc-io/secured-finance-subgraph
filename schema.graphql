@@ -143,3 +143,16 @@ type Deposit @entity {
   currency: Bytes!
   amount: BigInt!
 }
+type CandleStick @entity {
+  id: ID! # A composite ID, e.g., "currency-maturity-epochTime"
+  interval: BigInt! # interval in seconds
+  currency: Bytes!
+  maturity: BigInt!
+  timestamp: BigInt! # The start time of the interval
+  open: BigInt!
+  close: BigInt!
+  high: BigInt!
+  low: BigInt!
+  volume: BigInt!
+  lendingMarket: LendingMarket!
+}

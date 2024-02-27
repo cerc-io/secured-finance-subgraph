@@ -15,8 +15,12 @@ import {
     Liquidation,
     Transfer,
     Deposit,
+    CandleStick,
 } from '../../generated/schema';
-import { getDailyVolumeEntityId } from '../utils/id-generation';
+import {
+    getDailyVolumeEntityId,
+    getCandleStickEntityId,
+} from '../utils/id-generation';
 import { buildLendingMarketId } from '../utils/string';
 
 export const PROTOCOL_ID = 'ethereum';
@@ -255,4 +259,48 @@ export const initTransfer = (
 
     user.transferCount = user.transferCount.plus(BigInt.fromI32(1));
     user.save();
+};
+
+export const initOrUpdateCandleStick = (
+    txId: string,
+    interval: BigInt
+): void => {
+    const transaction = Transaction.load(txId);
+
+    if (!transaction || interval.isZero()) return;
+
+    const epochTime = transaction.createdAt.div(interval);
+
+    const candleStickId = getCandleStickEntityId(
+        transaction.currency,
+        transaction.maturity,
+        epochTime
+    );
+
+    let candleStick = CandleStick.load(candleStickId);
+
+    if (!candleStick) {
+        candleStick = new CandleStick(candleStickId);
+        candleStick.interval = interval;
+        candleStick.currency = transaction.currency;
+        candleStick.maturity = transaction.maturity;
+        candleStick.timestamp = epochTime.times(interval);
+        candleStick.open = transaction.orderPrice;
+        candleStick.close = transaction.orderPrice;
+        candleStick.high = transaction.orderPrice;
+        candleStick.low = transaction.orderPrice;
+        candleStick.volume = transaction.amount;
+        candleStick.lendingMarket = transaction.lendingMarket;
+    } else {
+        candleStick.close = transaction.orderPrice;
+        candleStick.high = BigInt.fromI32(
+            max(candleStick.high.toI32(), transaction.orderPrice.toI32())
+        );
+        candleStick.low = BigInt.fromI32(
+            min(candleStick.low.toI32(), transaction.orderPrice.toI32())
+        );
+        candleStick.volume = candleStick.volume.plus(transaction.amount);
+    }
+
+    candleStick.save();
 };
