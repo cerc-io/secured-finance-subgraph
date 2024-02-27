@@ -147,7 +147,7 @@ describe('Deposit & Withdraw', () => {
             'Deposit',
             ALICE.toHexString() + ':' + axlFIL.toString(),
             'amount',
-            (amount3 + amount2).toString()
+            amount3.plus(amount2).toString()
         );
     });
 
@@ -169,7 +169,7 @@ describe('Deposit & Withdraw', () => {
             'Deposit',
             ALICE.toHexString() + ':' + usdc.toString(),
             'amount',
-            (amount1 + amount2).toString()
+            amount1.plus(amount2).toString()
         );
 
         const event4 = createDepositEvent(ALICE, usdc, amount2);
@@ -179,7 +179,7 @@ describe('Deposit & Withdraw', () => {
             'Deposit',
             ALICE.toHexString() + ':' + usdc.toString(),
             'amount',
-            (amount1 + amount2 + amount2).toString()
+            amount1.plus(amount2.plus(amount2)).toString()
         );
     });
 });

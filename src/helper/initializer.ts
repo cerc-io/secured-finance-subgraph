@@ -289,7 +289,9 @@ export const initOrUpdateCandleStick = (
         candleStick.close = transaction.orderPrice;
         candleStick.high = transaction.orderPrice;
         candleStick.low = transaction.orderPrice;
+        candleStick.average = transaction.orderPrice.toBigDecimal();
         candleStick.volume = transaction.amount;
+        candleStick.volumeInFV = transaction.forwardValue;
         candleStick.lendingMarket = transaction.lendingMarket;
     } else {
         candleStick.close = transaction.orderPrice;
@@ -299,7 +301,16 @@ export const initOrUpdateCandleStick = (
         candleStick.low = BigInt.fromI32(
             min(candleStick.low.toI32(), transaction.orderPrice.toI32())
         );
+        candleStick.average = candleStick.average
+            .times(candleStick.volume.toBigDecimal())
+            .plus(
+                transaction.orderPrice.times(transaction.amount).toBigDecimal()
+            )
+            .div(candleStick.volume.plus(transaction.amount).toBigDecimal());
         candleStick.volume = candleStick.volume.plus(transaction.amount);
+        candleStick.volumeInFV = candleStick.volumeInFV.plus(
+            transaction.forwardValue
+        );
     }
 
     candleStick.save();
