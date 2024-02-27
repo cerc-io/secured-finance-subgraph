@@ -21,7 +21,8 @@ import {
     getUTCMonthYear,
 } from '../utils/id-generation';
 import { buildLendingMarketId } from '../utils/string';
-import { PROTOCOL_ID } from '../../protocol';
+
+const PROTOCOL_ID = '1';
 
 export const getProtocol = (): Protocol => {
     let protocol = Protocol.load(PROTOCOL_ID);

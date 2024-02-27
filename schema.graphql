@@ -100,7 +100,7 @@ type DailyVolume @entity {
 }
 
 type Protocol @entity {
-  id: ID! # ethereum
+  id: ID! # 1
   totalUsers: BigInt!
 }
 
