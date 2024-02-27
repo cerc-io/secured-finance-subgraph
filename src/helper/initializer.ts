@@ -17,8 +17,7 @@ import {
     Deposit,
 } from '../../generated/schema';
 import {
-    getDailyVolumeEntityId,
-    getUTCMonthYear,
+    getDailyVolumeEntityId
 } from '../utils/id-generation';
 import { buildLendingMarketId } from '../utils/string';
 
