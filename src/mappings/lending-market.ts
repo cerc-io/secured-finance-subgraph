@@ -136,17 +136,10 @@ export function handlePositionUnwound(event: PositionUnwound): void {
         ':' +
         event.transaction.hash.toHexString();
     let status: string;
-    if (
-        event.params.isCircuitBreakerTriggered ||
-        !event.params.filledAmountInFV.equals(event.params.inputFutureValue)
-    ) {
-        status = 'Killed';
-    } else if (
-        event.params.filledAmountInFV.equals(event.params.inputFutureValue)
-    ) {
+    if (event.params.filledAmountInFV.equals(event.params.inputFutureValue)) {
         status = 'Filled';
     } else {
-        return;
+        status = 'Killed';
     }
 
     initOrder(
