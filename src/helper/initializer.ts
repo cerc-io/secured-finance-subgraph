@@ -300,31 +300,33 @@ export const initOrUpdateCandleStick = (
         candleStick.currency = transaction.currency;
         candleStick.maturity = transaction.maturity;
         candleStick.timestamp = epochTime.times(interval);
-        candleStick.open = transaction.orderPrice;
-        candleStick.close = transaction.orderPrice;
-        candleStick.high = transaction.orderPrice;
-        candleStick.low = transaction.orderPrice;
-        candleStick.average = transaction.orderPrice.toBigDecimal();
+        candleStick.open = transaction.executionPrice;
+        candleStick.close = transaction.executionPrice;
+        candleStick.high = transaction.executionPrice;
+        candleStick.low = transaction.executionPrice;
+        candleStick.average = transaction.executionPrice.toBigDecimal();
         candleStick.volume = transaction.amount;
-        candleStick.volumeInFV = transaction.forwardValue;
+        candleStick.volumeInFV = transaction.futureValue;
         candleStick.lendingMarket = transaction.lendingMarket;
     } else {
-        candleStick.close = transaction.orderPrice;
+        candleStick.close = transaction.executionPrice;
         candleStick.high = BigInt.fromI32(
-            max(candleStick.high.toI32(), transaction.orderPrice.toI32())
+            max(candleStick.high.toI32(), transaction.executionPrice.toI32())
         );
         candleStick.low = BigInt.fromI32(
-            min(candleStick.low.toI32(), transaction.orderPrice.toI32())
+            min(candleStick.low.toI32(), transaction.executionPrice.toI32())
         );
         candleStick.average = candleStick.average
             .times(candleStick.volume.toBigDecimal())
             .plus(
-                transaction.orderPrice.times(transaction.amount).toBigDecimal()
+                transaction.executionPrice
+                    .times(transaction.amount)
+                    .toBigDecimal()
             )
             .div(candleStick.volume.plus(transaction.amount).toBigDecimal());
         candleStick.volume = candleStick.volume.plus(transaction.amount);
         candleStick.volumeInFV = candleStick.volumeInFV.plus(
-            transaction.forwardValue
+            transaction.futureValue
         );
     }
 
