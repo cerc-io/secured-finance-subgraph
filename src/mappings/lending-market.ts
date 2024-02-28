@@ -20,7 +20,7 @@ import { getOrderEntityId } from '../utils/id-generation';
 const intervals = [900, 3600, 21600, 86400]; // [15min, 1h, 6h, 1d]
 
 export function handleOrderExecuted(event: OrderExecuted): void {
-    let id = getOrderEntityId(
+    let orderId = getOrderEntityId(
         event.params.placedOrderId,
         event.params.ccy,
         event.params.maturity
@@ -33,28 +33,29 @@ export function handleOrderExecuted(event: OrderExecuted): void {
         type = 'Limit';
     }
 
-    if (!event.params.placedAmount.isZero()) {
-        if (!event.params.filledAmount.isZero()) {
-            status = 'PartiallyFilled';
-        } else {
-            status = 'Open';
-        }
-    } else if (event.params.isCircuitBreakerTriggered) {
-        id = id + ':' + event.transaction.hash.toHexString();
-        if (event.params.filledAmount.isZero()) {
-            status = 'Blocked';
-        } else {
-            status = 'PartiallyBlocked';
-        }
-    } else if (!event.params.filledAmount.isZero()) {
-        id = id + ':' + event.transaction.hash.toHexString();
+    if (event.params.filledAmount.equals(event.params.inputAmount)) {
         status = 'Filled';
+    } else if (
+        event.params.inputAmount.equals(
+            event.params.filledAmount.plus(event.params.placedAmount)
+        )
+    ) {
+        if (event.params.filledAmount.isZero()) {
+            status = 'Open';
+        } else {
+            status = 'PartiallyFilled';
+        }
     } else {
-        return;
+        // set status to Killed for circuit breaker and partially filled Market orders
+        status = 'Killed';
+    }
+
+    if (event.params.placedOrderId.isZero()) {
+        orderId = orderId + ':' + event.transaction.hash.toHexString();
     }
 
     initOrder(
-        id,
+        orderId,
         event.params.placedOrderId,
         event.params.user,
         event.params.ccy,
@@ -66,22 +67,20 @@ export function handleOrderExecuted(event: OrderExecuted): void {
         status,
         false,
         type,
+        event.params.isCircuitBreakerTriggered,
         event.block.timestamp,
         event.block.number,
         event.transaction.hash
     );
 
-    if (
-        status === 'PartiallyFilled' ||
-        status === 'Filled' ||
-        status === 'PartiallyBlocked'
-    ) {
+    if (!event.params.filledAmount.isZero()) {
         const txId =
             event.transaction.hash.toHexString() +
             ':' +
             event.logIndex.toString();
         initTransaction(
             txId,
+            orderId,
             event.params.filledUnitPrice,
             event.params.user,
             event.params.ccy,
@@ -90,7 +89,7 @@ export function handleOrderExecuted(event: OrderExecuted): void {
             event.params.filledAmount,
             event.params.filledAmountInFV,
             event.params.feeInFV,
-            'Sync',
+            'Taker',
             event.block.timestamp,
             event.block.number,
             event.transaction.hash
@@ -127,6 +126,7 @@ export function handlePreOrderExecuted(event: PreOrderExecuted): void {
         'Open',
         true,
         'Limit',
+        false,
         event.block.timestamp,
         event.block.number,
         event.transaction.hash
@@ -134,35 +134,47 @@ export function handlePreOrderExecuted(event: PreOrderExecuted): void {
 }
 
 export function handlePositionUnwound(event: PositionUnwound): void {
-    const orderId = BigInt.fromI32(0);
-    const id =
-        getOrderEntityId(orderId, event.params.ccy, event.params.maturity) +
+    const orderId =
+        getOrderEntityId(
+            BigInt.fromI32(0),
+            event.params.ccy,
+            event.params.maturity
+        ) +
         ':' +
         event.transaction.hash.toHexString();
+    let status: string;
+    if (event.params.filledAmountInFV.equals(event.params.inputFutureValue)) {
+        status = 'Filled';
+    } else {
+        status = 'Killed';
+    }
+
+    initOrder(
+        orderId,
+        BigInt.fromI32(0),
+        event.params.user,
+        event.params.ccy,
+        event.params.side,
+        event.params.maturity,
+        BigInt.fromI32(0),
+        event.params.inputFutureValue,
+        event.params.filledAmountInFV,
+        status,
+        false,
+        'Unwind',
+        event.params.isCircuitBreakerTriggered,
+        event.block.timestamp,
+        event.block.number,
+        event.transaction.hash
+    );
     if (!event.params.filledAmount.isZero()) {
-        initOrder(
-            id,
-            orderId,
-            event.params.user,
-            event.params.ccy,
-            event.params.side,
-            event.params.maturity,
-            BigInt.fromI32(0),
-            event.params.filledAmount,
-            event.params.filledAmount,
-            'Filled',
-            false,
-            'Market',
-            event.block.timestamp,
-            event.block.number,
-            event.transaction.hash
-        );
         const txId =
             event.transaction.hash.toHexString() +
             ':' +
             event.logIndex.toString();
         initTransaction(
             txId,
+            orderId,
             event.params.filledUnitPrice,
             event.params.user,
             event.params.ccy,
@@ -171,7 +183,7 @@ export function handlePositionUnwound(event: PositionUnwound): void {
             event.params.filledAmount,
             event.params.filledAmountInFV,
             event.params.feeInFV,
-            'Sync',
+            'Taker',
             event.block.timestamp,
             event.block.number,
             event.transaction.hash
@@ -185,24 +197,6 @@ export function handlePositionUnwound(event: PositionUnwound): void {
         for (let i = 0; i < intervals.length; i++) {
             initOrUpdateCandleStick(txId, BigInt.fromI32(intervals[i]));
         }
-    } else if (event.params.isCircuitBreakerTriggered) {
-        initOrder(
-            id,
-            orderId,
-            event.params.user,
-            event.params.ccy,
-            event.params.side,
-            event.params.maturity,
-            BigInt.fromI32(0),
-            BigInt.fromI32(0),
-            BigInt.fromI32(0),
-            'Blocked',
-            false,
-            'Market',
-            event.block.timestamp,
-            event.block.number,
-            event.transaction.hash
-        );
     }
 }
 
@@ -222,12 +216,12 @@ export function handleOrderCanceled(event: OrderCanceled): void {
 
 export function handleOrdersCleaned(event: OrdersCleaned): void {
     for (let i = 0; i < event.params.orderIds.length; i++) {
-        const id = getOrderEntityId(
+        const orderId = getOrderEntityId(
             event.params.orderIds[i],
             event.params.ccy,
             event.params.maturity
         );
-        const order = Order.load(id);
+        const order = Order.load(orderId);
 
         if (order) {
             const txId =
@@ -253,8 +247,9 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
             }
             initTransaction(
                 txId,
+                orderId,
                 unitPrice,
-                Address.fromString(order.maker),
+                Address.fromString(order.user),
                 order.currency,
                 order.maturity,
                 order.side,
@@ -264,7 +259,7 @@ export function handleOrdersCleaned(event: OrdersCleaned): void {
                     unitPrice
                 ),
                 BigInt.fromI32(0),
-                'Lazy',
+                'Maker',
                 event.block.timestamp,
                 event.block.number,
                 event.transaction.hash
