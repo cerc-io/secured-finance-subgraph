@@ -111,7 +111,7 @@ export const getOrInitDailyVolume = (
 export const initOrder = (
     id: string,
     orderId: BigInt,
-    maker: Address,
+    userAddress: Address,
     currency: Bytes,
     side: i32,
     maturity: BigInt,
@@ -121,15 +121,16 @@ export const initOrder = (
     status: string,
     isPreOrder: boolean,
     type: string,
+    isCircuitBreakerTriggered: boolean,
     timestamp: BigInt,
     blockNumber: BigInt,
     txHash: Bytes
 ): void => {
     const order = new Order(id);
-    const user = getOrInitUser(maker, timestamp);
+    const user = getOrInitUser(userAddress, timestamp);
 
     order.orderId = orderId;
-    order.maker = user.id;
+    order.user = user.id;
     order.currency = currency;
     order.side = side;
     order.maturity = maturity;
@@ -141,6 +142,7 @@ export const initOrder = (
     order.lendingMarket = getOrInitLendingMarket(currency, maturity).id;
     order.isPreOrder = isPreOrder;
     order.type = type;
+    order.isCircuitBreakerTriggered = isCircuitBreakerTriggered;
     order.createdAt = timestamp;
     order.blockNumber = blockNumber;
     order.txHash = txHash;
@@ -148,12 +150,15 @@ export const initOrder = (
 
     user.orderCount = user.orderCount.plus(BigInt.fromI32(1));
     user.save();
+
+    log.debug('Order created with: {}', [id]);
 };
 
 export const initTransaction = (
     txId: string,
-    unitPrice: BigInt,
-    taker: Address,
+    orderId: string,
+    filledPrice: BigInt,
+    userAddress: Address,
     currency: Bytes,
     maturity: BigInt,
     side: i32,
@@ -167,16 +172,19 @@ export const initTransaction = (
 ): void => {
     if (filledAmount.isZero()) return;
 
-    const transaction = new Transaction(txId);
-    const user = getOrInitUser(taker, timestamp);
+    const order = Order.load(orderId);
+    if (!order) return;
 
-    transaction.orderPrice = unitPrice;
-    transaction.taker = user.id;
+    const transaction = new Transaction(txId);
+    const user = getOrInitUser(userAddress, timestamp);
+
+    transaction.executionPrice = filledPrice;
+    transaction.user = user.id;
     transaction.currency = currency;
     transaction.maturity = maturity;
     transaction.side = side;
     transaction.executionType = executionType;
-    transaction.forwardValue = filledAmountInFV;
+    transaction.futureValue = filledAmountInFV;
     transaction.amount = filledAmount;
     transaction.feeInFV = feeInFV;
     transaction.averagePrice = !filledAmountInFV.isZero()
@@ -186,6 +194,7 @@ export const initTransaction = (
     transaction.createdAt = timestamp;
     transaction.blockNumber = blockNumber;
     transaction.txHash = txHash;
+    transaction.order = order.id;
     transaction.save();
 
     user.transactionCount = user.transactionCount.plus(BigInt.fromI32(1));
