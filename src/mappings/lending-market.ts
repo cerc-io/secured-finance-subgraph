@@ -30,22 +30,17 @@ export function handleOrderExecuted(event: OrderExecuted): void {
         type = 'Limit';
     }
 
-    if (event.params.isCircuitBreakerTriggered) {
-        status = 'Killed';
-    } else if (type === 'Limit') {
+    if (event.params.filledAmount.equals(event.params.inputAmount)) {
+        status = 'Filled';
+    } else if (type === 'Limit' && !event.params.isCircuitBreakerTriggered) {
         if (event.params.filledAmount.isZero()) {
             status = 'Open';
-        } else if (event.params.filledAmount.equals(event.params.inputAmount)) {
-            status = 'Filled';
         } else {
             status = 'PartiallyFilled';
         }
     } else {
-        if (event.params.filledAmount.equals(event.params.inputAmount)) {
-            status = 'Filled';
-        } else {
-            status = 'Killed';
-        }
+        // set status to Killed for circuit breaker and partially filled Market orders
+        status = 'Killed';
     }
 
     if (event.params.placedOrderId.isZero()) {
