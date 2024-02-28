@@ -32,7 +32,11 @@ export function handleOrderExecuted(event: OrderExecuted): void {
 
     if (event.params.filledAmount.equals(event.params.inputAmount)) {
         status = 'Filled';
-    } else if (type === 'Limit' && !event.params.isCircuitBreakerTriggered) {
+    } else if (
+        event.params.inputAmount.equals(
+            event.params.filledAmount.plus(event.params.placedAmount)
+        )
+    ) {
         if (event.params.filledAmount.isZero()) {
             status = 'Open';
         } else {
