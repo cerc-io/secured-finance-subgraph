@@ -21,7 +21,5 @@ export function getTransactionCandleStickEntityId(
     maturity: BigInt,
     epochTime: BigInt
 ): string {
-    return (
-        ccy.toString() + '-' + maturity.toString() + '-' + epochTime.toString()
-    );
+    return `${ccy.toString()}-${maturity.toString()}-${epochTime.toString()}`;
 }
