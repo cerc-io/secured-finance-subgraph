@@ -11,7 +11,7 @@ import { ItayoseExecuted } from '../../generated/templates/OrderBookLogic/OrderB
 import {
     getOrInitDailyVolume,
     getOrInitLendingMarket,
-    initOrUpdateTransactionCtransactionCandleStick,
+    initOrUpdateTransactionCandleStick,
     initOrder,
     initTransaction,
 } from '../helper/initializer';
@@ -102,7 +102,7 @@ export function handleOrderExecuted(event: OrderExecuted): void {
         addToTransactionVolume(event.params.filledAmount, dailyVolume);
 
         for (let i = 0; i < intervals.length; i++) {
-            initOrUpdateTransactionCtransactionCandleStick(
+            initOrUpdateTransactionCandleStick(
                 txId,
                 BigInt.fromI32(intervals[i])
             );
@@ -198,7 +198,7 @@ export function handlePositionUnwound(event: PositionUnwound): void {
         );
         addToTransactionVolume(event.params.filledAmount, dailyVolume);
         for (let i = 0; i < intervals.length; i++) {
-            initOrUpdateTransactionCtransactionCandleStick(
+            initOrUpdateTransactionCandleStick(
                 txId,
                 BigInt.fromI32(intervals[i])
             );

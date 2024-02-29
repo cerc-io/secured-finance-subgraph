@@ -13,13 +13,13 @@ import {
     Order,
     Protocol,
     Transaction,
-    TransactionCtransactionCandleStick,
+    TransactionCandleStick,
     Transfer,
     User,
 } from '../../generated/schema';
 import {
     getDailyVolumeEntityId,
-    getTransactionCtransactionCandleStickEntityId,
+    getTransactionCandleStickEntityId,
 } from '../utils/id-generation';
 import { buildLendingMarketId } from '../utils/string';
 
@@ -276,7 +276,7 @@ export const initTransfer = (
     user.save();
 };
 
-export const initOrUpdateTransactionCtransactionCandleStick = (
+export const initOrUpdateTransactionCandleStick = (
     txId: string,
     interval: BigInt
 ): void => {
@@ -286,66 +286,65 @@ export const initOrUpdateTransactionCtransactionCandleStick = (
 
     const epochTime = transaction.createdAt.div(interval);
 
-    const ctransactionCandleStickId =
-        getTransactionCtransactionCandleStickEntityId(
-            transaction.currency,
-            transaction.maturity,
-            epochTime
-        );
-
-    let ctransactionCandleStick = TransactionCtransactionCandleStick.load(
-        ctransactionCandleStickId
+    const transactionCandleStickId = getTransactionCandleStickEntityId(
+        transaction.currency,
+        transaction.maturity,
+        epochTime
     );
 
-    if (!ctransactionCandleStick) {
-        ctransactionCandleStick = new TransactionCtransactionCandleStick(
-            ctransactionCandleStickId
+    let transactionCandleStick = TransactionCandleStick.load(
+        transactionCandleStickId
+    );
+
+    if (!transactionCandleStick) {
+        transactionCandleStick = new TransactionCandleStick(
+            transactionCandleStickId
         );
-        ctransactionCandleStick.interval = interval;
-        ctransactionCandleStick.currency = transaction.currency;
-        ctransactionCandleStick.maturity = transaction.maturity;
-        ctransactionCandleStick.timestamp = epochTime.times(interval);
-        ctransactionCandleStick.open = transaction.executionPrice;
-        ctransactionCandleStick.close = transaction.executionPrice;
-        ctransactionCandleStick.high = transaction.executionPrice;
-        ctransactionCandleStick.low = transaction.executionPrice;
-        ctransactionCandleStick.average =
+        transactionCandleStick.interval = interval;
+        transactionCandleStick.currency = transaction.currency;
+        transactionCandleStick.maturity = transaction.maturity;
+        transactionCandleStick.timestamp = epochTime.times(interval);
+        transactionCandleStick.open = transaction.executionPrice;
+        transactionCandleStick.close = transaction.executionPrice;
+        transactionCandleStick.high = transaction.executionPrice;
+        transactionCandleStick.low = transaction.executionPrice;
+        transactionCandleStick.average =
             transaction.executionPrice.toBigDecimal();
-        ctransactionCandleStick.volume = transaction.amount;
-        ctransactionCandleStick.volumeInFV = transaction.futureValue;
-        ctransactionCandleStick.lendingMarket = transaction.lendingMarket;
+        transactionCandleStick.volume = transaction.amount;
+        transactionCandleStick.volumeInFV = transaction.futureValue;
+        transactionCandleStick.lendingMarket = transaction.lendingMarket;
     } else {
-        ctransactionCandleStick.close = transaction.executionPrice;
-        ctransactionCandleStick.high = BigInt.fromI32(
+        transactionCandleStick.close = transaction.executionPrice;
+        transactionCandleStick.high = BigInt.fromI32(
             max(
-                ctransactionCandleStick.high.toI32(),
+                transactionCandleStick.high.toI32(),
                 transaction.executionPrice.toI32()
             )
         );
-        ctransactionCandleStick.low = BigInt.fromI32(
+        transactionCandleStick.low = BigInt.fromI32(
             min(
-                ctransactionCandleStick.low.toI32(),
+                transactionCandleStick.low.toI32(),
                 transaction.executionPrice.toI32()
             )
         );
-        ctransactionCandleStick.average = ctransactionCandleStick.average
-            .times(ctransactionCandleStick.volume.toBigDecimal())
+        transactionCandleStick.average = transactionCandleStick.average
+            .times(transactionCandleStick.volume.toBigDecimal())
             .plus(
                 transaction.executionPrice
                     .times(transaction.amount)
                     .toBigDecimal()
             )
             .div(
-                ctransactionCandleStick.volume
+                transactionCandleStick.volume
                     .plus(transaction.amount)
                     .toBigDecimal()
             );
-        ctransactionCandleStick.volume = ctransactionCandleStick.volume.plus(
+        transactionCandleStick.volume = transactionCandleStick.volume.plus(
             transaction.amount
         );
-        ctransactionCandleStick.volumeInFV =
-            ctransactionCandleStick.volumeInFV.plus(transaction.futureValue);
+        transactionCandleStick.volumeInFV =
+            transactionCandleStick.volumeInFV.plus(transaction.futureValue);
     }
 
-    ctransactionCandleStick.save();
+    transactionCandleStick.save();
 };

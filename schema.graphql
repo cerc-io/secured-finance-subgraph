@@ -141,7 +141,7 @@ type Deposit @entity {
   amount: BigInt!
 }
 
-type TransactionCtransactionCandleStick @entity {
+type TransactionCandleStick @entity {
   id: ID! # A composite ID, e.g., "currency-maturity-epochTime"
   interval: BigInt! # interval in seconds
   currency: Bytes!

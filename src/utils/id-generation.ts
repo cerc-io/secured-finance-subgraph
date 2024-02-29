@@ -16,7 +16,7 @@ export function getOrderEntityId(
     return `${orderId.toHexString()}-${ccy.toString()}-${maturity.toString()}`;
 }
 
-export function getTransactionCtransactionCandleStickEntityId(
+export function getTransactionCandleStickEntityId(
     ccy: Bytes,
     maturity: BigInt,
     epochTime: BigInt
