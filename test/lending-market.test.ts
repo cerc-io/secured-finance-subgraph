@@ -6,6 +6,7 @@ import {
     describe,
     test,
 } from 'matchstick-as/assembly/index';
+import { getOrInitUser, getProtocol } from '../src/helper/initializer';
 import { handleOrderPartiallyFilled } from '../src/mappings/fund-management';
 import {
     handleItayoseExecuted,
@@ -18,10 +19,9 @@ import {
 import {
     getDailyVolumeEntityId,
     getOrderEntityId,
-    getCandleStickEntityId,
+    getTransactionCtransactionCandleStickEntityId,
 } from '../src/utils/id-generation';
 import { toBytes32 } from '../src/utils/string';
-import { getOrInitUser, getProtocol } from '../src/helper/initializer';
 import {
     createItayoseExecutedEvent,
     createOrderCanceledEvent,
@@ -1862,7 +1862,7 @@ describe('Daily Volume', () => {
     });
 });
 
-describe('Candle Stick', () => {
+describe('Transaction Candle Stick', () => {
     beforeEach(() => {
         clearStore();
         createLendingMarket(ccy, maturity);
@@ -1899,51 +1899,55 @@ describe('Candle Stick', () => {
             const interval = BigInt.fromI32(intervals[i]);
 
             const epochTime = timestamp.div(interval);
-            const id = getCandleStickEntityId(ccy, maturity, epochTime);
+            const id = getTransactionCtransactionCandleStickEntityId(
+                ccy,
+                maturity,
+                epochTime
+            );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'interval',
                 interval.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'currency',
                 ccy.toHexString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'maturity',
                 maturity.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'open',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'close',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'high',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'low',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'volume',
                 filledAmount.toString()
@@ -1983,45 +1987,49 @@ describe('Candle Stick', () => {
             const interval = BigInt.fromI32(intervals[i]);
 
             const epochTime = timestamp.div(interval);
-            const id = getCandleStickEntityId(ccy, maturity, epochTime);
+            const id = getTransactionCtransactionCandleStickEntityId(
+                ccy,
+                maturity,
+                epochTime
+            );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'open',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'close',
                 filledUnitPrice2.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'high',
                 filledUnitPrice2.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'low',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'average',
                 average.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'volume',
                 filledAmount.plus(filledAmount2).toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'volumeInFV',
                 filledAmountInFV.plus(filledAmountInFV2).toString()
@@ -2054,63 +2062,67 @@ describe('Candle Stick', () => {
         for (let i = 0; i < intervals.length; i++) {
             const interval = BigInt.fromI32(intervals[i]);
             const epochTime = timestamp.div(interval);
-            const id = getCandleStickEntityId(ccy, maturity, epochTime);
+            const id = getTransactionCtransactionCandleStickEntityId(
+                ccy,
+                maturity,
+                epochTime
+            );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'interval',
                 interval.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'currency',
                 ccy.toHexString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'maturity',
                 maturity.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'open',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'close',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'high',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'low',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'average',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'volume',
                 filledAmount.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'volumeInFV',
                 filledAmountInFV.toString()
@@ -2153,69 +2165,73 @@ describe('Candle Stick', () => {
             const timestamp = BigInt.fromI32(timestamps[i]);
             const epochTime = timestamp.div(interval);
             const startTime = epochTime.times(interval);
-            const id = getCandleStickEntityId(ccy, maturity, epochTime);
+            const id = getTransactionCtransactionCandleStickEntityId(
+                ccy,
+                maturity,
+                epochTime
+            );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'interval',
                 interval.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'currency',
                 ccy.toHexString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'maturity',
                 maturity.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'timestamp',
                 startTime.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'open',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'close',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'high',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'low',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'average',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'volume',
                 filledAmount.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'volumeInFV',
                 filledAmountInFV.toString()
@@ -2228,69 +2244,73 @@ describe('Candle Stick', () => {
             const timestamp = BigInt.fromI32(timestamps[i]);
             const epochTime = timestamp.div(interval);
             const startTime = epochTime.times(interval);
-            const id = getCandleStickEntityId(ccy, maturity, epochTime);
+            const id = getTransactionCtransactionCandleStickEntityId(
+                ccy,
+                maturity,
+                epochTime
+            );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'interval',
                 interval.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'currency',
                 ccy.toHexString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'maturity',
                 maturity.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'timestamp',
                 startTime.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'open',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'close',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'high',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'low',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'average',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'volume',
                 filledAmount.times(BigInt.fromI32(2)).toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'volumeInFV',
                 filledAmountInFV.times(BigInt.fromI32(2)).toString()
@@ -2303,57 +2323,61 @@ describe('Candle Stick', () => {
             const timestamp = BigInt.fromI32(timestamps[i]);
             const epochTime = timestamp.div(interval);
             const startTime = epochTime.times(interval);
-            const id = getCandleStickEntityId(ccy, maturity, epochTime);
+            const id = getTransactionCtransactionCandleStickEntityId(
+                ccy,
+                maturity,
+                epochTime
+            );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'interval',
                 interval.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'currency',
                 ccy.toHexString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'maturity',
                 maturity.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'timestamp',
                 startTime.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'open',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'close',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'high',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'low',
                 filledUnitPrice.toString()
             );
             assert.fieldEquals(
-                'CandleStick',
+                'TransactionCtransactionCandleStick',
                 id,
                 'average',
                 filledUnitPrice.toString()
