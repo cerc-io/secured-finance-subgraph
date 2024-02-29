@@ -1,5 +1,5 @@
-import { Address, BigInt, log } from '@graphprotocol/graph-ts';
-import { DailyVolume, Order, Transaction } from '../../generated/schema';
+import { Address, BigInt } from '@graphprotocol/graph-ts';
+import { DailyVolume, Order } from '../../generated/schema';
 import {
     OrderCanceled,
     OrderExecuted,
@@ -11,10 +11,13 @@ import { ItayoseExecuted } from '../../generated/templates/OrderBookLogic/OrderB
 import {
     getOrInitDailyVolume,
     getOrInitLendingMarket,
+    initOrUpdateTransactionCandleStick,
     initOrder,
     initTransaction,
 } from '../helper/initializer';
 import { getOrderEntityId } from '../utils/id-generation';
+
+const intervals = [900, 3600, 21600, 86400]; // [15min, 1h, 6h, 1d]
 
 export function handleOrderExecuted(event: OrderExecuted): void {
     let orderId = getOrderEntityId(
@@ -97,6 +100,13 @@ export function handleOrderExecuted(event: OrderExecuted): void {
             event.block.timestamp
         );
         addToTransactionVolume(event.params.filledAmount, dailyVolume);
+
+        for (let i = 0; i < intervals.length; i++) {
+            initOrUpdateTransactionCandleStick(
+                txId,
+                BigInt.fromI32(intervals[i])
+            );
+        }
     }
 }
 
@@ -187,6 +197,12 @@ export function handlePositionUnwound(event: PositionUnwound): void {
             event.block.timestamp
         );
         addToTransactionVolume(event.params.filledAmount, dailyVolume);
+        for (let i = 0; i < intervals.length; i++) {
+            initOrUpdateTransactionCandleStick(
+                txId,
+                BigInt.fromI32(intervals[i])
+            );
+        }
     }
 }
 

@@ -15,3 +15,11 @@ export function getOrderEntityId(
 ): string {
     return `${orderId.toHexString()}-${ccy.toString()}-${maturity.toString()}`;
 }
+
+export function getTransactionCandleStickEntityId(
+    ccy: Bytes,
+    maturity: BigInt,
+    epochTime: BigInt
+): string {
+    return `${ccy.toString()}-${maturity.toString()}-${epochTime.toString()}`;
+}

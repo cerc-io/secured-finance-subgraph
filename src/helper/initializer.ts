@@ -7,16 +7,20 @@ import {
 } from '@graphprotocol/graph-ts';
 import {
     DailyVolume,
+    Deposit,
     LendingMarket,
+    Liquidation,
     Order,
     Protocol,
     Transaction,
-    User,
-    Liquidation,
+    TransactionCandleStick,
     Transfer,
-    Deposit,
+    User,
 } from '../../generated/schema';
-import { getDailyVolumeEntityId } from '../utils/id-generation';
+import {
+    getDailyVolumeEntityId,
+    getTransactionCandleStickEntityId,
+} from '../utils/id-generation';
 import { buildLendingMarketId } from '../utils/string';
 
 const PROTOCOL_ID = '1';
@@ -270,4 +274,77 @@ export const initTransfer = (
 
     user.transferCount = user.transferCount.plus(BigInt.fromI32(1));
     user.save();
+};
+
+export const initOrUpdateTransactionCandleStick = (
+    txId: string,
+    interval: BigInt
+): void => {
+    const transaction = Transaction.load(txId);
+
+    if (!transaction || interval.isZero()) return;
+
+    const epochTime = transaction.createdAt.div(interval);
+
+    const transactionCandleStickId = getTransactionCandleStickEntityId(
+        transaction.currency,
+        transaction.maturity,
+        epochTime
+    );
+
+    let transactionCandleStick = TransactionCandleStick.load(
+        transactionCandleStickId
+    );
+
+    if (!transactionCandleStick) {
+        transactionCandleStick = new TransactionCandleStick(
+            transactionCandleStickId
+        );
+        transactionCandleStick.interval = interval;
+        transactionCandleStick.currency = transaction.currency;
+        transactionCandleStick.maturity = transaction.maturity;
+        transactionCandleStick.timestamp = epochTime.times(interval);
+        transactionCandleStick.open = transaction.executionPrice;
+        transactionCandleStick.close = transaction.executionPrice;
+        transactionCandleStick.high = transaction.executionPrice;
+        transactionCandleStick.low = transaction.executionPrice;
+        transactionCandleStick.average =
+            transaction.executionPrice.toBigDecimal();
+        transactionCandleStick.volume = transaction.amount;
+        transactionCandleStick.volumeInFV = transaction.futureValue;
+        transactionCandleStick.lendingMarket = transaction.lendingMarket;
+    } else {
+        transactionCandleStick.close = transaction.executionPrice;
+        transactionCandleStick.high = BigInt.fromI32(
+            max(
+                transactionCandleStick.high.toI32(),
+                transaction.executionPrice.toI32()
+            )
+        );
+        transactionCandleStick.low = BigInt.fromI32(
+            min(
+                transactionCandleStick.low.toI32(),
+                transaction.executionPrice.toI32()
+            )
+        );
+        transactionCandleStick.average = transactionCandleStick.average
+            .times(transactionCandleStick.volume.toBigDecimal())
+            .plus(
+                transaction.executionPrice
+                    .times(transaction.amount)
+                    .toBigDecimal()
+            )
+            .div(
+                transactionCandleStick.volume
+                    .plus(transaction.amount)
+                    .toBigDecimal()
+            );
+        transactionCandleStick.volume = transactionCandleStick.volume.plus(
+            transaction.amount
+        );
+        transactionCandleStick.volumeInFV =
+            transactionCandleStick.volumeInFV.plus(transaction.futureValue);
+    }
+
+    transactionCandleStick.save();
 };
