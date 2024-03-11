@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Address, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import { newMockEvent } from 'matchstick-as/assembly/index';
-import { LiquidationExecuted } from '../../generated/templates/LiquidationLogic/LiquidationLogic';
+import { LiquidationExecuted } from '../../generated/LiquidationLogic/LendingMarketController';
 
 export function createLiquidationExecutedEvent(
     user: Address,

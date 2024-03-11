@@ -1,5 +1,5 @@
 import { Address, BigInt, log } from '@graphprotocol/graph-ts';
-import { LiquidationExecuted } from '../../generated/templates/LiquidationLogic/LiquidationLogic';
+import { LiquidationExecuted } from '../../generated/LiquidationLogic/LendingMarketController';
 import { initLiquidation } from '../helper/initializer';
 
 export function handleLiquidationExecuted(event: LiquidationExecuted): void {
