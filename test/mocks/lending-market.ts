@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Address, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import { newMockEvent } from 'matchstick-as/assembly/index';
-import { OrderPartiallyFilled } from '../../generated/FundManagementLogic/FundManagementLogic';
+import { OrderPartiallyFilled } from '../../generated/templates/FundManagementLogic/FundManagementLogic';
 import {
     OrderCanceled,
     OrderExecuted,
