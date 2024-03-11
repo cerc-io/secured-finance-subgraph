@@ -1,5 +1,5 @@
 import { BigInt } from '@graphprotocol/graph-ts';
-import { OrderPartiallyFilled } from '../../generated/FundManagementLogic/FundManagementLogic';
+import { OrderPartiallyFilled } from '../../generated/templates/FundManagementLogic/FundManagementLogic';
 import { Order } from '../../generated/schema';
 import { initTransaction } from '../helper/initializer';
 import { getOrderEntityId } from '../utils/id-generation';
