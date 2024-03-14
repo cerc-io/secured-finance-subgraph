@@ -23,7 +23,7 @@ This subgraph tracks of the current state of Secured Finance Protocol smart cont
 | Transfer       | This entity contains user's deposit and withdraw history.                                             |
 | Liquidation    | This entity contains liquidation information.                                                         |
 | User           | This entity contains user's details like address, transactions, orders, liquidations and transfer history. |
-| TransactionCandleStick           | This entity contains transaction's details like open price, close price, high price, loq price and volume for different time frames. |
+| TransactionCandleStick           | This entity contains transaction's details like open price, close price, high price, low price and volume for different time frames. |
 
 ## Quick start
 
