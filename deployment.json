@@ -2,17 +2,17 @@
   "development": {
     "isMajorUpdate": false,
     "isMinorUpdate": false,
-    "version": "0.0.59"
+    "version": "0.0.60"
   },
   "development-arb": {
     "isMajorUpdate": false,
     "isMinorUpdate": false,
-    "version": "0.0.4"
+    "version": "0.0.5"
   },
   "development-ava": {
     "isMajorUpdate": false,
     "isMinorUpdate": false,
-    "version": "0.0.4"
+    "version": "0.0.5"
   },
   "staging": {
     "isMajorUpdate": false,
