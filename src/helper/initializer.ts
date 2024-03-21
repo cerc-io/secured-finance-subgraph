@@ -277,18 +277,19 @@ export const initTransfer = (
 };
 
 export const initOrUpdateTransactionCandleStick = (
-    txId: string,
+    currency: Bytes,
+    maturity: BigInt,
+    amount: BigInt,
+    futureValue: BigInt,
+    executionPrice: BigInt,
+    timestamp: BigInt,
     interval: BigInt
 ): void => {
-    const transaction = Transaction.load(txId);
-
-    if (!transaction || interval.isZero()) return;
-
-    const epochTime = transaction.createdAt.div(interval);
+    const epochTime = timestamp.div(interval);
 
     const transactionCandleStickId = getTransactionCandleStickEntityId(
-        transaction.currency,
-        transaction.maturity,
+        currency,
+        maturity,
         interval,
         epochTime
     );
@@ -302,49 +303,36 @@ export const initOrUpdateTransactionCandleStick = (
             transactionCandleStickId
         );
         transactionCandleStick.interval = interval;
-        transactionCandleStick.currency = transaction.currency;
-        transactionCandleStick.maturity = transaction.maturity;
+        transactionCandleStick.currency = currency;
+        transactionCandleStick.maturity = maturity;
         transactionCandleStick.timestamp = epochTime.times(interval);
-        transactionCandleStick.open = transaction.executionPrice;
-        transactionCandleStick.close = transaction.executionPrice;
-        transactionCandleStick.high = transaction.executionPrice;
-        transactionCandleStick.low = transaction.executionPrice;
-        transactionCandleStick.average =
-            transaction.executionPrice.toBigDecimal();
-        transactionCandleStick.volume = transaction.amount;
-        transactionCandleStick.volumeInFV = transaction.futureValue;
-        transactionCandleStick.lendingMarket = transaction.lendingMarket;
+        transactionCandleStick.open = executionPrice;
+        transactionCandleStick.close = executionPrice;
+        transactionCandleStick.high = executionPrice;
+        transactionCandleStick.low = executionPrice;
+        transactionCandleStick.average = executionPrice.toBigDecimal();
+        transactionCandleStick.volume = amount;
+        transactionCandleStick.volumeInFV = futureValue;
+        transactionCandleStick.lendingMarket = getOrInitLendingMarket(
+            currency,
+            maturity
+        ).id;
     } else {
-        transactionCandleStick.close = transaction.executionPrice;
+        transactionCandleStick.close = executionPrice;
         transactionCandleStick.high = BigInt.fromI32(
-            max(
-                transactionCandleStick.high.toI32(),
-                transaction.executionPrice.toI32()
-            )
+            max(transactionCandleStick.high.toI32(), executionPrice.toI32())
         );
         transactionCandleStick.low = BigInt.fromI32(
-            min(
-                transactionCandleStick.low.toI32(),
-                transaction.executionPrice.toI32()
-            )
+            min(transactionCandleStick.low.toI32(), executionPrice.toI32())
         );
         transactionCandleStick.average = transactionCandleStick.average
             .times(transactionCandleStick.volume.toBigDecimal())
-            .plus(
-                transaction.executionPrice
-                    .times(transaction.amount)
-                    .toBigDecimal()
-            )
-            .div(
-                transactionCandleStick.volume
-                    .plus(transaction.amount)
-                    .toBigDecimal()
-            );
-        transactionCandleStick.volume = transactionCandleStick.volume.plus(
-            transaction.amount
-        );
+            .plus(executionPrice.times(amount).toBigDecimal())
+            .div(transactionCandleStick.volume.plus(amount).toBigDecimal());
+        transactionCandleStick.volume =
+            transactionCandleStick.volume.plus(amount);
         transactionCandleStick.volumeInFV =
-            transactionCandleStick.volumeInFV.plus(transaction.futureValue);
+            transactionCandleStick.volumeInFV.plus(futureValue);
     }
 
     transactionCandleStick.save();
