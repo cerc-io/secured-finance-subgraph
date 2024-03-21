@@ -289,6 +289,7 @@ export const initOrUpdateTransactionCandleStick = (
     const transactionCandleStickId = getTransactionCandleStickEntityId(
         transaction.currency,
         transaction.maturity,
+        interval,
         epochTime
     );
 

@@ -19,7 +19,8 @@ export function getOrderEntityId(
 export function getTransactionCandleStickEntityId(
     ccy: Bytes,
     maturity: BigInt,
+    interval: BigInt,
     epochTime: BigInt
 ): string {
-    return `${ccy.toString()}-${maturity.toString()}-${epochTime.toString()}`;
+    return `${ccy.toString()}-${maturity.toString()}-${interval.toString()}-${epochTime.toString()}`;
 }

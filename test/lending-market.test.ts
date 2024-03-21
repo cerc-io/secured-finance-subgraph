@@ -40,6 +40,7 @@ const maturity = BigInt.fromI32(1677628800); // 1st Mar 23
 const amount = BigInt.fromI32(90);
 const unitPrice = BigInt.fromI32(9000);
 const timestamp = BigInt.fromI64(1675878200);
+const intervals = [1800, 3600, 14400, 86400, 259200, 604800, 2629800];
 
 describe('Order Executed', () => {
     beforeEach(() => {
@@ -1874,7 +1875,6 @@ describe('Transaction Candle Stick', () => {
         const filledUnitPrice = BigInt.fromI32(90);
         const filledAmountInFV = BigInt.fromI32(90);
         const totalAmount = filledAmount.plus(amount);
-        const intervals = [900, 3600, 21600, 86400];
 
         const event = createOrderExecutedEvent(
             ALICE,
@@ -1902,6 +1902,7 @@ describe('Transaction Candle Stick', () => {
             const id = getTransactionCandleStickEntityId(
                 ccy,
                 maturity,
+                interval,
                 epochTime
             );
             assert.fieldEquals(
@@ -1990,6 +1991,7 @@ describe('Transaction Candle Stick', () => {
             const id = getTransactionCandleStickEntityId(
                 ccy,
                 maturity,
+                interval,
                 epochTime
             );
             assert.fieldEquals(
@@ -2042,7 +2044,6 @@ describe('Transaction Candle Stick', () => {
         const filledAmount = BigInt.fromI32(225);
         const filledUnitPrice = unitPrice;
         const filledAmountInFV = BigInt.fromI32(250);
-        const intervals = [900, 3600, 21600, 86400];
 
         const event = createPositionUnwoundEvent(
             BOB,
@@ -2065,6 +2066,7 @@ describe('Transaction Candle Stick', () => {
             const id = getTransactionCandleStickEntityId(
                 ccy,
                 maturity,
+                interval,
                 epochTime
             );
             assert.fieldEquals(
@@ -2135,7 +2137,7 @@ describe('Transaction Candle Stick', () => {
         const filledUnitPrice = BigInt.fromI32(90);
         const filledAmountInFV = BigInt.fromI32(90);
         const totalAmount = filledAmount.plus(amount);
-        const timestamps = [1675878200, 1675879100, 1675880000, 1675880900];
+        const timestamps = [900, 2700, 4500, 6300];
 
         for (let i = 0; i < 4; i++) {
             const placedOrderId = BigInt.fromI32(i + 1);
@@ -2154,20 +2156,21 @@ describe('Transaction Candle Stick', () => {
                 amount,
                 unitPrice,
                 false,
-                BigInt.fromI32(timestamps[i])
+                BigInt.fromI64(timestamps[i])
             );
             handleOrderExecuted(event);
         }
 
-        // 15min
+        // 30min
         for (let i = 0; i < 4; i++) {
-            const interval = BigInt.fromI32(900);
-            const timestamp = BigInt.fromI32(timestamps[i]);
+            const interval = BigInt.fromI32(1800);
+            const timestamp = BigInt.fromI64(timestamps[i]);
             const epochTime = timestamp.div(interval);
             const startTime = epochTime.times(interval);
             const id = getTransactionCandleStickEntityId(
                 ccy,
                 maturity,
+                interval,
                 epochTime
             );
             assert.fieldEquals(
@@ -2241,12 +2244,13 @@ describe('Transaction Candle Stick', () => {
         // first 2 & last 2 will have the same id for 1h
         for (let i = 0; i < 4; i += 2) {
             const interval = BigInt.fromI32(3600);
-            const timestamp = BigInt.fromI32(timestamps[i]);
+            const timestamp = BigInt.fromI64(timestamps[i]);
             const epochTime = timestamp.div(interval);
             const startTime = epochTime.times(interval);
             const id = getTransactionCandleStickEntityId(
                 ccy,
                 maturity,
+                interval,
                 epochTime
             );
             assert.fieldEquals(
@@ -2317,15 +2321,16 @@ describe('Transaction Candle Stick', () => {
             );
         }
 
-        // 6h will have the same id for all timestamps
+        // 4h will have the same id for all timestamps
         for (let i = 0; i < 4; i += 4) {
-            const interval = BigInt.fromI32(21600);
+            const interval = BigInt.fromI32(14400);
             const timestamp = BigInt.fromI32(timestamps[i]);
             const epochTime = timestamp.div(interval);
             const startTime = epochTime.times(interval);
             const id = getTransactionCandleStickEntityId(
                 ccy,
                 maturity,
+                interval,
                 epochTime
             );
             assert.fieldEquals(
