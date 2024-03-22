@@ -40,7 +40,7 @@ const maturity = BigInt.fromI32(1677628800); // 1st Mar 23
 const amount = BigInt.fromI32(90);
 const unitPrice = BigInt.fromI32(9000);
 const timestamp = BigInt.fromI64(1675878200);
-const intervals = [60, 300, 900, 3600, 10800, 21600, 86400, 259200, 604800, 2592000];
+const intervals = [300, 900, 1800, 3600, 14400, 86400, 259200, 604800, 2592000];
 
 describe('Order Executed', () => {
     beforeEach(() => {
@@ -2410,9 +2410,9 @@ describe('Transaction Candle Stick', () => {
             );
         }
 
-        // 6h will have the same id for all timestamps
+        // 4h will have the same id for all timestamps
         for (let i = 0; i < 4; i += 4) {
-            const interval = BigInt.fromI32(21600);
+            const interval = BigInt.fromI32(14400);
             const timestamp = BigInt.fromI32(timestamps[i]);
             const epochTime = timestamp.div(interval);
             const startTime = epochTime.times(interval);
