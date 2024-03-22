@@ -42,7 +42,7 @@
   "arbitrum-sepolia": {
     "isMajorUpdate": false,
     "isMinorUpdate": false,
-    "version": "0.0.3"
+    "version": "0.0.4"
   },
   "arbitrum-one": {
     "isMajorUpdate": false,
