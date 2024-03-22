@@ -17,7 +17,7 @@ import {
 } from '../helper/initializer';
 import { getOrderEntityId } from '../utils/id-generation';
 
-const intervals = [900, 3600, 21600, 86400]; // [15min, 1h, 6h, 1d]
+const intervals = [300, 900, 1800, 3600, 14400, 86400, 259200, 604800, 2592000]; // [5min, 15min, 30min, 1h, 4h, 1d, 3d, 1w, 1m]
 
 export function handleOrderExecuted(event: OrderExecuted): void {
     let orderId = getOrderEntityId(
@@ -103,7 +103,12 @@ export function handleOrderExecuted(event: OrderExecuted): void {
 
         for (let i = 0; i < intervals.length; i++) {
             initOrUpdateTransactionCandleStick(
-                txId,
+                event.params.ccy,
+                event.params.maturity,
+                event.params.filledAmount,
+                event.params.filledAmountInFV,
+                event.params.filledUnitPrice,
+                event.block.timestamp,
                 BigInt.fromI32(intervals[i])
             );
         }
@@ -199,7 +204,12 @@ export function handlePositionUnwound(event: PositionUnwound): void {
         addToTransactionVolume(event.params.filledAmount, dailyVolume);
         for (let i = 0; i < intervals.length; i++) {
             initOrUpdateTransactionCandleStick(
-                txId,
+                event.params.ccy,
+                event.params.maturity,
+                event.params.filledAmount,
+                event.params.filledAmountInFV,
+                event.params.filledUnitPrice,
+                event.block.timestamp,
                 BigInt.fromI32(intervals[i])
             );
         }
@@ -295,6 +305,22 @@ export function handleItayoseExecuted(event: ItayoseExecuted): void {
         event.block.timestamp
     );
     addToTransactionVolume(event.params.offsetAmount, dailyVolume);
+
+    const offsetAmountInFV = calculateForwardValue(
+        event.params.offsetAmount,
+        event.params.openingUnitPrice
+    );
+    for (let i = 0; i < intervals.length; i++) {
+        initOrUpdateTransactionCandleStick(
+            event.params.ccy,
+            event.params.maturity,
+            event.params.offsetAmount,
+            offsetAmountInFV,
+            event.params.openingUnitPrice,
+            event.block.timestamp,
+            BigInt.fromI32(intervals[i])
+        );
+    }
 }
 
 function addToTransactionVolume(
@@ -305,6 +331,9 @@ function addToTransactionVolume(
     dailyVolume.save();
 }
 
-function calculateForwardValue(amount: BigInt, unitPrice: BigInt): BigInt {
+export function calculateForwardValue(
+    amount: BigInt,
+    unitPrice: BigInt
+): BigInt {
     return amount.times(BigInt.fromI32(10000)).div(unitPrice);
 }
