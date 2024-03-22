@@ -17,7 +17,7 @@
   "staging": {
     "isMajorUpdate": false,
     "isMinorUpdate": false,
-    "version": "0.0.16"
+    "version": "0.0.17"
   },
   "staging-arb": {
     "isMajorUpdate": false,
