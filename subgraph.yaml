@@ -41,7 +41,7 @@ dataSources:
           file: >-
             ./abis/TokenVault.json
       eventHandlers:
-        - event: Deposit(indexed address,bytes32,uint256)
+        - event: Deposit(indexed address,bytes32,uint256,address)
           handler: handleDeposit
         - event: Withdraw(indexed address,bytes32,uint256)
           handler: handleWithdraw
