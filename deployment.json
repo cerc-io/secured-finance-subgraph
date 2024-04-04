@@ -1,62 +1,62 @@
 {
   "development": {
     "isMajorUpdate": false,
-    "isMinorUpdate": false,
+    "isMinorUpdate": true,
     "version": "0.0.61"
   },
   "development-arb": {
     "isMajorUpdate": false,
-    "isMinorUpdate": false,
+    "isMinorUpdate": true,
     "version": "0.0.6"
   },
   "development-ava": {
     "isMajorUpdate": false,
-    "isMinorUpdate": false,
+    "isMinorUpdate": true,
     "version": "0.0.6"
   },
   "staging": {
     "isMajorUpdate": false,
-    "isMinorUpdate": false,
+    "isMinorUpdate": true,
     "version": "0.0.17"
   },
   "staging-arb": {
     "isMajorUpdate": false,
-    "isMinorUpdate": false,
+    "isMinorUpdate": true,
     "version": "0.0.4"
   },
   "staging-ava": {
     "isMajorUpdate": false,
-    "isMinorUpdate": false,
+    "isMinorUpdate": true,
     "version": "0.0.5"
   },
   "sepolia": {
     "isMajorUpdate": false,
-    "isMinorUpdate": false,
+    "isMinorUpdate": true,
     "version": "0.0.3"
   },
   "mainnet": {
     "isMajorUpdate": false,
-    "isMinorUpdate": false,
+    "isMinorUpdate": true,
     "version": "0.0.3"
   },
   "arbitrum-sepolia": {
     "isMajorUpdate": false,
-    "isMinorUpdate": false,
+    "isMinorUpdate": true,
     "version": "0.0.4"
   },
   "arbitrum-one": {
     "isMajorUpdate": false,
-    "isMinorUpdate": false,
+    "isMinorUpdate": true,
     "version": "0.0.3"
   },
   "avalanche-mainnet": {
     "isMajorUpdate": false,
-    "isMinorUpdate": false,
+    "isMinorUpdate": true,
     "version": "0.0.4"
   },
   "polygon-zkevm-mainnet": {
     "isMajorUpdate": false,
-    "isMinorUpdate": false,
+    "isMinorUpdate": true,
     "version": "0.0.3"
   }
 }
