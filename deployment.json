@@ -21,8 +21,8 @@
   },
   "staging-arb": {
     "isMajorUpdate": false,
-    "isMinorUpdate": true,
-    "version": "0.0.4"
+    "isMinorUpdate": false,
+    "version": "0.1.0"
   },
   "staging-ava": {
     "isMajorUpdate": false,
