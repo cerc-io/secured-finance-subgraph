@@ -6,8 +6,8 @@
   },
   "development-arb": {
     "isMajorUpdate": false,
-    "isMinorUpdate": true,
-    "version": "0.0.6"
+    "isMinorUpdate": false,
+    "version": "0.1.0"
   },
   "development-ava": {
     "isMajorUpdate": false,
