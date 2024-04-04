@@ -26,8 +26,8 @@
   },
   "staging-ava": {
     "isMajorUpdate": false,
-    "isMinorUpdate": true,
-    "version": "0.0.5"
+    "isMinorUpdate": false,
+    "version": "0.1.0"
   },
   "sepolia": {
     "isMajorUpdate": false,
