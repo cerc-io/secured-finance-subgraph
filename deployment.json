@@ -31,8 +31,8 @@
   },
   "sepolia": {
     "isMajorUpdate": false,
-    "isMinorUpdate": true,
-    "version": "0.0.3"
+    "isMinorUpdate": false,
+    "version": "0.1.0"
   },
   "mainnet": {
     "isMajorUpdate": false,
