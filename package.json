@@ -7,7 +7,7 @@
     "codegen": "graph codegen ./subgraph.yaml",
     "precodegen": "ts-node ./scripts/copy-abis.ts",
     "build": "graph build ./subgraph.yaml",
-    "build-fil": "graph build ./subgraph.development-fil.yaml",
+    "build:development-fil": "graph build ./subgraph.development-fil.yaml",
     "prebuild": "npm run codegen",
     "test": "graph test",
     "coverage": "graph test -- -c",

@@ -61,6 +61,7 @@ class Main {
 
             const proxyAddress = deployment.address;
             dataSource.source.address = proxyAddress;
+            dataSource.source.startBlock = deployment.receipt.blockNumber;
             dataSource.network = network;
         }
 
