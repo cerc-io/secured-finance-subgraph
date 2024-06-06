@@ -9,6 +9,7 @@ const arrowedNetworks = [
     'staging',
     'staging-arb',
     'staging-ava',
+    'staging-fil',
     'sepolia',
     'mainnet',
     'arbitrum-sepolia',
@@ -26,6 +27,7 @@ const networkMap: Partial<Record<Network, string>> = {
     staging: 'sepolia',
     'staging-arb': 'arbitrum-sepolia',
     'staging-ava': 'fuji',
+    'staging-fil': 'filecoin-testnet',
     'avalanche-mainnet': 'avalanche',
     'polygon-zkevm-mainnet': 'polygon-zkevm',
 };
