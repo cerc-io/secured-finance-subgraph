@@ -1,3 +1,4 @@
+import { BigNumber } from 'ethers';
 import { readFileSync, writeFileSync } from 'fs';
 import { dump, load } from 'js-yaml';
 
@@ -64,7 +65,8 @@ class Main {
 
             const proxyAddress = deployment.address;
             dataSource.source.address = proxyAddress;
-            dataSource.source.startBlock = deployment.receipt.blockNumber;
+            // Handle contract deployment hex block numbers in deployment JSON
+            dataSource.source.startBlock = BigNumber.from(deployment.receipt.blockNumber).toNumber();
             dataSource.network = network;
         }
 
