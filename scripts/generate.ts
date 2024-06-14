@@ -16,6 +16,7 @@ const arrowedNetworks = [
     'arbitrum-one',
     'avalanche-mainnet',
     'polygon-zkevm-mainnet',
+    'filecoin-mainnet',
 ] as const;
 type Network = (typeof arrowedNetworks)[number];
 
