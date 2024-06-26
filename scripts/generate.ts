@@ -66,7 +66,9 @@ class Main {
             const proxyAddress = deployment.address;
             dataSource.source.address = proxyAddress;
             // Handle contract deployment hex block numbers in deployment JSON
-            dataSource.source.startBlock = BigNumber.from(deployment.receipt.blockNumber).toNumber();
+            dataSource.source.startBlock = BigNumber.from(
+                deployment.receipt.blockNumber
+            ).toNumber();
             dataSource.network = network;
         }
 
